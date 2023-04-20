@@ -50,12 +50,25 @@ html, body, #root, .App {
 .Map-container {
   height: 100%;
   background-color: #c7c7c7;
+  width: 100%;
 }
 
 .Map-component {
   height: 100%;
+  width: 100%;
 }
 
 .Sidebar-input {
   margin: 20px 20px 20px 20px;
+}
+
+.Customize-products-container {
+  height: 20%;
+  width: 100%;
+  padding: 20px;
+  background-color: #2276AD;
+}
+
+.Main-navbar {
+  background-color: #2276AD;
 }

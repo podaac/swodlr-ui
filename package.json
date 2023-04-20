@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.21",
-    "@types/react": "^18.0.30",
+    "@types/react": "^18.0.37",
     "@types/react-bootstrap": "^0.32.32",
     "@types/react-dom": "^18.0.11",
     "bootstrap": "^5.2.3",
@@ -19,6 +20,7 @@
     "react-bootstrap-icons": "^1.10.3",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "react-redux": "^8.0.5",
     "react-scripts": "^4.0.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
@@ -38,7 +40,7 @@
       "plugin:import/typescript"
     ]
   },
-  "browserslist":[
+  "browserslist": [
     ">0.2%",
     "not dead",
     "not op_mini all"

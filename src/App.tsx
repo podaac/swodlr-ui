@@ -2,22 +2,15 @@ import React from 'react';
 import MainNavbar from './components/navbar/MainNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Row, Col } from 'react-bootstrap';
-import Sidebar from './components/sidebar/Sidebar'
 import Map from './components/map/Map'
+import CustomizeProductsFooter from './components/footer/CustomizeProductsFooter';
 
 function App() {
   return (
     <div className="App">
       <MainNavbar />
-      <Row style={{height: '100%'}}>
-        <Col sm={4}>
-          <Sidebar />
-        </Col>
-        <Col sm={8}>
-         <Map />
-        </Col>
-      </Row>
+      <Map />
+      <CustomizeProductsFooter />
     </div>
   );
 }

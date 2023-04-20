@@ -13,7 +13,6 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 function Map() {
   return (
-    <Container className="Map-container">
         <MapContainer style={{height: '100%'}} center={[51.505, -0.09]} zoom={13} scrollWheelZoom={true}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -25,7 +24,6 @@ function Map() {
                 </Popup>
             </Marker>
         </MapContainer>
-    </Container>
   );
 }
 
