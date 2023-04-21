@@ -1,4 +1,13 @@
 import Table from 'react-bootstrap/Table';
+import { allProductParameters } from '../../types/constantTypes';
+
+const addedTableRow = (addedProductParameters: allProductParameters) => {
+    return (
+    <tr>
+        {Object.entries(addedProductParameters).map(entry => <td>{entry[1]}</td>)}
+    </tr>
+    )
+}
 
 const CustomizedProductTable = () => {
   return (

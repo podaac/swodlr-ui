@@ -1,14 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../../redux/store'
+import { allProductParameters } from '../../types/constantTypes'
+import { parameterOptionDefaults } from '../../constants/rasterParameterConstants'
 
 // Define a type for the slice state
 interface AddCustomProductModalState {
-    showAddProductModal: boolean
+    showAddProductModal: boolean,
+    allProductParameters: allProductParameters
 }
 
 // Define the initial state using that type
 const initialState: AddCustomProductModalState = {
     showAddProductModal: false,
+    // allProducts: this will be like a 'database' for the local state of all the products added
+    // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
+    allProductParameters: parameterOptionDefaults
 }
 
 export const addCustomProductModalSlice = createSlice({
@@ -26,10 +32,13 @@ export const addCustomProductModalSlice = createSlice({
     invert: (state) => {
         state.showAddProductModal = !state.showAddProductModal
     },
+    addProduct: (state, action: PayloadAction<allProductParameters>) => {
+        state.allProductParameters = Object.assign(action.payload)
+    }
   },
 })
 
-export const { setFalse, setTrue, invert } = addCustomProductModalSlice.actions
+export const { setFalse, setTrue, invert, addProduct } = addCustomProductModalSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectShowAddProductModal = (state: RootState) => state.addCustomProductModal.showAddProductModal
