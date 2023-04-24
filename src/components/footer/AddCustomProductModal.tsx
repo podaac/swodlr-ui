@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { AddProductModalProps } from '../../types/modalTypes';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setFalse, addProduct } from './addCustomProductModalSlice'
 import Form from 'react-bootstrap/Form';
 import { Col, Row } from 'react-bootstrap';
-import { parameterOptionValues, rasterResolutionOptions } from '../../constants/rasterParameterConstants'
-import { allProductParameters, parameterValuesObject } from '../../types/constantTypes';
+import { parameterOptionValues } from '../../constants/rasterParameterConstants'
+import { allProductParameters, parameterValuesObject, validFieldsObject } from '../../types/constantTypes';
 
 const AddProductModal = () => {
     const showAddProductModal = useAppSelector((state) => state.addCustomProductModal.showAddProductModal)
@@ -23,20 +22,42 @@ const AddProductModal = () => {
     const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
     const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
 
-    const createFormSelectForParameters = (parameterName: string) => {
+    const [validated, setValidated] = useState(false);
+    const [inputsNotValid, setInputsNotValid] = useState([] as string[])
+
+    const requiredFields = ['name', 'cycle', 'pass', 'scene']
+
+    useEffect(() => {}, [showAddProductModal])
+
+    const createFormSelectForParameters = (parameterName: string, setFunction: any) => {
         let parameterNameForKey = parameterName
         if (parameterName === ('rasterResolution')) {
             parameterNameForKey = `${parameterName}${outputSamplingGridType.toUpperCase()}`
         } 
         const parameterOptions: parameterValuesObject = parameterOptionValues[parameterNameForKey]
         return (
-            <Form.Select id={parameterNameForKey} aria-label={`${parameterNameForKey}`} defaultValue={parameterOptions.default} onChange={event => setOutputSamplingGridType(event.target.value)}>
+            <Form.Select id={parameterNameForKey} aria-label={`${parameterNameForKey}`} defaultValue={parameterOptions.default} onChange={event => setFunction(event.target.value)}>
                 {parameterOptions.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
             </Form.Select>
         )
     }
 
-    const onSave = () => {
+    const isValidInput = (inputParameter: string): boolean => {
+        return inputParameter !== null && inputParameter !== ''
+    }
+
+    const checkValidInputs = (inputParameters: string[]) => {
+        const notValidInputs: string[] = []
+        const isValid: boolean = inputParameters.map(param => {
+            const validity = isValidInput(param)
+            if (!validity) notValidInputs.push(Object.keys(param)[0])
+            return isValidInput(param)
+        }).every(value => value)
+        setInputsNotValid(notValidInputs)
+        return isValid
+    }
+
+    const handleSave = () => {
         const parameters: allProductParameters = {
             name,
             cycle,
@@ -48,9 +69,14 @@ const AddProductModal = () => {
             utmZoneAdjust,
             mgrsBandAdjust
         }
-        dispatch(setFalse())
-        dispatch(addProduct(parameters))
-        console.log(parameters)
+
+        // if (checkValidInputs([name, cycle, pass, scene])) {
+            setValidated(true)
+            dispatch(addProduct(parameters))
+            dispatch(setFalse())
+        // } else {
+        //     console.log('not valid')
+        // }
     }
 
   return (
@@ -65,7 +91,7 @@ const AddProductModal = () => {
                 <Form.Label>Name</Form.Label>
             </Col>  
             <Col>
-                <Form.Control id="add-product-name" placeholder="custom_product_name"/>
+                <Form.Control required id="add-product-name" placeholder="custom_product_name" onChange={event => setName(event.target.value)}/>
             </Col>
         </Row>
         <Row>
@@ -80,7 +106,7 @@ const AddProductModal = () => {
                 <Form.Label>Cycle</Form.Label>
             </Col>  
             <Col>
-                <Form.Control id="add-product-cycle" placeholder="cycle_id"/>
+                <Form.Control required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/>
             </Col>
         </Row>
         <Row>
@@ -88,7 +114,7 @@ const AddProductModal = () => {
                 <Form.Label>Pass</Form.Label>
             </Col>  
             <Col>
-                <Form.Control id="add-product-pass" placeholder="pass_id"/>
+                <Form.Control required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/>
             </Col>
         </Row>
         <Row>
@@ -96,7 +122,7 @@ const AddProductModal = () => {
                 <Form.Label>Scene</Form.Label>
             </Col>  
             <Col>
-                <Form.Control id="add-product-scene" placeholder="scene_id"/>
+                <Form.Control required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/>
             </Col>
         </Row>
         <Row>
@@ -111,7 +137,7 @@ const AddProductModal = () => {
                 <Form.Label>Output Granule Extent Flag</Form.Label>
             </Col>  
             <Col>
-                {createFormSelectForParameters('outputGranuleExtentFlag')}
+                {createFormSelectForParameters('outputGranuleExtentFlag', setOutputGranuleExtentFlag)}
             </Col>
         </Row>
         <Row>
@@ -119,7 +145,7 @@ const AddProductModal = () => {
                 <Form.Label>Output Sampling Grid Type</Form.Label>
             </Col>  
             <Col>
-                {createFormSelectForParameters('outputSamplingGridType')}
+                {createFormSelectForParameters('outputSamplingGridType', setOutputSamplingGridType)}
             </Col>
         </Row>
         <Row>
@@ -127,7 +153,7 @@ const AddProductModal = () => {
                 <Form.Label>Raster Resolution</Form.Label>
             </Col>  
             <Col>
-                {createFormSelectForParameters('rasterResolution')}
+                {createFormSelectForParameters('rasterResolution', setRasterResulution)}
             </Col>
         </Row>
         <Row>
@@ -135,7 +161,7 @@ const AddProductModal = () => {
                 <Form.Label>UTM Zone Adjust</Form.Label>
             </Col>
             <Col>
-                {createFormSelectForParameters('utmZoneAdjust')}
+                {createFormSelectForParameters('utmZoneAdjust', setUTMZoneAdjust)}
             </Col>
         </Row>
         <Row>
@@ -143,14 +169,14 @@ const AddProductModal = () => {
                 <Form.Label>MGRS Band Adjust</Form.Label>
             </Col>
             <Col>
-                {createFormSelectForParameters('mgrsBandAdjust')}
+                {createFormSelectForParameters('mgrsBandAdjust', setMGRSBandAdjust)}
             </Col>
         </Row>
     </Modal.Body>
 
     <Modal.Footer>
         <Button variant="secondary" onClick={() => dispatch(setFalse())}>Close</Button>
-        <Button variant="primary" onClick={() => onSave()}>Save</Button>
+        <Button variant="primary" type="submit" onClick={() => handleSave()}>Save</Button>
     </Modal.Footer>
     </Modal>
   );

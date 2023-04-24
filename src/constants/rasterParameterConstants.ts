@@ -32,6 +32,18 @@ export const parameterOptionValues: parameterValuesDictionary = {
     },
 }
 
+export const parameterOptionLabels = {
+    name: 'Name',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+    outputGranuleExtentFlag: 'Output Granule Extent Flag',
+    outputSamplingGridType: 'Output Sampling Grid Type',
+    rasterResolution: 'Raster Resolution',
+    utmZoneAdjust: 'UTM Zone Adjust',
+    mgrsBandAdjust: 'MGRS Band Adjust',
+}
+
 export const parameterOptionDefaults = {
     name: '',
     cycle: '',

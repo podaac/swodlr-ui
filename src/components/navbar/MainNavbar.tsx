@@ -13,7 +13,7 @@ const MainNavbar = () => {
         <Nav className="me-auto">
           <Nav.Link style={{color: 'white'}} href="#home">Home</Nav.Link>
           <Nav.Link style={{color: 'white'}} href="#link">About</Nav.Link>
-          <NavDropdown style={{color: 'white'}} title="Data Discovery" id="basic-nav-dropdown">
+          <NavDropdown  title="Data Discovery" id="basic-nav-dropdown">
             <NavDropdown.Item href="https://search.earthdata.nasa.gov/search" target="_blank">Earthdata Search</NavDropdown.Item>
             <NavDropdown.Item href="https://podaac.jpl.nasa.gov/" target="_blank">PO.DAAC Portal</NavDropdown.Item>
           </NavDropdown>

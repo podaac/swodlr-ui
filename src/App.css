@@ -2,6 +2,14 @@ html, body, #root, .App {
   height: 100%;
 }
 
+body {
+  user-select: none; /* supported by Chrome and Opera */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
 .App {
   text-align: center;
   height: 100%;
@@ -63,12 +71,31 @@ html, body, #root, .App {
 }
 
 .Customize-products-container {
-  height: 20%;
+  height: auto;
   width: 100%;
-  padding: 20px;
+  padding: 5px 20px 20px 20px;
+  background-color: #2276AD;
+}
+
+.Customize-products-container-min {
+  height: auto;
+  width: 100%;
+  padding: 10px 0px 10px 0px;
   background-color: #2276AD;
 }
 
 .Main-navbar {
   background-color: #2276AD;
+}
+
+.dropdown-toggle {
+  color: white !important;
+}
+
+.enable-text-selection {
+  user-select: text; /* supported by Chrome and Opera */
+ -webkit-user-select: text; /* Safari */
+ -khtml-user-select: text; /* Konqueror HTML */
+ -moz-user-select: text; /* Firefox */
+ -ms-user-select: text; /* Internet Explorer/Edge */
 }

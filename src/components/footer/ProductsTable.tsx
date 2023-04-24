@@ -1,38 +1,55 @@
 import Table from 'react-bootstrap/Table';
-import { allProductParameters } from '../../types/constantTypes';
+import { useAppSelector } from '../../redux/hooks'
+import { parameterOptionLabels } from '../../constants/rasterParameterConstants';
+import { Button, Col, Form, Row } from 'react-bootstrap';
+import { PencilSquare, Trash } from 'react-bootstrap-icons';
 
-const addedTableRow = (addedProductParameters: allProductParameters) => {
-    return (
-    <tr>
-        {Object.entries(addedProductParameters).map(entry => <td>{entry[1]}</td>)}
-    </tr>
-    )
-}
 
 const CustomizedProductTable = () => {
+  const allProductParametersArray = useAppSelector((state) => state.addCustomProductModal.allProductParametersArray)
+
   return (
-    <Table striped bordered hover style={{color:'white'}}>
+    <Table bordered hover style={{color:'white'}}>
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Cycle ID</th>
-          <th>Pass ID</th>
-          <th>Scene ID</th>
-          <th>Output Granule Extent Flag</th>
-          <th>Output Sampling Grid Type</th>
-          <th>Raster Resolution</th>
-          <th>UTM Zone Adjust</th>
-          <th>MGRS Band Adjust</th>
+          <th>          
+            <Form.Check
+              inline
+              name="group1"
+              id={`inline-select-all`}
+            />
+          </th>
+          {Object.entries(parameterOptionLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {/* <tr>
-          <td>1</td>
-          <td>Mark</td>
-          <td>Otto</td>
-          <td>@mdo</td>
-        </tr> */}
+        {allProductParametersArray.map((productParameterObject, index) => (
+          <tr>
+            <td>
+              <Form.Check
+                inline
+                name="group1"
+                id={`inline-select-${index}`}
+              />
+            </td>
+            {Object.entries(productParameterObject).map(entry => <td>{entry[1]}</td>)}
+            <td>
+              <Row>
+                <Col>
+                  <Button variant="success" size='sm'>
+                    <PencilSquare color="white" size={18}/>
+                  </Button>
+                </Col>
+                <Col>
+                  <Button variant="danger" size='sm'>
+                    <Trash color="white" size={18}/>
+                  </Button>
+                </Col>
+              </Row>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </Table>
   );

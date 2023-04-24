@@ -7,6 +7,10 @@ export interface parameterValuesDictionary {
     [key: string]: parameterValuesObject
  }
 
+ export interface validFieldsObject {
+    [key: string]: boolean
+ }
+
  export interface allProductParameters {
     name: string,
     cycle: string,
