@@ -30,6 +30,7 @@ const App = () => {
       <MainNavbar />
       <Map />
       {footerMinimized ? <CustomizeProductsFooterMin /> : <CustomizeProductsFooter />}
+
     </div>
   );
 }
