@@ -70,18 +70,37 @@ body {
   margin: 20px 20px 20px 20px;
 }
 
-.Customize-products-container {
+.Customize-products-container-all {
   height: auto;
-  width: 100%;
-  padding: 5px 20px 20px 20px;
+  background-color: #2276AD;
+  margin: 20px;
+  border-radius: 10px;
+  /* overflow: hidden; */
+}
+
+.Customize-products-container {
+  padding: 5px 25px 20px 25px;
+  overflow-y: auto;
+}
+
+.Products-table {
+  /* height: 10%;
+  overflow-y: auto; */
+}
+
+thead {
+  position: sticky;
+  top: -1px;
   background-color: #2276AD;
 }
 
+
+.table-responsive {
+  max-height: 35vh;
+}
+
 .Customize-products-container-min {
-  height: auto;
-  width: 100%;
   padding: 10px 0px 10px 0px;
-  background-color: #2276AD;
 }
 
 .Main-navbar {

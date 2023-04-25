@@ -13,7 +13,7 @@ const CustomizeProductsFooter = () => {
     const resizeStartLocation = useAppSelector((state) => state.customizeProductsFooter.resizeStartLocation)
     const resizeEndLocation = useAppSelector((state) => state.customizeProductsFooter.resizeEndLocation)
     const footerRef = useRef<HTMLHeadingElement>(null);
-    const [footerHeight, setFooterHeight] = useState(footerRef.current?.clientHeight)
+    const [footerHeight, setFooterHeight] = useState('auto')
     const dispatch = useAppDispatch()
 
     const handleResizeClickDown = (event: any) => {
@@ -27,11 +27,12 @@ const CustomizeProductsFooter = () => {
     }
 
     useEffect(() => {
-        setFooterHeight(footerRef.current?.clientHeight ? calculateFooterHeightAfterResize(resizeStartLocation, resizeEndLocation, footerRef.current?.clientHeight) : footerHeight)
+        const footerHeightNumber = footerRef.current?.clientHeight ? calculateFooterHeightAfterResize(resizeStartLocation, resizeEndLocation, footerRef.current?.clientHeight) : footerHeight
+        setFooterHeight(`${footerHeightNumber}px`)
     }, [resizeEndLocation])
 
   return (
-    <div className='Customize-products-container fixed-bottom' ref={footerRef} style={{height: footerHeight ? `${footerHeight}px`: 'auto'}}>
+    <div className='Customize-products-container-all Customize-products-container fixed-bottom' ref={footerRef} style={{height: 'auto'}}>
         <Row>
             <Col md={{ span: 2, offset: 5 }}>
                 <ArrowsExpand className="Footer-resize" style={{cursor: footerResizeActive ? 'grabbing' : 'grab'}} color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>

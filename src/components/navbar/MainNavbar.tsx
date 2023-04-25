@@ -6,7 +6,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 
 const MainNavbar = () => {
   return (
-    <Navbar className='Main-navbar' expand="lg">
+    <Navbar className='Main-navbar fixed-top' expand="lg">
       <Navbar.Brand style={{marginLeft: '20px', color: 'white'}} href="#home">SWODLR</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">

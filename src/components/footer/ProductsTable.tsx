@@ -9,49 +9,51 @@ const CustomizedProductTable = () => {
   const allProductParametersArray = useAppSelector((state) => state.addCustomProductModal.allProductParametersArray)
 
   return (
-    <Table bordered hover style={{color:'white'}}>
-      <thead>
-        <tr>
-          <th>          
-            <Form.Check
-              inline
-              name="group1"
-              id={`inline-select-all`}
-            />
-          </th>
-          {Object.entries(parameterOptionLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {allProductParametersArray.map((productParameterObject, index) => (
+    <div className='table-responsive'>
+      <Table bordered hover style={{color:'white'}} className='table-responsive Products-table'>
+        <thead>
           <tr>
-            <td>
+            <th>          
               <Form.Check
                 inline
                 name="group1"
-                id={`inline-select-${index}`}
+                id={`inline-select-all`}
               />
-            </td>
-            {Object.entries(productParameterObject).map(entry => <td>{entry[1]}</td>)}
-            <td>
-              <Row>
-                <Col>
-                  <Button variant="success" size='sm'>
-                    <PencilSquare color="white" size={18}/>
-                  </Button>
-                </Col>
-                <Col>
-                  <Button variant="danger" size='sm'>
-                    <Trash color="white" size={18}/>
-                  </Button>
-                </Col>
-              </Row>
-            </td>
+            </th>
+            {Object.entries(parameterOptionLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {allProductParametersArray.map((productParameterObject, index) => (
+            <tr>
+              <td>
+                <Form.Check
+                  inline
+                  name="group1"
+                  id={`inline-select-${index}`}
+                />
+              </td>
+              {Object.entries(productParameterObject).map(entry => <td>{entry[1]}</td>)}
+              <td>
+                <Row>
+                  <Col>
+                    <Button variant="success" size='sm'>
+                      <PencilSquare color="white" size={18}/>
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button variant="danger" size='sm'>
+                      <Trash color="white" size={18}/>
+                    </Button>
+                  </Col>
+                </Row>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
 }
 
