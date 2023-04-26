@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
-import addCustomProductModalSlice from '../components/footer/addCustomProductModalSlice'
+import customProductModalSlice from '../components/footer/customProductModalSlice'
 import customizeProductsFooterSlice from '../components/footer/customizeProductsFooterSlice'
+import navbarSlice from '../components/navbar/navbarSlice'
 // ...
 
 export const store = configureStore({
   reducer: {
-    addCustomProductModal: addCustomProductModalSlice,
+    customProductModal: customProductModalSlice,
     customizeProductsFooter: customizeProductsFooterSlice,
+    navbar: navbarSlice
   },
 })
 

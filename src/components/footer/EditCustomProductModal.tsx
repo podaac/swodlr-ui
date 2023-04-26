@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowAddProductModalFalse, addProduct } from './customProductModalSlice'
+import { setShowEditProductModalFalse, editProduct } from './customProductModalSlice'
 import Form from 'react-bootstrap/Form';
 import { Col, Row } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
 import { v4 as uuidv4 } from 'uuid';
+import { EditProductModalProps } from '../../types/modalTypes';
 
-const AddProductModal = () => {
-    const showAddProductModal = useAppSelector((state) => state.customProductModal.showAddProductModal)
+const EditProductModal = (props: EditProductModalProps) => {
+    const showEditProductModal = useAppSelector((state) => state.customProductModal.showEditProductModal)
+    const { productsBeingEdited } = props
     const dispatch = useAppDispatch()
 
     const [name, setName] = useState('');
@@ -42,7 +44,7 @@ const AddProductModal = () => {
         setMGRSBandAdjust(parameterOptionValues.mgrsBandAdjust.default as string)
     }
 
-    useEffect(() => {}, [showAddProductModal, outputSamplingGridType])
+    useEffect(() => {}, [showEditProductModal, outputSamplingGridType])
 
     // const isValidInput = (inputParameter: string): boolean => {
     //     return inputParameter !== null && inputParameter !== ''
@@ -92,8 +94,8 @@ const AddProductModal = () => {
 
         // if (checkValidInputs([name, cycle, pass, scene])) {
             // setValidated(true)
-            dispatch(addProduct(parameters))
-            dispatch(setShowAddProductModalFalse())
+            dispatch(editProduct(parameters))
+            dispatch(setShowEditProductModalFalse())
 
             // set parameters back to default
             setInitialStates()
@@ -103,9 +105,9 @@ const AddProductModal = () => {
     }
 
   return (
-    <Modal show={showAddProductModal} onHide={() => dispatch(setShowAddProductModalFalse())}>
+    <Modal show={showEditProductModal} onHide={() => dispatch(setShowEditProductModalFalse())}>
     <Modal.Header className="modal-style" closeButton>
-        <Modal.Title>Add Product</Modal.Title>
+        <Modal.Title>Edit Product</Modal.Title>
     </Modal.Header>
 
     <Modal.Body className="modal-style">
@@ -231,11 +233,11 @@ const AddProductModal = () => {
     </Modal.Body>
 
     <Modal.Footer>
-        <Button variant="secondary" onClick={() => dispatch(setShowAddProductModalFalse())}>Close</Button>
-        <Button variant="success" type="submit" onClick={() => handleSave()}>Save</Button>
+        <Button variant="secondary" onClick={() => dispatch(setShowEditProductModalFalse())}>Close</Button>
+        <Button variant="primary" type="submit" onClick={() => handleSave()}>Save</Button>
     </Modal.Footer>
     </Modal>
   );
 }
 
-export default AddProductModal;
+export default EditProductModal;

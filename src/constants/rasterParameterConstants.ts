@@ -23,16 +23,17 @@ export const parameterOptionValues: parameterValuesDictionary = {
         default: 60
     },
     utmZoneAdjust: {
-        values: ['-1', '0', '+1'],
+        values: ['+1', '0', '-1'],
         default: '0'
     },
     mgrsBandAdjust: {
-        values: ['-1', '0', '+1'],
+        values: ['+1', '0', '-1'],
         default: '0'
     },
 }
 
 export const parameterOptionLabels = {
+    productId: 'ID',
     name: 'Name',
     cycle: 'Cycle',
     pass: 'Pass',
