@@ -11,7 +11,7 @@ const GenerateProductModal = (props: GenerateProductModalProps) => {
     const dispatch = useAppDispatch()
     // const {productsBeingGenerated} = props
 
-    useEffect(() => {console.log(showGenerateProductModal)}, [showGenerateProductModal])
+    useEffect(() => {}, [showGenerateProductModal])
 
 
     const handleDelete = () => {

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowDeleteProductModalFalse } from './customProductModalSlice'
+import { deleteProduct, setShowDeleteProductModalFalse } from './customProductModalSlice'
 import { Row } from 'react-bootstrap';
 import { DeleteProductModalProps } from '../../types/modalTypes';
 
@@ -11,14 +11,13 @@ const DeleteProductModal = (props: DeleteProductModalProps) => {
     const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
     const dispatch = useAppDispatch()
     const {productsBeingDeleted} = props
-    const productNames = allProductParametersArray.filter(productObject => productsBeingDeleted.includes(productObject.productId)).map(object => object.name)
-    console.log(productsBeingDeleted)
-    useEffect(() => {console.log(showDeleteProductModal)}, [showDeleteProductModal, productsBeingDeleted])
+    const productNames = allProductParametersArray.filter(productObject => productsBeingDeleted.includes(productObject.granuleId)).map(object => object.name ?? object.granuleId)
+    // console.log('productsBeingDeleted',productsBeingDeleted)
+    useEffect(() => {}, [showDeleteProductModal, productsBeingDeleted])
 
 
-    const handleDelete = () => {
-        console.log('in delete function')
-        // dispatch(addProduct(parameters))
+    const handleDelete = (parametersToDelete: string[]) => {
+        dispatch(deleteProduct(parametersToDelete))
         dispatch(setShowDeleteProductModalFalse())
     }
 
@@ -37,7 +36,7 @@ const DeleteProductModal = (props: DeleteProductModalProps) => {
 
     <Modal.Footer>
         <Button variant="secondary" onClick={() => dispatch(setShowDeleteProductModalFalse())}>Close</Button>
-        <Button variant="danger" type="submit" onClick={() => handleDelete()}>Delete</Button>
+        <Button variant="danger" type="submit" onClick={() => handleDelete(productsBeingDeleted)}>Delete</Button>
     </Modal.Footer>
     </Modal>
   );

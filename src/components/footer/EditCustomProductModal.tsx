@@ -12,6 +12,7 @@ import { EditProductModalProps } from '../../types/modalTypes';
 
 const EditProductModal = (props: EditProductModalProps) => {
     const showEditProductModal = useAppSelector((state) => state.customProductModal.showEditProductModal)
+    const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
     const { productsBeingEdited } = props
     const dispatch = useAppDispatch()
 
@@ -79,22 +80,43 @@ const EditProductModal = (props: EditProductModalProps) => {
 
     const handleSave = () => {
         const rasterResolutionToSet = outputSamplingGridType === 'utm' ? rasterResolutionUTM : rasterResolutionGEO;
-        const parameters: allProductParameters = {
-            productId: uuidv4(),
-            name,
-            cycle,
-            pass,
-            scene,
-            outputGranuleExtentFlag,
-            outputSamplingGridType,
-            rasterResolution: rasterResolutionToSet,
-            utmZoneAdjust,
-            mgrsBandAdjust
-        }
+        // const applicableGranuleObject = allProductParametersArray.find(granuleObject => granuleObject.granuleId === granuleId)
+        // const parameters: allProductParameters = {
+        //     granuleId,
+        //     name,
+        //     cycle,
+        //     pass,
+        //     scene,
+        //     outputGranuleExtentFlag,
+        //     outputSamplingGridType,
+        //     rasterResolution: rasterResolutionToSet,
+        //     utmZoneAdjust,
+        //     mgrsBandAdjust,
+        //     footprint: applicableGranuleObject!.footprint
+        // }
+
+        const parametersArray: allProductParameters[] = productsBeingEdited.map(idToEdit => {
+            //go through each id and find the 
+            const applicableObject = allProductParametersArray.find(granuleObj => granuleObj.granuleId === idToEdit)
+            const parameters: allProductParameters = {
+                granuleId: idToEdit,
+                name,
+                cycle,
+                pass,
+                scene,
+                outputGranuleExtentFlag,
+                outputSamplingGridType,
+                rasterResolution: rasterResolutionToSet,
+                utmZoneAdjust,
+                mgrsBandAdjust,
+                footprint: applicableObject!.footprint
+            }
+            return parameters
+        })
 
         // if (checkValidInputs([name, cycle, pass, scene])) {
             // setValidated(true)
-            dispatch(editProduct(parameters))
+            // dispatch(editProduct(parametersArray))
             dispatch(setShowEditProductModalFalse())
 
             // set parameters back to default

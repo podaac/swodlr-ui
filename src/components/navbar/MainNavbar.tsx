@@ -4,6 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setDarkMode, setLightMode } from './navbarSlice';
+import swotLogo from '../../assets/swot_mainlogo_portrait.jpg'
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()

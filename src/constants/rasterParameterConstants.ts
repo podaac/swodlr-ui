@@ -33,7 +33,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
 }
 
 export const parameterOptionLabels = {
-    productId: 'ID',
+    granuleId: 'ID',
     name: 'Name',
     cycle: 'Cycle',
     pass: 'Pass',
@@ -43,6 +43,14 @@ export const parameterOptionLabels = {
     rasterResolution: 'Raster Resolution',
     utmZoneAdjust: 'UTM Zone Adjust',
     mgrsBandAdjust: 'MGRS Band Adjust',
+}
+
+export const granuleEssentialLabels = {
+    // name: 'Name',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+    granuleId: 'ID'
 }
 
 export const parameterOptionDefaults = {

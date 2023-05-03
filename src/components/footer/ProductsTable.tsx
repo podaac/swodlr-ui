@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { parameterOptionLabels } from '../../constants/rasterParameterConstants';
+import { granuleEssentialLabels } from '../../constants/rasterParameterConstants';
 import { Button, Form } from 'react-bootstrap';
 import { PencilSquare, PlayFill, Trash } from 'react-bootstrap-icons';
 import EditCusomProductModal from './EditCustomProductModal'
@@ -9,6 +9,7 @@ import DeleteCusomProductModal from './DeleteCustomProductModal'
 import GenerateCusomProductModal from './GenerateCustomProductModal'
 import { setShowDeleteProductModalTrue, setShowEditProductModalTrue, setShowGenerateProductModalTrue } from './customProductModalSlice';
 import { arrayOfProductIds } from '../../types/modalTypes';
+import { allProductParameters } from '../../types/constantTypes';
 
 
 const CustomizedProductTable = () => {
@@ -19,24 +20,25 @@ const CustomizedProductTable = () => {
   const [productsBeingDeleted, setProductBeingDeleted] = useState([] as arrayOfProductIds)
   const [productsBeingGenerated, setProductBeingGenerated] = useState([] as arrayOfProductIds)
 
-  const handleEdit = (productId: string) => {
-    setProductBeingEdited([...productsBeingEdited, productId])
+  const handleEdit = (granuleId: string) => {
+    setProductBeingEdited([...productsBeingEdited, granuleId])
     dispatch(setShowEditProductModalTrue())
   }
   
-  const handleDelete = (productId: string) => {
+  const handleDelete = (granuleId: string) => {
+    const granuleIdToDelete: string = granuleId.split('-')[0]
     dispatch(setShowDeleteProductModalTrue())
-    setProductBeingDeleted([...productsBeingDeleted, productId])
+    setProductBeingDeleted([...productsBeingDeleted, granuleIdToDelete])
   }
   
-  const handleGenerate = (productId: string) => {
-    setProductBeingGenerated([...productsBeingGenerated, productId])
+  const handleGenerate = (granuleId: string) => {
+    setProductBeingGenerated([...productsBeingGenerated, granuleId])
     dispatch(setShowGenerateProductModalTrue())
   }
 
   return (
     <div className='table-responsive'>
-      <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-text`}>
+      <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
         <thead>
           <tr>
             <th>          
@@ -47,15 +49,19 @@ const CustomizedProductTable = () => {
                 style={{cursor: 'pointer'}}
               />
             </th>
-            {Object.entries(parameterOptionLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
+            {Object.entries(granuleEssentialLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
             <th>Edit</th>
             <th>Delete</th>
-            <th>Generate</th>
+            {/* <th>Generate</th> */}
           </tr>
         </thead>
         <tbody>
-          {allProductParametersArray.map((productParameterObject, index) => (
-            <tr>
+          {allProductParametersArray.map((productParameterObject, index) => {
+            // remove footprint from product object when mapping to table
+            const {name, cycle, pass, scene, granuleId} = productParameterObject
+            const essentialsGranule = {cycle, pass, scene, granuleId}
+            return (
+            <tr className={`${colorModeClass}-table`}>
               <td>
                 <Form.Check
                   inline
@@ -64,49 +70,30 @@ const CustomizedProductTable = () => {
                   className='table-checkbox'
                 />
               </td>
-              {Object.entries(productParameterObject).map(entry => {
+              {Object.entries(essentialsGranule).map(entry => {
                 let valueToDisplay = entry[1]
-                if (entry[0] === 'outputSamplingGridType') {
+                if (entry[0] === 'outputSamplingGridType' && typeof valueToDisplay === 'string') {
                   valueToDisplay = valueToDisplay.toUpperCase()
                 }
                 return <td>{valueToDisplay}</td>
               })}
               <td>
-                <Button variant="primary" id={`${productParameterObject.productId}-edit`} size='sm' onClick={(event) => handleEdit(event.currentTarget.id)}>
+                <Button variant="primary" id={`${essentialsGranule.granuleId}-edit`} size='sm' onClick={(event) => handleEdit(event.currentTarget.id)}>
                   <PencilSquare color="white" size={18}/>
                 </Button>
               </td>
               <td>
-                <Button variant="danger" id={`${productParameterObject.productId}-delete`} size='sm' onClick={(event) => handleDelete(event.currentTarget.id)}>
+                <Button variant="danger" id={`${essentialsGranule.granuleId}-delete`} size='sm' onClick={(event) => handleDelete(event.currentTarget.id)}>
                   <Trash color="white" size={18}/>
                 </Button>
               </td>
-              <td>
-                <Button variant="success" id={`${productParameterObject.productId}-generate`} size='sm' onClick={(event) => handleGenerate(event.currentTarget.id)}>
+              {/* <td>
+                <Button variant="success" id={`${essentialsGranule.granuleId}-generate`} size='sm' onClick={(event) => handleGenerate(event.currentTarget.id)}>
                   <PlayFill color="white" size={18}/>
                 </Button>
-              </td>
-              {/* <td>
-                <Row>
-                  <Col>
-                    <Button variant="primary" size='sm'>
-                      <PencilSquare color="white" size={18}/>
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button variant="danger" size='sm'>
-                      <Trash color="white" size={18}/>
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button variant="success" size='sm'>
-                      <Play color="white" size={18}/>
-                    </Button>
-                  </Col>
-                </Row>
               </td> */}
             </tr>
-          ))}
+          )})}
         </tbody>
       </Table>
       <EditCusomProductModal productsBeingEdited={productsBeingEdited}/>

@@ -8,6 +8,8 @@ import { Col, Row } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
 import { v4 as uuidv4 } from 'uuid';
+import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
+import { LatLngExpression } from 'leaflet';
 
 const AddProductModal = () => {
     const showAddProductModal = useAppSelector((state) => state.customProductModal.showAddProductModal)
@@ -77,30 +79,76 @@ const AddProductModal = () => {
 
     const handleSave = () => {
         const rasterResolutionToSet = outputSamplingGridType === 'utm' ? rasterResolutionUTM : rasterResolutionGEO;
-        const parameters: allProductParameters = {
-            productId: uuidv4(),
-            name,
-            cycle,
-            pass,
-            scene,
-            outputGranuleExtentFlag,
-            outputSamplingGridType,
-            rasterResolution: rasterResolutionToSet,
-            utmZoneAdjust,
-            mgrsBandAdjust
+        // check if granule exists with that scene, cycle, and pass
+        const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
+        if (granuleFoundResult) {
+            // NOTE: this is using sample json array but will be hooked up to the get granule API result later
+            // get the granuleId from it and pass it to the parameters
+            const parameters: allProductParameters = {
+                granuleId: granuleFoundResult.granuleId,
+                name,
+                cycle,
+                pass,
+                scene,
+                outputGranuleExtentFlag,
+                outputSamplingGridType,
+                rasterResolution: rasterResolutionToSet,
+                utmZoneAdjust,
+                mgrsBandAdjust,
+                footprint: granuleFoundResult.footprint as LatLngExpression[]
+            }
+
+            // if (checkValidInputs([name, cycle, pass, scene])) {
+                // setValidated(true)
+                dispatch(addProduct(parameters))
+                dispatch(setShowAddProductModalFalse())
+
+                // set parameters back to default
+                setInitialStates()
+            // } else {
+            //     console.log('not valid')
+            // }
+        } else {
+            console.log('NO MATCHING GRANULES FOUND') 
         }
-
-        // if (checkValidInputs([name, cycle, pass, scene])) {
-            // setValidated(true)
-            dispatch(addProduct(parameters))
-            dispatch(setShowAddProductModalFalse())
-
-            // set parameters back to default
-            setInitialStates()
-        // } else {
-        //     console.log('not valid')
-        // }
     }
+
+    const utmOptions = (
+        <>
+            <Row>
+                <Col>
+                    <Form.Label>UTM Zone Adjust</Form.Label>
+                </Col>
+                <Col>
+                    {parameterOptionValues.utmZoneAdjust.values.map((value, index) => <Form.Check
+                        defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
+                        inline
+                        label={value}
+                        name="utmZoneAdjustGroup"
+                        type={'radio'}
+                        id={`utmZoneAdjustGroup-${'radio'}-${index}`}
+                        onChange={() => setUTMZoneAdjust(value as string)} />
+                    )}
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Form.Label>MGRS Band Adjust</Form.Label>
+                </Col>
+                <Col>
+                    {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => <Form.Check
+                        defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
+                        inline
+                        label={value}
+                        name="mgrsBandAdjustGroup"
+                        type={'radio'}
+                        id={`mgrsBandAdjustGroup-${'radio'}-${index}`}
+                        onChange={() => setMGRSBandAdjust(value as string)} />
+                    )}
+                </Col>
+            </Row>
+        </>
+    )
 
   return (
     <Modal show={showAddProductModal} onHide={() => dispatch(setShowAddProductModalFalse())}>
@@ -192,42 +240,7 @@ const AddProductModal = () => {
                 {renderRasterResolutionOptions(outputSamplingGridType)}
             </Col>
         </Row>
-        <Row>
-            <Col>
-                <Form.Label>UTM Zone Adjust</Form.Label>
-            </Col>
-            <Col>
-                {parameterOptionValues.utmZoneAdjust.values.map((value, index) =>
-                    <Form.Check 
-                        defaultChecked={value === parameterOptionValues.utmZoneAdjust.default} 
-                        inline 
-                        label={value} 
-                        name="utmZoneAdjustGroup" 
-                        type={'radio'} 
-                        id={`utmZoneAdjustGroup-${'radio'}-${index}`}
-                        onChange={() => setUTMZoneAdjust(value as string)}
-                    />
-                )}
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <Form.Label>MGRS Band Adjust</Form.Label>
-            </Col>
-            <Col>
-                {parameterOptionValues.mgrsBandAdjust.values.map((value, index) =>
-                    <Form.Check 
-                        defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default} 
-                        inline 
-                        label={value} 
-                        name="mgrsBandAdjustGroup" 
-                        type={'radio'} 
-                        id={`mgrsBandAdjustGroup-${'radio'}-${index}`}
-                        onChange={() => setMGRSBandAdjust(value as string)}
-                    />
-                 )}
-            </Col>
-        </Row>
+        {outputSamplingGridType === 'geo' ? null : utmOptions}
     </Modal.Body>
 
     <Modal.Footer>

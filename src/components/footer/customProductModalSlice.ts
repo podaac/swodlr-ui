@@ -51,14 +51,18 @@ export const customProductModalSlice = createSlice({
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
         const editedParameters = Object.assign(action.payload)
-        const indexOfObjectToUpdate = state.allProductParametersArray.findIndex(productObj => productObj.productId === editedParameters.productId)
+        const indexOfObjectToUpdate = state.allProductParametersArray.findIndex(productObj => productObj.granuleId === editedParameters.granuleId)
         state.allProductParametersArray[indexOfObjectToUpdate] = editedParameters
+    },
+    deleteProduct: (state, action: PayloadAction<string[]>) => {
+        const productsToDelete: string[] = action.payload
+        const newProductArray = [...state.allProductParametersArray].filter(productObject => !productsToDelete.includes(productObject.granuleId))
+        state.allProductParametersArray = newProductArray
     },
     setShowDeleteProductModalFalse: (state) => {
         state.showDeleteProductModal = false
     },
     setShowDeleteProductModalTrue: (state) => {
-        console.log('open delete modal')
         state.showDeleteProductModal = true
     },
     setShowGenerateProductModalFalse: (state) => {
@@ -78,6 +82,7 @@ export const {
     setShowEditProductModalFalse,
     setShowEditProductModalTrue,
     editProduct,
+    deleteProduct,
     setShowDeleteProductModalFalse,
     setShowDeleteProductModalTrue,
     setShowGenerateProductModalFalse,

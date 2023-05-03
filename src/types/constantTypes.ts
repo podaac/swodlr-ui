@@ -1,3 +1,5 @@
+import { LatLngExpression } from "leaflet"
+
 export interface parameterValuesObject {
    values: string[] | number[],
    default: string | number
@@ -12,7 +14,7 @@ export interface parameterValuesDictionary {
  }
 
  export interface allProductParameters {
-   productId: string,
+   granuleId: string,
    name: string,
    cycle: string,
    pass: string,
@@ -21,7 +23,8 @@ export interface parameterValuesDictionary {
    outputSamplingGridType: string,
    rasterResolution: number,
    utmZoneAdjust: string,
-   mgrsBandAdjust: string
+   mgrsBandAdjust: string,
+   footprint?: LatLngExpression[]
  }
 
  export interface sampleGranuleData {
