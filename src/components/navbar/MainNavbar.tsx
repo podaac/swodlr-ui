@@ -12,7 +12,7 @@ const MainNavbar = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
   return (
-    <Navbar className={`fixed-top ${colorModeClass}-background Main-navbar`} expand="lg">
+    <Navbar className={`fixed-top ${colorModeClass}-navbar-background Main-navbar`} expand="lg">
       <Navbar.Brand className={`${colorModeClass}-text`} style={{marginLeft: '20px'}} href="#home">SWODLR</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">

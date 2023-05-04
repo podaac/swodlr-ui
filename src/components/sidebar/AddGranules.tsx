@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setShowAddProductModalFalse, addProduct } from './customProductModalSlice'
 import Form from 'react-bootstrap/Form';
-import { Col, Row } from 'react-bootstrap';
+import { Alert, Col, Row } from 'react-bootstrap';
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
@@ -13,23 +13,29 @@ import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 const AddGranules = () => {
     const dispatch = useAppDispatch()
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+    const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
 
     const [name, setName] = useState('');
     const [cycle, setCycle] = useState('');
     const [pass, setPass] = useState('');
     const [scene, setScene] = useState('');
+    const [addGranuleWarning, setAddGranuleWarning] = useState('')
+    const [addGranuleWarningVariant, setAddGranuleWarningVariant] = useState('')
 
     // const [validated, setValidated] = useState(false);
     // const [inputsNotValid, setInputsNotValid] = useState([] as string[])
 
     // const requiredFields = ['name', 'cycle', 'pass', 'scene']
 
-    const setInitialStates = () => {
-        setName('')
-        setCycle('')
-        setPass('')
-        setScene('')
-    }
+    // const setInitialStates = () => {
+    //     setName('')
+    //     setCycle('')
+    //     setPass('')
+    //     setScene('')
+    //     setAddGranuleWarning('')
+    // }
+
+    // useEffect(() => {}, [setInitialStates])
 
     // const isValidInput = (inputParameter: string): boolean => {
     //     return inputParameter !== null && inputParameter !== ''
@@ -49,7 +55,8 @@ const AddGranules = () => {
     const handleSave = () => {
         // check if granule exists with that scene, cycle, and pass
         const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-        if (granuleFoundResult) {
+        const granulesAlreadyAdded: string[] = allProductParametersArray.map(granuleObj => granuleObj.granuleId)
+        if (granuleFoundResult && !granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
             // NOTE: this is using sample json array but will be hooked up to the get granule API result later
             // get the granuleId from it and pass it to the parameters
             const parameters: allProductParameters = {
@@ -65,21 +72,26 @@ const AddGranules = () => {
                 mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
                 footprint: granuleFoundResult.footprint as LatLngExpression[]
             }
-
+            setAddGranuleWarningVariant('success')
+            setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
             // if (checkValidInputs([name, cycle, pass, scene])) {
                 // setValidated(true)
                 dispatch(addProduct(parameters))
-                dispatch(setShowAddProductModalFalse())
-
+                // dispatch(setShowAddProductModalFalse())
                 // set parameters back to default
-                setInitialStates()
+                // setInitialStates()
             // } else {
             //     console.log('not valid')
             // }
-        } else {
-            console.log('NO MATCHING GRANULES FOUND') 
+        } else if (!granuleFoundResult){
+            setAddGranuleWarningVariant('danger')
+            setAddGranuleWarning('NO MATCHING GRANULES FOUND') 
+        } else if (granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
+            setAddGranuleWarningVariant('danger')
+            setAddGranuleWarning('THAT GRANULE HAS ALREADY BEEN ADDED')
         }
     }
+
 
   return (
     <>
@@ -96,22 +108,27 @@ const AddGranules = () => {
         <Row>
             <Col>
                 <Form.Label>Cycle</Form.Label>
-                <Form.Control required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/>
+                <Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/>
             </Col>
             <Col>
                 <Form.Label>Pass</Form.Label>
-                <Form.Control required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/>
+                <Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/>
             </Col>
             <Col>
                 <Form.Label>Scene</Form.Label>
-                <Form.Control required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/>
+                <Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/>
             </Col>
         </Row>
-        <Row style={{paddingTop: '20px', paddingBottom: '30px'}}>
+        <Row style={{paddingTop: '20px', paddingBottom: '5px'}}>
             <Col>
-                <Button variant="success" onClick={() => handleSave()}>
+                <Button variant='success' onClick={() => handleSave()}>
                     <Plus size={24}/> Add Granule(s)
                 </Button>
+            </Col>
+        </Row>
+        <Row style={{paddingTop: '5px', paddingBottom: '30px'}}>
+            <Col md={{ span: 6, offset: 3 }}>
+                <Alert variant={`${addGranuleWarningVariant}`}>{addGranuleWarning}</Alert>
             </Col>
         </Row>
     </>

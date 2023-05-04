@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import customProductModalSlice from '../components/footer/customProductModalSlice'
-import customizeProductsFooterSlice from '../components/footer/customizeProductsFooterSlice'
+import customProductModalSlice from '../components/sidebar/customProductModalSlice'
+import customizeProductsFooterSlice from '../components/sidebar/customizeProductsFooterSlice'
 import navbarSlice from '../components/navbar/navbarSlice'
 import appSlice from '../components/app/appSlice'
-import granuleSlice from '../components/footer/granuleSlice'
+import granuleSlice from '../components/sidebar/granuleSlice'
 // ...
 
 export const store = configureStore({

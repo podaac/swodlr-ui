@@ -3,12 +3,12 @@ import MainNavbar from '../navbar/MainNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Map from '../map/Map'
-import CustomizeProductsFooter from '../footer/CustomizeProductsFooter';
+import CustomizeProductsFooter from '../sidebar/CustomizeProductsFooter';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeInactive, setResizeEndLocation, setResizeStartLocation } from '../footer/customizeProductsFooterSlice';
-import CustomizeProductsFooterMin from '../footer/CustomizeProductsFooterMin';
+import { setResizeInactive, setResizeEndLocation, setResizeStartLocation } from '../sidebar/customizeProductsFooterSlice';
+import CustomizeProductsFooterMin from '../sidebar/CustomizeProductsFooterMin';
 import Welcome from '../welcome/Welcome'
-import CustomizeProductsSidebar from '../footer/CustomizeProductsSidebar';
+import CustomizeProductsSidebar from '../sidebar/CustomizeProductsSidebar';
 
 const App = () => {
   const dispatch = useAppDispatch()

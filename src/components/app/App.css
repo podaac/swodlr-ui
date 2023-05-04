@@ -74,6 +74,7 @@ MAP
 
 .Map-container {
   height: 100%;
+  /* margin-top: 12px; */
   background-color: #c7c7c7;
   position: relative;
 }
@@ -102,7 +103,8 @@ NAVBAR
   cursor: 'pointer';
 }
 .dark-mode-switch .form-check-input:checked {
-  background-color: #2ab464ff;
+  /* background-color: #2ab464ff; */
+  background-color: #5C946E;
   border-color: #2ab464ff;
   border: none;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
@@ -111,6 +113,17 @@ NAVBAR
 
 .dark-mode-background {
   background-color: #274c61ff;
+  color: #FAF9F6
+}
+
+.dark-mode-navbar-background {
+  background-color: #1A2535;
+  color: #FAF9F6
+}
+
+.dark-mode-container-background {
+  background-color: #3D5D82;
+  /* background-color: #274c61; */
   color: #FAF9F6
 }
 
@@ -130,6 +143,16 @@ NAVBAR
   border-width: thin; */
 }
 
+.light-mode-navbar-background {
+  background-color:	#89A897;
+  color: black;
+}
+
+.light-mode-container-background {
+  background-color:	#FAF9F6;
+  color: black;
+}
+
 .light-mode-text {
   color: black
 }
@@ -138,6 +161,12 @@ NAVBAR
   color: black !important;
 }
 
+.Main-navbar {  
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+  /* background-color: #282c34; */
+  /* background-color: #1A2535; */
+  /* background-color: #02182B; */
+}
 
 /**************************************************
 CUSTOMIZE PRODUCT CONTAINER
@@ -177,36 +206,80 @@ CUSTOMIZE PRODUCT CONTAINER
 }
 
 .Customize-products-container-sidebar-all {
-  height: 94%;
-  width: 75%;
+  /* height: 94.3%; */
+  height: 100vh;
+  width: 65%;
   /* background-color: #2276AD; */
   /* background-color: #274c61ff; */
-  margin: 15px;
-  border-radius: 20px;
+  /* margin: 15px; */
+  /* border-radius: 20px; */
   position: absolute;
   top: 0;
   left: 0;
-  margin-top: 70px;
+  /* margin-top: 55px;
+  margin-bottom: 55px; */
   z-index: 1000;
-  /* padding-top: 200px; */
+  padding-top: 60px;
   /* overflow: hidden; */
+  /* background-color: #407899; */
+  /* background-color: #3D5D82; */
+}
+
+.sidebar-resize {
+  margin: 0;
+  position: absolute;
+  background-color: #1a8754;
+  /* border-style: solid; */
+  /* border-color: #FAF9F6; */
+  border-width: 1px;
+  top: 50%;
+  right: 0;
+  margin-right: -14px;
+  /* border-radius: 30%; */
+  height: 60px;
+  width: 30px;
+  cursor: col-resize;
+}
+
+.sidebar-resize-icon {
+  /* margin: 0; */
+  position: relative;
+  top: 15%;
+  /* right: 0; */
+  height: 60%;
+  cursor: col-resize;
+  /* margin-right: -11px; */
 }
 
 /**************************************************
 PRODUCT TABLE
 **************************************************/
-
+/* 
 .dark-mode-table .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-  /* background-color: rgb(37, 108, 150); */
   color: #FAF9F6;
   cursor: pointer;
 }
 
 .light-mode-table .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-  /* background-color: rgb(37, 108, 150); */
   color: black;
   cursor: pointer;
   background-color: orange;
+}
+
+.dark-mode-table tr.hoverable-row tr:hover td:hover {
+  cursor: pointer;
+  background-color: orange;
+  color: white
+}
+
+.light-mode-table tr.hoverable-row tr:hover td:hover {
+  cursor: pointer;
+  background-color: orange;
+  color: white
+} */
+
+.dark-mode-table tr:hover td {
+  /* background-color: pink; */
 }
 
 thead {
@@ -229,9 +302,29 @@ thead {
   border: #FAF9F6 solid 1px;
 }
 
+.dark-mode-table tr {
+  color: #FAF9F6;
+  border-bottom: #FAF9F6 solid 1px;
+}
+
 .light-mode-table {
   color: black;
   border: black solid 1px;
+}
+
+.dark-mode-table tr.add-granules {
+  border-bottom: none;
+  background-color: #314a68;
+}
+
+.light-mode-table tr.add-granules {
+  border-bottom: none;
+  background-color:#c8c7c5;
+
+}
+
+tr.add-granules td {
+  border: 0
 }
 
 /**************************************************
@@ -249,3 +342,25 @@ WELCOME PAGE
   height: '100%'; 
   width: '100%';
 }
+
+.button-style {
+  background-color: #5C946E;
+  border-color: #5C946E;
+}
+
+/* .button-style:hover{
+  background-color: #5C946E;
+  border-color: #5C946E;
+  opacity: 50%;
+}
+
+.button-style:active{
+  background-color: #5C946E;
+  border-color: #5C946E;
+  opacity: 50%;
+}
+
+.button-style:disabled{
+  background-color: #5C946E;
+  border-color: #5C946E;
+} */

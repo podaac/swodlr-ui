@@ -8,7 +8,8 @@ interface AddCustomProductModalState {
     showDeleteProductModal: boolean,
     showGenerateProductModal: boolean,
     allProductParametersArray: allProductParameters[],
-    sampleGranuleDataArray: number[]
+    sampleGranuleDataArray: number[],
+    selectedGranules: string[]
 }
 
 // Define the initial state using that type
@@ -20,7 +21,8 @@ const initialState: AddCustomProductModalState = {
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
     allProductParametersArray: [],
-    sampleGranuleDataArray: []
+    sampleGranuleDataArray: [],
+    selectedGranules: []
 }
 
 export const customProductModalSlice = createSlice({
@@ -71,6 +73,9 @@ export const customProductModalSlice = createSlice({
     setShowGenerateProductModalTrue: (state) => {
         state.showGenerateProductModal = true
     },
+    setSelectedGranules: (state, action: PayloadAction<string[]>) => {
+        state.selectedGranules = action.payload
+    }
   },
 })
 
@@ -86,7 +91,8 @@ export const {
     setShowDeleteProductModalFalse,
     setShowDeleteProductModalTrue,
     setShowGenerateProductModalFalse,
-    setShowGenerateProductModalTrue
+    setShowGenerateProductModalTrue,
+    setSelectedGranules
 } = customProductModalSlice.actions
 
 export default customProductModalSlice.reducer
