@@ -1,12 +1,8 @@
-import { Button, Col, Row, Image } from 'react-bootstrap';
-import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setDarkMode, setLightMode } from '../navbar/navbarSlice';
+import { Button, Col, Row } from 'react-bootstrap';
+import { useAppSelector } from '../../redux/hooks'
 import swotPosterCropped from '../../assets/swotPosterCropped.png'
-import swotPosterMin from '../../assets/swotPosterMin.jpeg'
 
 const Welcome = () => {
-  const dispatch = useAppDispatch()
-  const darkMode = useAppSelector((state) => state.navbar.darkMode)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
   return (

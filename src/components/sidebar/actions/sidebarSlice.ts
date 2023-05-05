@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { mouseLocation } from '../../types/customizeProductsFooterTypes'
+import { mouseLocation } from '../../../types/sidebarTypes'
 
 // Define a type for the slice state
 interface CustomizeProductsFooterState {
@@ -23,8 +23,8 @@ const initialState: CustomizeProductsFooterState = {
     footerMinimized: false
 }
 
-export const customizeProductsFooterSlice = createSlice({
-  name: 'addCustomProdutModal',
+export const sidebarSlice = createSlice({
+  name: 'sidebarSlice',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
@@ -56,9 +56,9 @@ export const {
     setResizeEndLocation, 
     setFooterMinimized, 
     setFooterExpanded 
-} = customizeProductsFooterSlice.actions
+} = sidebarSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectShowAddProductModal = (state: RootState) => state.addCustomProductModal.showAddProductModal
 
-export default customizeProductsFooterSlice.reducer
+export default sidebarSlice.reducer

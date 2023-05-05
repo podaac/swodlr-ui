@@ -2,21 +2,19 @@ import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowGenerateProductModalFalse } from './customProductModalSlice'
+import { setShowGenerateProductModalFalse } from '../sidebar/actions/modalSlice'
 import { Row } from 'react-bootstrap';
 import { GenerateProductModalProps } from '../../types/modalTypes';
 
 const GenerateProductModal = (props: GenerateProductModalProps) => {
-    const showGenerateProductModal = useAppSelector((state) => state.customProductModal.showGenerateProductModal)
+    const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const dispatch = useAppDispatch()
-    // const {productsBeingGenerated} = props
 
     useEffect(() => {}, [showGenerateProductModal])
 
 
     const handleDelete = () => {
         console.log('in delete function')
-        // dispatch(addProduct(parameters))
         dispatch(setShowGenerateProductModalFalse())
     }
 

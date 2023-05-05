@@ -2,17 +2,18 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowAddProductModalFalse, addProduct } from './customProductModalSlice'
+import { setShowEditProductModalFalse } from '../sidebar/actions/modalSlice'
 import Form from 'react-bootstrap/Form';
 import { Col, Row } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
 import { v4 as uuidv4 } from 'uuid';
-import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
-import { LatLngExpression } from 'leaflet';
+import { EditProductModalProps } from '../../types/modalTypes';
 
-const AddProductModal = () => {
-    const showAddProductModal = useAppSelector((state) => state.customProductModal.showAddProductModal)
+const EditProductModal = (props: EditProductModalProps) => {
+    const showEditProductModal = useAppSelector((state) => state.modal.showEditProductModal)
+    const addedProducts = useAppSelector((state) => state.product.addedProducts)
+    const { productsBeingEdited } = props
     const dispatch = useAppDispatch()
 
     const [name, setName] = useState('');
@@ -25,11 +26,6 @@ const AddProductModal = () => {
     const [rasterResolutionGEO, setRasterResolutionGEO] = useState(parameterOptionValues.rasterResolutionGEO.default as number)
     const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
     const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
-
-    // const [validated, setValidated] = useState(false);
-    // const [inputsNotValid, setInputsNotValid] = useState([] as string[])
-
-    // const requiredFields = ['name', 'cycle', 'pass', 'scene']
 
     const setInitialStates = () => {
         setName('')
@@ -44,22 +40,7 @@ const AddProductModal = () => {
         setMGRSBandAdjust(parameterOptionValues.mgrsBandAdjust.default as string)
     }
 
-    useEffect(() => {}, [showAddProductModal, outputSamplingGridType])
-
-    // const isValidInput = (inputParameter: string): boolean => {
-    //     return inputParameter !== null && inputParameter !== ''
-    // }
-
-    // const checkValidInputs = (inputParameters: string[]) => {
-    //     const notValidInputs: string[] = []
-    //     const isValid: boolean = inputParameters.map(param => {
-    //         const validity = isValidInput(param)
-    //         if (!validity) notValidInputs.push(Object.keys(param)[0])
-    //         return isValidInput(param)
-    //     }).every(value => value)
-    //     setInputsNotValid(notValidInputs)
-    //     return isValid
-    // }
+    useEffect(() => {}, [showEditProductModal, outputSamplingGridType])
 
     const renderRasterResolutionOptions = (outputSamplingGridType: string) => {
         if (outputSamplingGridType === 'utm') {
@@ -79,13 +60,11 @@ const AddProductModal = () => {
 
     const handleSave = () => {
         const rasterResolutionToSet = outputSamplingGridType === 'utm' ? rasterResolutionUTM : rasterResolutionGEO;
-        // check if granule exists with that scene, cycle, and pass
-        const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-        if (granuleFoundResult) {
-            // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-            // get the granuleId from it and pass it to the parameters
+        const parametersArray: allProductParameters[] = productsBeingEdited.map(idToEdit => {
+            //go through each id and find the 
+            const applicableObject = addedProducts.find(granuleObj => granuleObj.granuleId === idToEdit)
             const parameters: allProductParameters = {
-                granuleId: granuleFoundResult.granuleId,
+                granuleId: idToEdit,
                 name,
                 cycle,
                 pass,
@@ -95,65 +74,20 @@ const AddProductModal = () => {
                 rasterResolution: rasterResolutionToSet,
                 utmZoneAdjust,
                 mgrsBandAdjust,
-                footprint: granuleFoundResult.footprint as LatLngExpression[]
+                footprint: applicableObject!.footprint
             }
+            return parameters
+        })
 
-            // if (checkValidInputs([name, cycle, pass, scene])) {
-                // setValidated(true)
-                dispatch(addProduct(parameters))
-                dispatch(setShowAddProductModalFalse())
-
-                // set parameters back to default
-                setInitialStates()
-            // } else {
-            //     console.log('not valid')
-            // }
-        } else {
-            console.log('NO MATCHING GRANULES FOUND') 
-        }
+        // dispatch(editProduct(parametersArray))
+        dispatch(setShowEditProductModalFalse())
+        setInitialStates()
     }
 
-    const utmOptions = (
-        <>
-            <Row>
-                <Col>
-                    <Form.Label>UTM Zone Adjust</Form.Label>
-                </Col>
-                <Col>
-                    {parameterOptionValues.utmZoneAdjust.values.map((value, index) => <Form.Check
-                        defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
-                        inline
-                        label={value}
-                        name="utmZoneAdjustGroup"
-                        type={'radio'}
-                        id={`utmZoneAdjustGroup-${'radio'}-${index}`}
-                        onChange={() => setUTMZoneAdjust(value as string)} />
-                    )}
-                </Col>
-            </Row>
-            <Row>
-                <Col>
-                    <Form.Label>MGRS Band Adjust</Form.Label>
-                </Col>
-                <Col>
-                    {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => <Form.Check
-                        defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
-                        inline
-                        label={value}
-                        name="mgrsBandAdjustGroup"
-                        type={'radio'}
-                        id={`mgrsBandAdjustGroup-${'radio'}-${index}`}
-                        onChange={() => setMGRSBandAdjust(value as string)} />
-                    )}
-                </Col>
-            </Row>
-        </>
-    )
-
   return (
-    <Modal show={showAddProductModal} onHide={() => dispatch(setShowAddProductModalFalse())}>
+    <Modal show={showEditProductModal} onHide={() => dispatch(setShowEditProductModalFalse())}>
     <Modal.Header className="modal-style" closeButton>
-        <Modal.Title>Add Product</Modal.Title>
+        <Modal.Title>Edit Product</Modal.Title>
     </Modal.Header>
 
     <Modal.Body className="modal-style">
@@ -240,15 +174,50 @@ const AddProductModal = () => {
                 {renderRasterResolutionOptions(outputSamplingGridType)}
             </Col>
         </Row>
-        {outputSamplingGridType === 'geo' ? null : utmOptions}
+        <Row>
+            <Col>
+                <Form.Label>UTM Zone Adjust</Form.Label>
+            </Col>
+            <Col>
+                {parameterOptionValues.utmZoneAdjust.values.map((value, index) =>
+                    <Form.Check 
+                        defaultChecked={value === parameterOptionValues.utmZoneAdjust.default} 
+                        inline 
+                        label={value} 
+                        name="utmZoneAdjustGroup" 
+                        type={'radio'} 
+                        id={`utmZoneAdjustGroup-${'radio'}-${index}`}
+                        onChange={() => setUTMZoneAdjust(value as string)}
+                    />
+                )}
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                <Form.Label>MGRS Band Adjust</Form.Label>
+            </Col>
+            <Col>
+                {parameterOptionValues.mgrsBandAdjust.values.map((value, index) =>
+                    <Form.Check 
+                        defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default} 
+                        inline 
+                        label={value} 
+                        name="mgrsBandAdjustGroup" 
+                        type={'radio'} 
+                        id={`mgrsBandAdjustGroup-${'radio'}-${index}`}
+                        onChange={() => setMGRSBandAdjust(value as string)}
+                    />
+                 )}
+            </Col>
+        </Row>
     </Modal.Body>
 
     <Modal.Footer>
-        <Button variant="secondary" onClick={() => dispatch(setShowAddProductModalFalse())}>Close</Button>
-        <Button variant="success" type="submit" onClick={() => handleSave()}>Save</Button>
+        <Button variant="secondary" onClick={() => dispatch(setShowEditProductModalFalse())}>Close</Button>
+        <Button variant="primary" type="submit" onClick={() => handleSave()}>Save</Button>
     </Modal.Footer>
     </Modal>
   );
 }
 
-export default AddProductModal;
+export default EditProductModal;

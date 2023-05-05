@@ -1,11 +1,10 @@
 import { Col, Row} from 'react-bootstrap';
 import { ChevronUp } from 'react-bootstrap-icons';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setFooterExpanded } from './customizeProductsFooterSlice';
+import { setFooterExpanded } from '../sidebar/actions/sidebarSlice';
 
 const CustomizeProductsFooter = () => {
     const dispatch = useAppDispatch()
-    // const footerResizeActive = useAppSelector((state) => state.customizeProductsFooter.footerResizeActive)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
   return (

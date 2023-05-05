@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
 import { Plus, Trash } from 'react-bootstrap-icons';
 // import EditCusomProductModal from './EditCustomProductModal'
-import DeleteCusomProductModal from './DeleteCustomProductModal'
-import GenerateCusomProductModal from './GenerateCustomProductModal'
-import { setShowDeleteProductModalTrue, addProduct, setShowGenerateProductModalTrue } from './customProductModalSlice';
+import DeleteCusomProductModal from './DeleteGranulesModal'
+import GenerateCusomProductModal from '../misc/GenerateCustomProductModal'
+import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from './actions/modalSlice';
 import { arrayOfProductIds } from '../../types/modalTypes';
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
+import { addProduct, setSelectedGranules } from './actions/productSlice';
 
 const CustomizedProductTable = () => {
-  const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
+  const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+  const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
   const dispatch = useAppDispatch()
-  // const [productsBeingEdited, setProductBeingEdited] = useState([] as arrayOfProductIds)
   const [productsBeingDeleted, setProductBeingDeleted] = useState([] as arrayOfProductIds)
   const [productsBeingGenerated, setProductBeingGenerated] = useState([] as arrayOfProductIds)
-  const [selectedGranules, setSelectedGranules] = useState([] as arrayOfProductIds)
+  // const [selectedGranules, setSelectedGranules] = useState([] as arrayOfProductIds)
   const [allChecked, setAllChecked] = useState(false)
 
   // add granules
@@ -31,10 +32,15 @@ const CustomizedProductTable = () => {
   const [addGranuleWarning, setAddGranuleWarning] = useState('')
   const [addGranuleWarningVariant, setAddGranuleWarningVariant] = useState('')
 
+  useEffect(() => {console.log('selectedGranules',selectedGranules)}, [selectedGranules])
+
+  console.log('allchecked', allChecked)
+
+  // const objectGranules = addedProducts.reduce((a,v))
   const handleSave = () => {
     // check if granule exists with that scene, cycle, and pass
     const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-    const granulesAlreadyAdded: string[] = allProductParametersArray.map(granuleObj => granuleObj.granuleId)
+    const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
     if (granuleFoundResult && !granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
@@ -53,15 +59,7 @@ const CustomizedProductTable = () => {
         }
         setAddGranuleWarningVariant('success')
         setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
-        // if (checkValidInputs([name, cycle, pass, scene])) {
-            // setValidated(true)
-            dispatch(addProduct(parameters))
-            // dispatch(setShowAddProductModalFalse())
-            // set parameters back to default
-            // setInitialStates()
-        // } else {
-        //     console.log('not valid')
-        // }
+        dispatch(addProduct(parameters))
     } else if (!granuleFoundResult){
         setAddGranuleWarningVariant('danger')
         setAddGranuleWarning('NO MATCHING GRANULES FOUND') 
@@ -85,14 +83,28 @@ const CustomizedProductTable = () => {
   const handleAllChecked = () => {
     console.log('CHECKED')
     if (!allChecked) {
+      console.log('set checked true')
       setAllChecked(true)
       // add all granules to checked
-      const allCheckedArray = allProductParametersArray.map(parameterObject => parameterObject.granuleId)
-      setSelectedGranules(allCheckedArray)
+      const allCheckedArray = addedProducts.map(parameterObject => parameterObject.granuleId)
+      console.log(allCheckedArray)
+      dispatch(setSelectedGranules(allCheckedArray))
     } else {
+      console.log('set checked false')
       setAllChecked(false)
       // remove all granules from checked
-      setSelectedGranules([])
+      dispatch(setSelectedGranules([]))
+    }
+  }
+
+  const handleGranuleSelected = (granuleBeingSelected: string) => {
+    if (selectedGranules.includes(granuleBeingSelected)) {
+      // remove granuleId from selected list
+      dispatch(setSelectedGranules(selectedGranules.filter(id => id !== granuleBeingSelected)))
+    } else {
+      console.log('ADDING GRANULE')
+      // add granuleId to selected list
+      dispatch(setSelectedGranules([...selectedGranules, granuleBeingSelected]))
     }
   }
 
@@ -119,7 +131,7 @@ const CustomizedProductTable = () => {
             </tr>
           </thead>
           <tbody>
-            {allProductParametersArray.map((productParameterObject, index) => {
+            {addedProducts.map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
               const {name, cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {cycle, pass, scene, granuleId}
@@ -129,8 +141,10 @@ const CustomizedProductTable = () => {
                   <Form.Check
                     inline
                     name="group1"
-                    id={`inline-select-${index}`}
+                    id={`inline-select-${granuleId}`}
                     className='table-checkbox'
+                    onChange={event => handleGranuleSelected(granuleId)}
+                    checked={selectedGranules.includes(granuleId)}
                   />
                 </td>
                 {Object.entries(essentialsGranule).map(entry => {
@@ -169,7 +183,6 @@ const CustomizedProductTable = () => {
               </Col>
             </Row>)
         }
-        {/* <EditCusomProductModal productsBeingEdited={productsBeingEdited}/> */}
         <DeleteCusomProductModal productsBeingDeleted={productsBeingDeleted}/>
       </div>
     </>

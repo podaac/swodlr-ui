@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { allProductParameters } from '../../types/constantTypes'
+import { allProductParameters } from '../../../types/constantTypes'
 
 // Define a type for the slice state
 interface AddCustomProductModalState {
@@ -7,7 +7,7 @@ interface AddCustomProductModalState {
     showEditProductModal: boolean,
     showDeleteProductModal: boolean,
     showGenerateProductModal: boolean,
-    allProductParametersArray: allProductParameters[],
+    addedProducts: allProductParameters[],
     sampleGranuleDataArray: number[],
     selectedGranules: string[]
 }
@@ -20,13 +20,13 @@ const initialState: AddCustomProductModalState = {
     showGenerateProductModal: false,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
-    allProductParametersArray: [],
+    addedProducts: [],
     sampleGranuleDataArray: [],
     selectedGranules: []
 }
 
-export const customProductModalSlice = createSlice({
-  name: 'addCustomProdutModal',
+export const modalSlice = createSlice({
+  name: 'modalSlice',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
@@ -40,26 +40,11 @@ export const customProductModalSlice = createSlice({
     invertShowAddProductModal: (state) => {
         state.showAddProductModal = !state.showAddProductModal
     },
-    addProduct: (state, action: PayloadAction<allProductParameters>) => {
-        state.allProductParametersArray.push(Object.assign(action.payload))
-        // add sample granule data
-
-    },
     setShowEditProductModalFalse: (state) => {
         state.showEditProductModal = false
     },
     setShowEditProductModalTrue: (state) => {
         state.showEditProductModal = true
-    },
-    editProduct: (state, action: PayloadAction<allProductParameters>) => {
-        const editedParameters = Object.assign(action.payload)
-        const indexOfObjectToUpdate = state.allProductParametersArray.findIndex(productObj => productObj.granuleId === editedParameters.granuleId)
-        state.allProductParametersArray[indexOfObjectToUpdate] = editedParameters
-    },
-    deleteProduct: (state, action: PayloadAction<string[]>) => {
-        const productsToDelete: string[] = action.payload
-        const newProductArray = [...state.allProductParametersArray].filter(productObject => !productsToDelete.includes(productObject.granuleId))
-        state.allProductParametersArray = newProductArray
     },
     setShowDeleteProductModalFalse: (state) => {
         state.showDeleteProductModal = false
@@ -72,9 +57,6 @@ export const customProductModalSlice = createSlice({
     },
     setShowGenerateProductModalTrue: (state) => {
         state.showGenerateProductModal = true
-    },
-    setSelectedGranules: (state, action: PayloadAction<string[]>) => {
-        state.selectedGranules = action.payload
     }
   },
 })
@@ -83,16 +65,12 @@ export const {
     setShowAddProductModalFalse, 
     setShowAddProductModalTrue, 
     invertShowAddProductModal, 
-    addProduct, 
     setShowEditProductModalFalse,
     setShowEditProductModalTrue,
-    editProduct,
-    deleteProduct,
     setShowDeleteProductModalFalse,
     setShowDeleteProductModalTrue,
     setShowGenerateProductModalFalse,
     setShowGenerateProductModalTrue,
-    setSelectedGranules
-} = customProductModalSlice.actions
+} = modalSlice.actions
 
-export default customProductModalSlice.reducer
+export default modalSlice.reducer

@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button, Col, Row} from 'react-bootstrap';
 import { ArrowsExpand} from 'react-bootstrap-icons';
-import CustomizedProductTable from './ProductsTable';
+import CustomizedProductTable from './GranulesTable';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './customizeProductsFooterSlice';
-import { mouseLocation } from '../../types/customizeProductsFooterTypes';
+import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './actions/sidebarSlice';
+import { mouseLocation } from '../../types/sidebarTypes';
 import GenerateProductsModal from './GenerateProductsModal';
-import { setShowGenerateProductModalTrue } from './customProductModalSlice';
+import { setShowGenerateProductModalTrue } from './actions/modalSlice';
 
 
 const CustomizeProductsSidebar = () => {
-    const selectedGranules = useAppSelector((state) => state.customProductModal.selectedGranules)
-    const resizeStartLocation = useAppSelector((state) => state.customizeProductsFooter.resizeStartLocation)
-    const resizeEndLocation = useAppSelector((state) => state.customizeProductsFooter.resizeEndLocation)
+    const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+    const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
+    const resizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const footerRef = useRef<HTMLHeadingElement>(null);
     const [sidebarWidth, setSidebarWidth] = useState('')
@@ -37,50 +37,28 @@ const CustomizeProductsSidebar = () => {
 
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
-        {/* <Row style={{height: '100%'}}> */}
-            <Col>
-                <Row>
-                    <Col >
-                        <h2 className={`${colorModeClass}-text`}>SWOT Products Customization</h2>
-                    </Col>
-                    {/* <Col md={{ span: 1, offset: 2 }}>
-                        <ChevronDown className={`${colorModeClass}-text`} style={{cursor: 'pointer'}} size={36} onClick={() => dispatch(setFooterMinimized())}/>
-                    </Col> */}
-                </Row>
-                <hr></hr>
-                {/* <Row>
-                    <AddGranules />
-                </Row> */}
-                <Row>
-                    <CustomizedProductTable />
-                </Row>
-                <Row>
-                    <Col>
-                        <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => dispatch(setShowGenerateProductModalTrue())}>
-                            Generate Selected Products
-                        </Button>
-                    </Col>
-                </Row>
-                {/* <Row>
-                    <Col>
-                        <Button variant="success" onClick={() => dispatch(setShowAddProductModalTrue())}>
-                            <Plus size={24}/> Add Custom Product
-                        </Button>
-                    </Col>
-                </Row> */}
-            </Col>
-            {/* style={{cursor: footerResizeActive ? 'grabbing' : 'grab'}} */}
-            <GenerateProductsModal />
-            <div className='sidebar-resize'  onMouseDown={(event) => handleResizeClickDown(event)}>
-                <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
-            </div>
-            {/* <Col sm={1} style={{position: 'relative'}}>
-                <Row style={{margin: 0, position: 'absolute', top: '50%'}}>
-                    <ArrowsExpand className="Footer-resize icon-flipped" style={{cursor: footerResizeActive ? 'grabbing' : 'grab'}} color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
-                </Row>
-            </Col> */}
-        {/* </Row> */}
-        {/* <AddProductModal/> */}
+        <Col>
+            <Row>
+                <Col >
+                    <h2 className={`${colorModeClass}-text`}>SWOT Products Customization</h2>
+                </Col>
+            </Row>
+            <hr></hr>
+            <Row>
+                <CustomizedProductTable />
+            </Row>
+            <Row>
+                <Col>
+                    <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => dispatch(setShowGenerateProductModalTrue())}>
+                        Generate Selected Products
+                    </Button>
+                </Col>
+            </Row>
+        </Col>
+        <GenerateProductsModal />
+        <div className='sidebar-resize'  onMouseDown={(event) => handleResizeClickDown(event)}>
+            <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
+        </div>
     </div>
   );
 }

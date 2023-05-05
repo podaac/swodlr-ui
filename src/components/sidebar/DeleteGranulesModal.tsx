@@ -2,17 +2,17 @@ import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { deleteProduct, setShowDeleteProductModalFalse } from './customProductModalSlice'
+import { setShowDeleteProductModalFalse } from './actions/modalSlice'
 import { Row } from 'react-bootstrap';
 import { DeleteProductModalProps } from '../../types/modalTypes';
+import { deleteProduct } from './actions/productSlice';
 
 const DeleteProductModal = (props: DeleteProductModalProps) => {
-    const showDeleteProductModal = useAppSelector((state) => state.customProductModal.showDeleteProductModal)
-    const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
+    const showDeleteProductModal = useAppSelector((state) => state.modal.showDeleteProductModal)
+    const addedProducts = useAppSelector((state) => state.product.addedProducts)
     const dispatch = useAppDispatch()
     const {productsBeingDeleted} = props
-    const productNames = allProductParametersArray.filter(productObject => productsBeingDeleted.includes(productObject.granuleId)).map(object => object.name ?? object.granuleId)
-    // console.log('productsBeingDeleted',productsBeingDeleted)
+    const productNames = addedProducts.filter(productObject => productsBeingDeleted.includes(productObject.granuleId)).map(object => object.name ?? object.granuleId)
     useEffect(() => {}, [showDeleteProductModal, productsBeingDeleted])
 
 

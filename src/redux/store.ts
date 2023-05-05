@@ -1,18 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit'
-import customProductModalSlice from '../components/sidebar/customProductModalSlice'
-import customizeProductsFooterSlice from '../components/sidebar/customizeProductsFooterSlice'
+import modalSlice from '../components/sidebar/actions/modalSlice'
+import productSlice from '../components/sidebar/actions/productSlice'
 import navbarSlice from '../components/navbar/navbarSlice'
 import appSlice from '../components/app/appSlice'
-import granuleSlice from '../components/sidebar/granuleSlice'
+import granuleSlice from '../components/sidebar/actions/productSlice'
+import sidebarSlice from '../components/sidebar/actions/sidebarSlice'
 // ...
 
 export const store = configureStore({
   reducer: {
-    customProductModal: customProductModalSlice,
-    customizeProductsFooter: customizeProductsFooterSlice,
+    modal: modalSlice,
+    product: productSlice,
     navbar: navbarSlice,
     app: appSlice,
-    granule: granuleSlice
+    granule: granuleSlice,
+    sidebar: sidebarSlice
   },
 })
 

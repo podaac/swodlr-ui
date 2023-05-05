@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowAddProductModalFalse, addProduct } from './customProductModalSlice'
+import { setShowAddProductModalFalse } from '../sidebar/actions/modalSlice'
 import Form from 'react-bootstrap/Form';
 import { Alert, Col, Row } from 'react-bootstrap';
 import { allProductParameters } from '../../types/constantTypes';
@@ -9,11 +9,12 @@ import sampleAvailableGranules from '../../constants/sampleAvailableGranules.jso
 import { LatLngExpression } from 'leaflet';
 import { Plus } from 'react-bootstrap-icons';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
+import { addProduct } from '../sidebar/actions/productSlice';
 
 const AddGranules = () => {
     const dispatch = useAppDispatch()
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-    const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
+    const addedProducts = useAppSelector((state) => state.product.addedProducts)
 
     const [name, setName] = useState('');
     const [cycle, setCycle] = useState('');
@@ -22,40 +23,10 @@ const AddGranules = () => {
     const [addGranuleWarning, setAddGranuleWarning] = useState('')
     const [addGranuleWarningVariant, setAddGranuleWarningVariant] = useState('')
 
-    // const [validated, setValidated] = useState(false);
-    // const [inputsNotValid, setInputsNotValid] = useState([] as string[])
-
-    // const requiredFields = ['name', 'cycle', 'pass', 'scene']
-
-    // const setInitialStates = () => {
-    //     setName('')
-    //     setCycle('')
-    //     setPass('')
-    //     setScene('')
-    //     setAddGranuleWarning('')
-    // }
-
-    // useEffect(() => {}, [setInitialStates])
-
-    // const isValidInput = (inputParameter: string): boolean => {
-    //     return inputParameter !== null && inputParameter !== ''
-    // }
-
-    // const checkValidInputs = (inputParameters: string[]) => {
-    //     const notValidInputs: string[] = []
-    //     const isValid: boolean = inputParameters.map(param => {
-    //         const validity = isValidInput(param)
-    //         if (!validity) notValidInputs.push(Object.keys(param)[0])
-    //         return isValidInput(param)
-    //     }).every(value => value)
-    //     setInputsNotValid(notValidInputs)
-    //     return isValid
-    // }
-
     const handleSave = () => {
         // check if granule exists with that scene, cycle, and pass
         const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-        const granulesAlreadyAdded: string[] = allProductParametersArray.map(granuleObj => granuleObj.granuleId)
+        const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
         if (granuleFoundResult && !granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
             // NOTE: this is using sample json array but will be hooked up to the get granule API result later
             // get the granuleId from it and pass it to the parameters
@@ -74,15 +45,7 @@ const AddGranules = () => {
             }
             setAddGranuleWarningVariant('success')
             setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
-            // if (checkValidInputs([name, cycle, pass, scene])) {
-                // setValidated(true)
-                dispatch(addProduct(parameters))
-                // dispatch(setShowAddProductModalFalse())
-                // set parameters back to default
-                // setInitialStates()
-            // } else {
-            //     console.log('not valid')
-            // }
+            dispatch(addProduct(parameters))
         } else if (!granuleFoundResult){
             setAddGranuleWarningVariant('danger')
             setAddGranuleWarning('NO MATCHING GRANULES FOUND') 
@@ -98,12 +61,6 @@ const AddGranules = () => {
         <Row style={{paddingTop: '20px', paddingBottom: '10px'}}>
             <h3 className={`${colorModeClass}-text`}>Add Granules</h3>
         </Row>
-        {/* <Row>
-            <Col>
-                <h5>Name</h5>
-                <Form.Control required id="add-product-name" placeholder="custom_product_name" onChange={event => setName(event.target.value)}/>
-            </Col>
-        </Row> */}
         <Row><h5>Parameter IDs</h5></Row>
         <Row>
             <Col>

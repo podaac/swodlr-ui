@@ -1,5 +1,5 @@
 import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl } from 'react-leaflet'
-import L, { LatLngBoundsExpression, LatLngExpression } from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -11,8 +11,7 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const Map = () => {
-  const allProductParametersArray = useAppSelector((state) => state.customProductModal.allProductParametersArray)
-  const footprintsToDisplay = allProductParametersArray.map(addedProduct => { return {granuleId: addedProduct.granuleId, footprint: addedProduct.footprint as LatLngBoundsExpression}})
+  const addedProducts = useAppSelector((state) => state.product.addedProducts)
   
   return (
     <MapContainer className='Map-container' center={[33.854457, -118.709093]} zoom={7} scrollWheelZoom={true} zoomControl={false}>
@@ -22,7 +21,7 @@ const Map = () => {
           maxNativeZoom={8}
         />
         <ZoomControl position='bottomright'/>
-        {allProductParametersArray.map(productObject => (
+        {addedProducts.map(productObject => (
         <Polygon positions={productObject.footprint as LatLngExpression[]}>
           <Tooltip sticky>{productObject.granuleId}</Tooltip>
         </Polygon>

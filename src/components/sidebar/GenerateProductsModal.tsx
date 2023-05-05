@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowAddProductModalFalse, addProduct, setShowGenerateProductModalFalse } from './customProductModalSlice'
+import { setShowGenerateProductModalFalse } from './actions/modalSlice'
 import Form from 'react-bootstrap/Form';
 import { Col, Row } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
-import { v4 as uuidv4 } from 'uuid';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
+import { addProduct } from './actions/productSlice';
 
 const GenerateProductsModal = () => {
-    const showGenerateProductsModal = useAppSelector((state) => state.customProductModal.showGenerateProductModal)
+    const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const dispatch = useAppDispatch()
 
     const [name, setName] = useState('');
@@ -25,11 +25,6 @@ const GenerateProductsModal = () => {
     const [rasterResolutionGEO, setRasterResolutionGEO] = useState(parameterOptionValues.rasterResolutionGEO.default as number)
     const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
     const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
-
-    // const [validated, setValidated] = useState(false);
-    // const [inputsNotValid, setInputsNotValid] = useState([] as string[])
-
-    // const requiredFields = ['name', 'cycle', 'pass', 'scene']
 
     const setInitialStates = () => {
         setName('')
@@ -45,21 +40,6 @@ const GenerateProductsModal = () => {
     }
 
     useEffect(() => {}, [showGenerateProductsModal, outputSamplingGridType])
-
-    // const isValidInput = (inputParameter: string): boolean => {
-    //     return inputParameter !== null && inputParameter !== ''
-    // }
-
-    // const checkValidInputs = (inputParameters: string[]) => {
-    //     const notValidInputs: string[] = []
-    //     const isValid: boolean = inputParameters.map(param => {
-    //         const validity = isValidInput(param)
-    //         if (!validity) notValidInputs.push(Object.keys(param)[0])
-    //         return isValidInput(param)
-    //     }).every(value => value)
-    //     setInputsNotValid(notValidInputs)
-    //     return isValid
-    // }
 
     const renderRasterResolutionOptions = (outputSamplingGridType: string) => {
         if (outputSamplingGridType === 'utm') {
@@ -97,17 +77,9 @@ const GenerateProductsModal = () => {
                 mgrsBandAdjust,
                 footprint: granuleFoundResult.footprint as LatLngExpression[]
             }
-
-            // if (checkValidInputs([name, cycle, pass, scene])) {
-                // setValidated(true)
-                dispatch(addProduct(parameters))
-                dispatch(setShowGenerateProductModalFalse())
-
-                // set parameters back to default
-                setInitialStates()
-            // } else {
-            //     console.log('not valid')
-            // }
+            dispatch(addProduct(parameters))
+            dispatch(setShowGenerateProductModalFalse())
+            setInitialStates()
         } else {
             console.log('NO MATCHING GRANULES FOUND') 
         }
