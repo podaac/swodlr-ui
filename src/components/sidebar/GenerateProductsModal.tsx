@@ -13,6 +13,7 @@ import { addProduct } from './actions/productSlice';
 
 const GenerateProductsModal = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
+    const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
     const dispatch = useAppDispatch()
 
     const [name, setName] = useState('');
@@ -77,7 +78,7 @@ const GenerateProductsModal = () => {
                 mgrsBandAdjust,
                 footprint: granuleFoundResult.footprint as LatLngExpression[]
             }
-            dispatch(addProduct(parameters))
+            dispatch(addProduct([parameters]))
             dispatch(setShowGenerateProductModalFalse())
             setInitialStates()
         } else {
@@ -131,7 +132,7 @@ const GenerateProductsModal = () => {
     <Modal.Body className="modal-style">
         <Row>
             <Col>
-                <h5>Generation Parameter Options</h5>
+                <h5>Parameter Options</h5>
             </Col>  
             <Col>
             </Col>

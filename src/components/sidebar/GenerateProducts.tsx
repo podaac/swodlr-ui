@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowAddProductModalFalse } from '../sidebar/actions/modalSlice'
+import { setShowGenerateProductModalFalse } from './actions/modalSlice'
 import Form from 'react-bootstrap/Form';
 import { Col, Row } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
-import { v4 as uuidv4 } from 'uuid';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
-import { addProduct } from '../sidebar/actions/productSlice';
+import { addProduct } from './actions/productSlice';
 
-const AddProductModal = () => {
-    const showAddProductModal = useAppSelector((state) => state.modal.showAddProductModal)
+const GenerateProducts = () => {
+    const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
+    const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
     const dispatch = useAppDispatch()
 
     const [name, setName] = useState('');
@@ -26,11 +26,6 @@ const AddProductModal = () => {
     const [rasterResolutionGEO, setRasterResolutionGEO] = useState(parameterOptionValues.rasterResolutionGEO.default as number)
     const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
     const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
-
-    // const [validated, setValidated] = useState(false);
-    // const [inputsNotValid, setInputsNotValid] = useState([] as string[])
-
-    // const requiredFields = ['name', 'cycle', 'pass', 'scene']
 
     const setInitialStates = () => {
         setName('')
@@ -45,22 +40,7 @@ const AddProductModal = () => {
         setMGRSBandAdjust(parameterOptionValues.mgrsBandAdjust.default as string)
     }
 
-    useEffect(() => {}, [showAddProductModal, outputSamplingGridType])
-
-    // const isValidInput = (inputParameter: string): boolean => {
-    //     return inputParameter !== null && inputParameter !== ''
-    // }
-
-    // const checkValidInputs = (inputParameters: string[]) => {
-    //     const notValidInputs: string[] = []
-    //     const isValid: boolean = inputParameters.map(param => {
-    //         const validity = isValidInput(param)
-    //         if (!validity) notValidInputs.push(Object.keys(param)[0])
-    //         return isValidInput(param)
-    //     }).every(value => value)
-    //     setInputsNotValid(notValidInputs)
-    //     return isValid
-    // }
+    useEffect(() => {}, [showGenerateProductsModal, outputSamplingGridType])
 
     const renderRasterResolutionOptions = (outputSamplingGridType: string) => {
         if (outputSamplingGridType === 'utm') {
@@ -98,9 +78,8 @@ const AddProductModal = () => {
                 mgrsBandAdjust,
                 footprint: granuleFoundResult.footprint as LatLngExpression[]
             }
-
             dispatch(addProduct([parameters]))
-            dispatch(setShowAddProductModalFalse())
+            dispatch(setShowGenerateProductModalFalse())
             setInitialStates()
         } else {
             console.log('NO MATCHING GRANULES FOUND') 
@@ -109,9 +88,9 @@ const AddProductModal = () => {
 
     const utmOptions = (
         <>
-            <Row>
+            <Row className='normal-row'>
                 <Col>
-                    <Form.Label>UTM Zone Adjust</Form.Label>
+                    <h5>UTM Zone Adjust</h5>
                 </Col>
                 <Col>
                     {parameterOptionValues.utmZoneAdjust.values.map((value, index) => <Form.Check
@@ -125,9 +104,9 @@ const AddProductModal = () => {
                     )}
                 </Col>
             </Row>
-            <Row>
+            <Row className='normal-row'>
                 <Col>
-                    <Form.Label>MGRS Band Adjust</Form.Label>
+                    <h5>MGRS Band Adjust</h5>
                 </Col>
                 <Col>
                     {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => <Form.Check
@@ -145,61 +124,13 @@ const AddProductModal = () => {
     )
 
   return (
-    <Modal show={showAddProductModal} onHide={() => dispatch(setShowAddProductModalFalse())}>
-    <Modal.Header className="modal-style" closeButton>
-        <Modal.Title>Add Product</Modal.Title>
-    </Modal.Header>
-
-    <Modal.Body className="modal-style">
+    <>
         <Row>
-            <Col>
-                <Form.Label>Name</Form.Label>
-            </Col>  
-            <Col>
-                <Form.Control required id="add-product-name" placeholder="custom_product_name" onChange={event => setName(event.target.value)}/>
-            </Col>
+            <h3>Parameter Options</h3>
         </Row>
-        <Row>
+        <Row className='normal-row'>
             <Col>
-                <h5>Parameter IDs</h5>
-            </Col>  
-            <Col>
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <Form.Label>Cycle</Form.Label>
-            </Col>  
-            <Col>
-                <Form.Control required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/>
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <Form.Label>Pass</Form.Label>
-            </Col>  
-            <Col>
-                <Form.Control required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/>
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <Form.Label>Scene</Form.Label>
-            </Col>  
-            <Col>
-                <Form.Control required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/>
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <h5>Variables</h5>
-            </Col>  
-            <Col>
-            </Col>
-        </Row>
-        <Row>
-            <Col>
-                <Form.Label>Output Granule Extent Flag</Form.Label>
+                <h5>Output Granule Extent Flag</h5>
             </Col>  
             <Col>
                 <Form.Check 
@@ -209,9 +140,9 @@ const AddProductModal = () => {
                 />
             </Col>
         </Row>
-        <Row>
+        <Row className='normal-row'>
             <Col>
-                <Form.Label>Output Sampling Grid Type</Form.Label>
+                <h5>Output Sampling Grid Type</h5>
             </Col>  
             <Col>
                 {parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
@@ -226,23 +157,24 @@ const AddProductModal = () => {
                         />)}
             </Col>
         </Row>
-        <Row>
+        <Row className='normal-row'>
             <Col>
-                <Form.Label>Raster Resolution</Form.Label>
+                <h5>Raster Resolution</h5>
             </Col>  
             <Col>
                 {renderRasterResolutionOptions(outputSamplingGridType)}
             </Col>
         </Row>
         {outputSamplingGridType === 'geo' ? null : utmOptions}
-    </Modal.Body>
-
-    <Modal.Footer>
-        <Button variant="secondary" onClick={() => dispatch(setShowAddProductModalFalse())}>Close</Button>
-        <Button variant="success" type="submit" onClick={() => handleSave()}>Save</Button>
-    </Modal.Footer>
-    </Modal>
+        <Row className='normal-row' style={{paddingTop: '30px'}}>
+            <Col>
+                <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => console.log('generating products', selectedGranules)}>
+                    Generate Selected Products
+                </Button>
+            </Col>
+        </Row>
+    </>       
   );
 }
 
-export default AddProductModal;
+export default GenerateProducts;

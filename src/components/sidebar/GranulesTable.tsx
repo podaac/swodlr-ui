@@ -4,15 +4,13 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
 import { Plus, Trash } from 'react-bootstrap-icons';
-// import EditCusomProductModal from './EditCustomProductModal'
 import DeleteCusomProductModal from './DeleteGranulesModal'
-import GenerateCusomProductModal from '../misc/GenerateCustomProductModal'
 import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from './actions/modalSlice';
 import { arrayOfProductIds } from '../../types/modalTypes';
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
-import { addProduct, setSelectedGranules } from './actions/productSlice';
+import { addProduct, setSelectedGranules, setGranuleFocus } from './actions/productSlice';
 
 const CustomizedProductTable = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
@@ -31,41 +29,82 @@ const CustomizedProductTable = () => {
   const [scene, setScene] = useState('');
   const [addGranuleWarning, setAddGranuleWarning] = useState('')
   const [addGranuleWarningVariant, setAddGranuleWarningVariant] = useState('')
+  const [showGranuleAddAlert, setShowGranuleAddAlert] = useState(false)
 
-  useEffect(() => {console.log('selectedGranules',selectedGranules)}, [selectedGranules])
+  useEffect(() => {}, [selectedGranules])
 
-  console.log('allchecked', allChecked)
+  useEffect(() => {  
+    const timeId = setTimeout(() => {
+      setShowGranuleAddAlert(false)
+    }, 5000)
+
+    return () => {
+      clearTimeout(timeId)
+    }
+  }, [showGranuleAddAlert])
+
+  const getScenesArray = (sceneString: string): string[] => {
+    const scenesArray = []
+    if (sceneString.includes('-')) {
+      const scenesSplit = sceneString.split('-')
+      const sceneStartCount = parseInt(scenesSplit[0])
+      const sceneEndCount = parseInt(scenesSplit[1])
+      for (let sceneId = sceneStartCount; sceneId <= sceneEndCount; sceneId++ ) {
+        scenesArray.push(sceneId.toString())
+      }
+    } else {
+      scenesArray.push(sceneString)
+    }
+    return scenesArray
+  }
 
   // const objectGranules = addedProducts.reduce((a,v))
   const handleSave = () => {
-    // check if granule exists with that scene, cycle, and pass
-    const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-    const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
-    if (granuleFoundResult && !granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
-        // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-        // get the granuleId from it and pass it to the parameters
-        const parameters: allProductParameters = {
-            granuleId: granuleFoundResult.granuleId,
-            name,
-            cycle,
-            pass,
-            scene,
-            outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
-            outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
-            rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
-            utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
-            mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-            footprint: granuleFoundResult.footprint as LatLngExpression[]
-        }
-        setAddGranuleWarningVariant('success')
-        setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
-        dispatch(addProduct(parameters))
-    } else if (!granuleFoundResult){
-        setAddGranuleWarningVariant('danger')
-        setAddGranuleWarning('NO MATCHING GRANULES FOUND') 
-    } else if (granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
-        setAddGranuleWarningVariant('danger')
-        setAddGranuleWarning('THAT GRANULE HAS ALREADY BEEN ADDED')
+    const granulesToAdd: allProductParameters[] = []
+    const granuleNoMatchingResults: {cycleNotFound: string, passNotFound: string, sceneNotFound: string}[] = []
+    const granuleAlreadyAddedResults: string[] = []
+    getScenesArray(scene).forEach(sceneId => {
+      // check if granule exists with that scene, cycle, and pass
+      const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
+      const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
+      if (granuleFoundResult && !granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
+          // NOTE: this is using sample json array but will be hooked up to the get granule API result later
+          // get the granuleId from it and pass it to the parameters
+          const parameters: allProductParameters = {
+              granuleId: granuleFoundResult.granuleId,
+              name,
+              cycle,
+              pass,
+              scene: sceneId,
+              outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
+              outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
+              rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
+              utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
+              mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
+              footprint: granuleFoundResult.footprint as LatLngExpression[]
+          }
+          // setAddGranuleWarningVariant('success')
+          // setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
+          granulesToAdd.push(parameters)
+      } else if (!granuleFoundResult){
+          if (!granuleNoMatchingResults.filter(sceneObj => sceneObj.sceneNotFound === sceneId)) granuleNoMatchingResults.push({cycleNotFound: cycle, passNotFound: pass, sceneNotFound: sceneId})
+      } else if (granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
+        if (!granuleAlreadyAddedResults.includes(granuleFoundResult.granuleId)) granuleAlreadyAddedResults.push(granuleFoundResult.granuleId)
+      }
+    })
+    // check if any granules could not be found or they were already added
+    if (granuleNoMatchingResults.length === 0 && granuleAlreadyAddedResults.length === 0 && granulesToAdd.length !== 0) {
+      // success
+      dispatch(addProduct(granulesToAdd))
+      dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
+      setAddGranuleWarningVariant('success')
+      setAddGranuleWarning('SUCCESSFULLY ADDED GRANULES!') 
+      setShowGranuleAddAlert(true)
+    } else if ((granuleNoMatchingResults.length !== 0 || granuleAlreadyAddedResults.length !== 0) && granulesToAdd.length === 0) {
+      //some granules not found or already added
+      setAddGranuleWarningVariant('danger')
+      setAddGranuleWarning('SOME GRANULES HAVE ALREADY BEEN ADDED OR NOT FOUND')
+      setShowGranuleAddAlert(true)
     }
 }
   
@@ -74,23 +113,14 @@ const CustomizedProductTable = () => {
     dispatch(setShowDeleteProductModalTrue())
     setProductBeingDeleted([...productsBeingDeleted, granuleIdToDelete])
   }
-  
-  const handleGenerate = (granuleId: string) => {
-    setProductBeingGenerated([...productsBeingGenerated, granuleId])
-    dispatch(setShowGenerateProductModalTrue())
-  }
 
   const handleAllChecked = () => {
-    console.log('CHECKED')
     if (!allChecked) {
-      console.log('set checked true')
       setAllChecked(true)
       // add all granules to checked
       const allCheckedArray = addedProducts.map(parameterObject => parameterObject.granuleId)
-      console.log(allCheckedArray)
       dispatch(setSelectedGranules(allCheckedArray))
     } else {
-      console.log('set checked false')
       setAllChecked(false)
       // remove all granules from checked
       dispatch(setSelectedGranules([]))
@@ -102,7 +132,6 @@ const CustomizedProductTable = () => {
       // remove granuleId from selected list
       dispatch(setSelectedGranules(selectedGranules.filter(id => id !== granuleBeingSelected)))
     } else {
-      console.log('ADDING GRANULE')
       // add granuleId to selected list
       dispatch(setSelectedGranules([...selectedGranules, granuleBeingSelected]))
     }
@@ -114,7 +143,7 @@ const CustomizedProductTable = () => {
         <h3 className={`${colorModeClass}-text`}>Granule Table</h3>
       </Row>
       <div className='table-responsive'>
-        <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
+        <Table bordered hover className={`table-responsive ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
           <thead>
             <tr>
               <th>          
@@ -133,10 +162,10 @@ const CustomizedProductTable = () => {
           <tbody>
             {addedProducts.map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
-              const {name, cycle, pass, scene, granuleId} = productParameterObject
+              const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {cycle, pass, scene, granuleId}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`}>
+              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
                 <td>
                   <Form.Check
                     inline
@@ -161,6 +190,8 @@ const CustomizedProductTable = () => {
                 </td>
               </tr>
             )})}
+          </tbody>
+          {/* <tfoot>
             <tr className='add-granules' style={{ border: 0 }}>
               <td></td>
               <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
@@ -168,23 +199,39 @@ const CustomizedProductTable = () => {
               <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
               <td colSpan={2}>                
                 <Button variant='success' size='sm' onClick={() => handleSave()}>
-                  <Plus size={24}/>  Add Granule(s)
+                  <Plus size={24}/>Add Granule(s)
                 </Button>
               </td>
             </tr>
-          </tbody>
+          </tfoot> */}
         </Table>
-
-        {addGranuleWarning === '' 
-          ? null 
-          : (<Row style={{paddingTop: '5px', paddingBottom: '30px'}}>
+        <DeleteCusomProductModal productsBeingDeleted={productsBeingDeleted}/>
+      </div>
+      <div className='table-responsive'>
+      <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
+        <thead>
+          <tr className='add-granules' style={{ border: 0 }}>
+            <td></td>
+            <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
+            <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
+            <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
+            <td colSpan={2}>                
+              <Button variant='success' size='sm' onClick={() => handleSave()}>
+                <Plus size={24}/>Add Granule(s)
+              </Button>
+            </td>
+          </tr>
+        </thead>
+      </Table>
+      </div>
+      {(showGranuleAddAlert && addGranuleWarning !== '') 
+          ? (<Row style={{paddingTop: '5px', paddingBottom: '30px'}}>
               <Col md={{ span: 6, offset: 3 }}>
                 <Alert variant={`${addGranuleWarningVariant}`}>{addGranuleWarning}</Alert>
               </Col>
             </Row>)
-        }
-        <DeleteCusomProductModal productsBeingDeleted={productsBeingDeleted}/>
-      </div>
+          : null
+      }
     </>
   );
 }

@@ -24,7 +24,7 @@ export interface parameterValuesDictionary {
    rasterResolution: number,
    utmZoneAdjust: string,
    mgrsBandAdjust: string,
-   footprint?: LatLngExpression[]
+   footprint: LatLngExpression[]
  }
 
  export interface sampleGranuleData {

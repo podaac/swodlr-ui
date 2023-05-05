@@ -13,10 +13,9 @@ const GenerateProductModal = (props: GenerateProductModalProps) => {
     useEffect(() => {}, [showGenerateProductModal])
 
 
-    const handleDelete = () => {
-        console.log('in delete function')
-        dispatch(setShowGenerateProductModalFalse())
-    }
+    // const handleDelete = () => {
+    //     dispatch(setShowGenerateProductModalFalse())
+    // }
 
   return (
     <Modal show={showGenerateProductModal} onHide={() => dispatch(setShowGenerateProductModalFalse())}>
@@ -32,7 +31,7 @@ const GenerateProductModal = (props: GenerateProductModalProps) => {
 
     <Modal.Footer>
         <Button variant="secondary" onClick={() => dispatch(setShowGenerateProductModalFalse())}>Close</Button>
-        <Button variant="success" type="submit" onClick={() => handleDelete()}>Generate</Button>
+        <Button variant="success" type="submit" onClick={() => dispatch(setShowGenerateProductModalFalse())}>Generate</Button>
     </Modal.Footer>
     </Modal>
   );

@@ -7,6 +7,7 @@ import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from '.
 import { mouseLocation } from '../../types/sidebarTypes';
 import GenerateProductsModal from './GenerateProductsModal';
 import { setShowGenerateProductModalTrue } from './actions/modalSlice';
+import GenerateProducts from './GenerateProducts';
 
 
 const CustomizeProductsSidebar = () => {
@@ -19,7 +20,6 @@ const CustomizeProductsSidebar = () => {
     const dispatch = useAppDispatch()
 
     const handleResizeClickDown = (event: any) => {
-        console.log(event.pageX)
         dispatch(setResizeStartLocation({left: event.pageX, top: event.pageY}))
         dispatch(setResizeEndLocation({left: event.pageX, top: event.pageY}))
         dispatch(setResizeActive())
@@ -47,13 +47,9 @@ const CustomizeProductsSidebar = () => {
             <Row>
                 <CustomizedProductTable />
             </Row>
-            <Row>
-                <Col>
-                    <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => dispatch(setShowGenerateProductModalTrue())}>
-                        Generate Selected Products
-                    </Button>
-                </Col>
-            </Row>
+            {/* <Row> */}
+                <GenerateProducts />
+            {/* </Row> */}
         </Col>
         <GenerateProductsModal />
         <div className='sidebar-resize'  onMouseDown={(event) => handleResizeClickDown(event)}>

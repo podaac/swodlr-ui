@@ -164,7 +164,7 @@ CUSTOMIZE PRODUCT CONTAINER
 /* NOTE: CHANGE THIS BACK TO ORIGINAL FOOTER CSS */
 .Customize-products-container-all {
   height: 93%;
-  width: 75%;
+  width: 60%;
   margin: 20px;
   border-radius: 10px;
   position: absolute;
@@ -220,6 +220,15 @@ CUSTOMIZE PRODUCT CONTAINER
   cursor: col-resize;
 }
 
+.heading-row {
+
+}
+
+.normal-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 /**************************************************
 PRODUCT TABLE
 **************************************************/
@@ -233,12 +242,16 @@ thead {
   top: -1px;
 }
 
+tfoot {
+  position: sticky
+}
+
 .table-checkbox {
   cursor: pointer;
 }
 
 .table-responsive {
-  max-height: 40vh;
+  max-height: 30vh;
 }
 
 .dark-mode-table {
@@ -261,10 +274,19 @@ thead {
   background-color: #314a68;
 }
 
+.dark-mode-table thead {
+  /* border: #FAF9F6 solid 1px; */
+  background-color: #314a68;
+}
+
 .light-mode-table tr.add-granules {
   border-bottom: none;
   background-color:#c8c7c5;
+}
 
+.light-mode-table thead {
+  /* border: #FAF9F6 solid 1px; */
+  background-color: #c8c7c5;
 }
 
 tr.add-granules td {

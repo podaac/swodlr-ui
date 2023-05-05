@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { allProductParameters } from '../../../types/constantTypes'
+import L, { LatLngExpression } from 'leaflet'
 
 // Define a type for the slice state
 interface GranuleState {
     sampleGranuleDataArray: number[],
     addedProducts: allProductParameters[],
-    selectedGranules: string[]
+    selectedGranules: string[],
+    granuleFocus: LatLngExpression,
 }
 
 // Define the initial state using that type
@@ -14,7 +16,8 @@ const initialState: GranuleState = {
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
     addedProducts: [],
     sampleGranuleDataArray: [],
-    selectedGranules: []
+    selectedGranules: [],
+    granuleFocus: [33.854457, -118.709093]
 }
 
 export const productSlice = createSlice({
@@ -22,8 +25,9 @@ export const productSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    addProduct: (state, action: PayloadAction<allProductParameters>) => {
-      state.addedProducts.push(Object.assign(action.payload))
+    addProduct: (state, action: PayloadAction<allProductParameters[]>) => {
+      action.payload.forEach(granuleObjectToAdd => state.addedProducts.push(Object.assign(granuleObjectToAdd)))
+      // state.addedProducts.push(Object.assign(action.payload))
       // add sample granule data
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
@@ -37,8 +41,13 @@ export const productSlice = createSlice({
         state.addedProducts = newProductArray
     },
     setSelectedGranules: (state, action: PayloadAction<string[]>) => {
-      console.log(action.payload)
       state.selectedGranules = [...action.payload]
+    },
+    setGranuleFocus: (state, action: PayloadAction<string>) => {
+      const granuleIdToFocus = action.payload
+      const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint
+      const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
+      state.granuleFocus = centerOfFootprint as LatLngExpression
     }
   },
 })
@@ -47,7 +56,8 @@ export const {
     addProduct,
     editProduct,
     deleteProduct,
-    setSelectedGranules
+    setSelectedGranules,
+    setGranuleFocus
 } = productSlice.actions
 
 export default productSlice.reducer

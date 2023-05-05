@@ -45,7 +45,7 @@ const AddGranules = () => {
             }
             setAddGranuleWarningVariant('success')
             setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
-            dispatch(addProduct(parameters))
+            dispatch(addProduct([parameters]))
         } else if (!granuleFoundResult){
             setAddGranuleWarningVariant('danger')
             setAddGranuleWarning('NO MATCHING GRANULES FOUND') 
