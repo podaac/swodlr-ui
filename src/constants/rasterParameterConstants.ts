@@ -1,4 +1,4 @@
-import { parameterValuesDictionary } from "../types/constantTypes"
+import { granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -15,11 +15,11 @@ export const parameterOptionValues: parameterValuesDictionary = {
         default: 'utm'
     },
     rasterResolutionUTM: {
-        values: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
+        values: rasterResolutionOptions.UTM,
         default: 100
     },
     rasterResolutionGEO: {
-        values: [3, 4, 5, 6, 8, 15, 30, 60, 180, 300],
+        values: rasterResolutionOptions.GEO,
         default: 60
     },
     utmZoneAdjust: {
@@ -64,3 +64,10 @@ export const parameterOptionDefaults = {
     utmZoneAdjust: '0',
     mgrsBandAdjust: '0',
 }
+
+export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
+    success: 'SUCCESSFULLY ADDED GRANULES!',
+    alreadyAdded: 'SOME GRANULES HAVE ALREADY BEEN ADDED',
+    notFound: 'SOME GRANULES WERE NOT FOUND',
+    alreadyAddedAndNotFound: 'SOME GRANULES HAVE ALREADY BEEN ADDED OR NOT FOUND'
+  }

@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
-import { Plus, Trash } from 'react-bootstrap-icons';
-import DeleteCusomProductModal from './DeleteGranulesModal'
-import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from './actions/modalSlice';
+import { Plus } from 'react-bootstrap-icons';
+import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import { arrayOfProductIds } from '../../types/modalTypes';
-import { allProductParameters } from '../../types/constantTypes';
+import { allProductParameters, sampleGranuleData } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus } from './actions/productSlice';
+import DeleteGranulesModal from './DeleteGranulesModal';
 
-const CustomizedProductTable = () => {
+const GranuleTable = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
@@ -58,12 +58,20 @@ const CustomizedProductTable = () => {
     return scenesArray
   }
 
-  // const objectGranules = addedProducts.reduce((a,v))
+  const setSaveGranulesAlert = (variant: string, alertMessage: string) => {
+    setAddGranuleWarningVariant(variant)
+    setAddGranuleWarning(granuleAlertMessageConstant[alertMessage]) 
+    setShowGranuleAddAlert(true)
+  }
+
   const handleSave = () => {
     const granulesToAdd: allProductParameters[] = []
-    const granuleNoMatchingResults: {cycleNotFound: string, passNotFound: string, sceneNotFound: string}[] = []
-    const granuleAlreadyAddedResults: string[] = []
+    let granuleAlreadyAdded = false
+    const granulesAlreadyAdded: sampleGranuleData[] = []
+    let granuleNotFound = false
+    const granulesNotFound: sampleGranuleData[] = []
     getScenesArray(scene).forEach(sceneId => {
+      console.log('sceneId', sceneId)
       // check if granule exists with that scene, cycle, and pass
       const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
       const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
@@ -83,28 +91,27 @@ const CustomizedProductTable = () => {
               mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
               footprint: granuleFoundResult.footprint as LatLngExpression[]
           }
-          // setAddGranuleWarningVariant('success')
-          // setAddGranuleWarning('SUCCESSFULLY ADDED GRANULE!') 
+
           granulesToAdd.push(parameters)
       } else if (!granuleFoundResult){
-          if (!granuleNoMatchingResults.filter(sceneObj => sceneObj.sceneNotFound === sceneId)) granuleNoMatchingResults.push({cycleNotFound: cycle, passNotFound: pass, sceneNotFound: sceneId})
+        granuleNotFound = true
       } else if (granulesAlreadyAdded.includes(granuleFoundResult.granuleId)) {
-        if (!granuleAlreadyAddedResults.includes(granuleFoundResult.granuleId)) granuleAlreadyAddedResults.push(granuleFoundResult.granuleId)
+        granuleAlreadyAdded = true
       }
     })
+    
     // check if any granules could not be found or they were already added
-    if (granuleNoMatchingResults.length === 0 && granuleAlreadyAddedResults.length === 0 && granulesToAdd.length !== 0) {
-      // success
+    if (granuleNotFound && granuleAlreadyAdded) {
+      console.log()
+      setSaveGranulesAlert('danger', 'alreadyAddedAndNotFound')
+    } else if (granuleNotFound) {
+      setSaveGranulesAlert('danger', 'notFound')
+    } else if  (granuleAlreadyAdded) {
+      setSaveGranulesAlert('danger', 'alreadyAdded')
+    } else {
+      setSaveGranulesAlert('success', 'success')
       dispatch(addProduct(granulesToAdd))
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
-      setAddGranuleWarningVariant('success')
-      setAddGranuleWarning('SUCCESSFULLY ADDED GRANULES!') 
-      setShowGranuleAddAlert(true)
-    } else if ((granuleNoMatchingResults.length !== 0 || granuleAlreadyAddedResults.length !== 0) && granulesToAdd.length === 0) {
-      //some granules not found or already added
-      setAddGranuleWarningVariant('danger')
-      setAddGranuleWarning('SOME GRANULES HAVE ALREADY BEEN ADDED OR NOT FOUND')
-      setShowGranuleAddAlert(true)
     }
 }
   
@@ -138,9 +145,9 @@ const CustomizedProductTable = () => {
   }
 
   return (
-    <>
-      <Row>
-        <h3 className={`${colorModeClass}-text`}>Granule Table</h3>
+    <Row>
+      <Row style={{marginBottom: '10px'}}>
+        <h4 className={`${colorModeClass}-text`}>Granule Table</h4>
       </Row>
       <div className='table-responsive'>
         <Table bordered hover className={`table-responsive ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
@@ -156,7 +163,7 @@ const CustomizedProductTable = () => {
                 />
               </th>
               {Object.entries(granuleEssentialLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
-              <th>Delete</th>
+              {/* <th>Delete</th> */}
             </tr>
           </thead>
           <tbody>
@@ -183,29 +190,16 @@ const CustomizedProductTable = () => {
                   }
                   return <td>{valueToDisplay}</td>
                 })}
-                <td>
+                {/* <td>
                   <Button variant="danger" id={`${essentialsGranule.granuleId}-delete`} size='sm' onClick={(event) => handleDelete(event.currentTarget.id)}>
                     <Trash color="white" size={18}/>
                   </Button>
-                </td>
+                </td> */}
               </tr>
             )})}
           </tbody>
-          {/* <tfoot>
-            <tr className='add-granules' style={{ border: 0 }}>
-              <td></td>
-              <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
-              <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
-              <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
-              <td colSpan={2}>                
-                <Button variant='success' size='sm' onClick={() => handleSave()}>
-                  <Plus size={24}/>Add Granule(s)
-                </Button>
-              </td>
-            </tr>
-          </tfoot> */}
         </Table>
-        <DeleteCusomProductModal productsBeingDeleted={productsBeingDeleted}/>
+        {/* <DeleteGranulesModal /> */}
       </div>
       <div className='table-responsive'>
       <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
@@ -232,8 +226,8 @@ const CustomizedProductTable = () => {
             </Row>)
           : null
       }
-    </>
+    </Row>
   );
 }
 
-export default CustomizedProductTable;
+export default GranuleTable;

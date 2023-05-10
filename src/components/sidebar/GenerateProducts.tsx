@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowGenerateProductModalFalse } from './actions/modalSlice'
+import { setShowGenerateProductModalFalse, setShowGenerateProductModalTrue } from './actions/modalSlice'
 import Form from 'react-bootstrap/Form';
-import { Col, Row } from 'react-bootstrap';
+import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct } from './actions/productSlice';
+import { InfoCircle } from 'react-bootstrap-icons';
 
 const GenerateProducts = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
@@ -86,13 +87,28 @@ const GenerateProducts = () => {
         }
     }
 
+    const renderInfoTooltip = (props: any) => (
+        <Tooltip id="button-tooltip" {...props}>
+          Output Granule Extent Flag Explination
+        </Tooltip>
+      );
+
     const utmOptions = (
         <>
             <Row className='normal-row'>
-                <Col>
+                <Col md={{ span: 4, offset: 1 }}>
                     <h5>UTM Zone Adjust</h5>
                 </Col>
-                <Col>
+                <Col md={{ span: 1, offset: 0 }}>
+                    <OverlayTrigger
+                        placement="right"
+                        delay={{ show: 250, hide: 400 }}
+                        overlay={renderInfoTooltip}
+                    >
+                    <InfoCircle />
+                    </OverlayTrigger>    
+                </Col>
+                <Col md={{ span: 4, offset: 1 }}>
                     {parameterOptionValues.utmZoneAdjust.values.map((value, index) => <Form.Check
                         defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
                         inline
@@ -105,10 +121,19 @@ const GenerateProducts = () => {
                 </Col>
             </Row>
             <Row className='normal-row'>
-                <Col>
+                <Col md={{ span: 4, offset: 1 }}>
                     <h5>MGRS Band Adjust</h5>
                 </Col>
-                <Col>
+                <Col md={{ span: 1, offset: 0 }}>
+                    <OverlayTrigger
+                        placement="right"
+                        delay={{ show: 250, hide: 400 }}
+                        overlay={renderInfoTooltip}
+                    >
+                    <InfoCircle />
+                    </OverlayTrigger>    
+                </Col>
+                <Col md={{ span: 4, offset: 1 }}>
                     {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => <Form.Check
                         defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
                         inline
@@ -124,15 +149,24 @@ const GenerateProducts = () => {
     )
 
   return (
-    <>
-        <Row>
+    <Row>
+        <Row className='heading-row'>
             <h3>Parameter Options</h3>
         </Row>
         <Row className='normal-row'>
-            <Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 <h5>Output Granule Extent Flag</h5>
             </Col>  
-            <Col>
+            <Col md={{ span: 1, offset: 0 }}>
+                <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderInfoTooltip}
+                >
+                    <InfoCircle />
+                </OverlayTrigger>
+            </Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 <Form.Check 
                     type="switch"
                     id="outputGranuleExtentFlag-switch"
@@ -141,10 +175,19 @@ const GenerateProducts = () => {
             </Col>
         </Row>
         <Row className='normal-row'>
-            <Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 <h5>Output Sampling Grid Type</h5>
             </Col>  
-            <Col>
+            <Col md={{ span: 1, offset: 0 }}>
+                <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderInfoTooltip}
+                >
+                    <InfoCircle />
+                </OverlayTrigger>    
+            </Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 {parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
                     <Form.Check 
                         defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
@@ -158,22 +201,31 @@ const GenerateProducts = () => {
             </Col>
         </Row>
         <Row className='normal-row'>
-            <Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 <h5>Raster Resolution</h5>
             </Col>  
-            <Col>
+            <Col md={{ span: 1, offset: 0 }}>
+                <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderInfoTooltip}
+                >
+                    <InfoCircle />
+                </OverlayTrigger>    
+            </Col>
+            <Col md={{ span: 4, offset: 1 }}>
                 {renderRasterResolutionOptions(outputSamplingGridType)}
             </Col>
         </Row>
         {outputSamplingGridType === 'geo' ? null : utmOptions}
-        <Row className='normal-row' style={{paddingTop: '30px'}}>
+        {/* <Row className='normal-row' style={{paddingTop: '30px'}}>
             <Col>
-                <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => console.log('generating products', selectedGranules)}>
+                <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => dispatch(setShowGenerateProductModalTrue())}>
                     Generate Selected Products
                 </Button>
             </Col>
-        </Row>
-    </>       
+        </Row> */}
+    </Row>      
   );
 }
 

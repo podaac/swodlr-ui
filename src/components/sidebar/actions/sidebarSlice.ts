@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { mouseLocation } from '../../../types/sidebarTypes'
+import { TabTypes } from '../../../types/constantTypes'
 
 // Define a type for the slice state
 interface CustomizeProductsFooterState {
@@ -7,6 +8,7 @@ interface CustomizeProductsFooterState {
     resizeStartLocation: mouseLocation,
     resizeEndLocation: mouseLocation,
     footerMinimized: boolean
+    activeTab: TabTypes,
 }
 
 // Define the initial state using that type
@@ -20,7 +22,8 @@ const initialState: CustomizeProductsFooterState = {
         left: 0,
         top: 0
     },
-    footerMinimized: false
+    footerMinimized: false,
+    activeTab: 'productCustomization'
 }
 
 export const sidebarSlice = createSlice({
@@ -46,6 +49,9 @@ export const sidebarSlice = createSlice({
     setFooterExpanded: (state) => {
         state.footerMinimized = false
     },
+    setActiveTab: (state, action: PayloadAction<TabTypes>) => {
+        state.activeTab = action.payload
+    },
   },
 })
 
@@ -55,7 +61,8 @@ export const {
     setResizeStartLocation, 
     setResizeEndLocation, 
     setFooterMinimized, 
-    setFooterExpanded 
+    setFooterExpanded,
+    setActiveTab
 } = sidebarSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type

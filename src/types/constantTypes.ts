@@ -33,3 +33,17 @@ export interface parameterValuesDictionary {
    pass: string,
    scene: string
 }
+
+export interface granuleAlertMessageConstantType {
+  [key: string]: string
+}
+
+export interface generatedProduct {
+  granuleId: string,
+  status: StatusTypes,
+  downloadUrl?: string,
+}
+
+export type StatusTypes = 'IN_PROGRESS' | 'COMPLETE'
+
+export type TabTypes = 'productCustomization' | 'productHistory'

@@ -1,22 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button, Col, Row} from 'react-bootstrap';
+import { Button, Col, Row, Tab, Tabs} from 'react-bootstrap';
 import { ArrowsExpand} from 'react-bootstrap-icons';
-import CustomizedProductTable from './GranulesTable';
+import GranuleTable from './GranulesTable';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './actions/sidebarSlice';
+import { setResizeActive, setResizeStartLocation, setResizeEndLocation, setActiveTab } from './actions/sidebarSlice';
 import { mouseLocation } from '../../types/sidebarTypes';
-import GenerateProductsModal from './GenerateProductsModal';
-import { setShowGenerateProductModalTrue } from './actions/modalSlice';
 import GenerateProducts from './GenerateProducts';
-
+import ProductActionBar from './ProductActionBar';
+import GeneratedProductHistory from './GeneratedProductHistory';
+import { TabTypes } from '../../types/constantTypes';
+import { act } from 'react-dom/test-utils';
 
 const CustomizeProductsSidebar = () => {
-    const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
     const resizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+    const activeTab = useAppSelector((state) => state.sidebar.activeTab)
     const footerRef = useRef<HTMLHeadingElement>(null);
     const [sidebarWidth, setSidebarWidth] = useState('')
+    const [tabKey, setTabKey] = useState(activeTab)
+
     const dispatch = useAppDispatch()
 
     const handleResizeClickDown = (event: any) => {
@@ -35,23 +38,39 @@ const CustomizeProductsSidebar = () => {
         setSidebarWidth(`${sidebarWidthNumber}px`)
     }, [resizeEndLocation])
 
+    const renderSidebarContents = () => {
+        if (activeTab === 'productCustomization') {
+            return (
+                <>
+                    <GranuleTable />
+                    <GenerateProducts />
+                    <ProductActionBar />
+                </>
+            )
+        } else if (activeTab === 'productHistory') {
+            return (
+                <>
+                    <GeneratedProductHistory />
+                </>
+            )
+        }
+    }
+
+    const getTabClass = (tabId: TabTypes) => {
+        console.log()
+        return tabId === activeTab ? `${colorModeClass}-active-tab` : `${colorModeClass}-inactive-tab` 
+    }
+
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
         <Col>
             <Row>
-                <Col >
-                    <h2 className={`${colorModeClass}-text`}>SWOT Products Customization</h2>
-                </Col>
+                <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')}`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Product Customization</Button>
+                <Button id="productHistory" className={`product-tab ${getTabClass('productHistory')}`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productHistory'))}>Product History</Button>
+                <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '1px', opacity: 1}} />
             </Row>
-            <hr></hr>
-            <Row>
-                <CustomizedProductTable />
-            </Row>
-            {/* <Row> */}
-                <GenerateProducts />
-            {/* </Row> */}
+            {renderSidebarContents()}
         </Col>
-        <GenerateProductsModal />
         <div className='sidebar-resize'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
         </div>

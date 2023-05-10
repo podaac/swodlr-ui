@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { allProductParameters } from '../../../types/constantTypes'
+import { allProductParameters, generatedProduct } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
 
 // Define a type for the slice state
@@ -8,6 +8,7 @@ interface GranuleState {
     addedProducts: allProductParameters[],
     selectedGranules: string[],
     granuleFocus: LatLngExpression,
+    generatedProducts: generatedProduct[],
 }
 
 // Define the initial state using that type
@@ -17,8 +18,10 @@ const initialState: GranuleState = {
     addedProducts: [],
     sampleGranuleDataArray: [],
     selectedGranules: [],
-    granuleFocus: [33.854457, -118.709093]
+    granuleFocus: [33.854457, -118.709093],
+    generatedProducts: [],
 }
+
 
 export const productSlice = createSlice({
   name: 'productSlice',
@@ -48,7 +51,12 @@ export const productSlice = createSlice({
       const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
       state.granuleFocus = centerOfFootprint as LatLngExpression
-    }
+    },
+    addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
+      const productsToBeGeneratedCopy = [...action.payload]
+      const newGeneratedProducts: generatedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({granuleId: granuleId, status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE"}))
+      state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]
+    },
   },
 })
 
@@ -57,7 +65,8 @@ export const {
     editProduct,
     deleteProduct,
     setSelectedGranules,
-    setGranuleFocus
+    setGranuleFocus,
+    addGeneratedProducts
 } = productSlice.actions
 
 export default productSlice.reducer

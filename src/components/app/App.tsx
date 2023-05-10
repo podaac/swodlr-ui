@@ -15,7 +15,7 @@ const App = () => {
   const footerResizeActive = useAppSelector((state) => state.sidebar.footerResizeActive)
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const footerMinimized = useAppSelector((state) => state.sidebar.footerMinimized)
-  // const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
+  const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
@@ -29,7 +29,7 @@ const App = () => {
   }
 
   // can use this for testing purposes
-  const userAuthenticated = true
+  // const userAuthenticated = true
 
   const authenticatedApplicationView = (
     <>
