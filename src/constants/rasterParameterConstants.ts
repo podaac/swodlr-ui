@@ -1,4 +1,4 @@
-import { granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
+import { ParameterHelp, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -32,7 +32,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
     },
 }
 
-export const parameterOptionLabels = {
+export const parameterOptions = {
     granuleId: 'ID',
     name: 'Name',
     cycle: 'Cycle',
@@ -65,9 +65,34 @@ export const parameterOptionDefaults = {
     mgrsBandAdjust: '0',
 }
 
+export const parameterHelp: ParameterHelp = {
+    outputGranuleExtentFlag: `	
+    Flag indicating whether the SAS should produce a non-overlapping or overlapping granule
+    
+    “0” for a non-overlapping, 128 km x 128 km granule extent
+    “1” for an overlapping, 256 km x 128 km granule extent`,
+    outputSamplingGridType: `	
+    Type of the raster sampling grid
+    
+    “utm” for a Universal Transverse Mercator (UTM) grid
+    “geo” for a geodetic latitude-longitude grid`,
+    rasterResolution: `	
+    Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids`,
+    utmZoneAdjust: `This parameter allows the UTM grid to use a zone within +/-1 zone of the closest zone to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    mgrsBandAdjust: `This parameter allows the UTM grid to use an MGRS latitude band within +/-1 band of the closest band to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+}
+
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: 'SUCCESSFULLY ADDED GRANULES!',
     alreadyAdded: 'SOME GRANULES HAVE ALREADY BEEN ADDED',
     notFound: 'SOME GRANULES WERE NOT FOUND',
     alreadyAddedAndNotFound: 'SOME GRANULES HAVE ALREADY BEEN ADDED OR NOT FOUND'
+  }
+
+  export const parameterOptionHelp = {
+    outputGranuleExtentFlag: 'test',
+    outputSamplingGridType: 'test',
+    rasterResolution: 'test',
+    utmZoneAdjust: 'test',
+    mgrsBandAdjust: 'test',
   }

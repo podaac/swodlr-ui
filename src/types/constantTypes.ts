@@ -2,7 +2,7 @@ import { LatLngExpression } from "leaflet"
 
 export interface parameterValuesObject {
    values: string[] | number[],
-   default: string | number
+   default: string | number | GridTypes
 }
 
 export interface parameterValuesDictionary {
@@ -27,6 +27,14 @@ export interface parameterValuesDictionary {
    footprint: LatLngExpression[]
  }
 
+ export interface GenerateProductParameters {
+  outputGranuleExtentFlag: number,
+  outputSamplingGridType: string,
+  rasterResolution: number,
+  utmZoneAdjust: string,
+  mgrsBandAdjust: string,
+}
+
  export interface sampleGranuleData {
    name: string,
    cycle: string,
@@ -41,9 +49,16 @@ export interface granuleAlertMessageConstantType {
 export interface generatedProduct {
   granuleId: string,
   status: StatusTypes,
+  parametersUsedToGenerate: GenerateProductParameters,
   downloadUrl?: string,
 }
 
 export type StatusTypes = 'IN_PROGRESS' | 'COMPLETE'
 
 export type TabTypes = 'productCustomization' | 'productHistory'
+
+export type GridTypes = 'utm' | 'geo' 
+
+export interface ParameterHelp {
+  [key: string]: string
+}

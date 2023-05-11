@@ -1,26 +1,21 @@
 import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowGenerateProductModalFalse, setShowGenerateProductModalTrue } from './actions/modalSlice'
+import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from './actions/modalSlice'
 import Form from 'react-bootstrap/Form';
-import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { parameterOptionValues } from '../../constants/rasterParameterConstants'
-import { allProductParameters } from '../../types/constantTypes';
-import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
-import { LatLngExpression } from 'leaflet';
-import { addProduct } from './actions/productSlice';
-import { InfoCircle } from 'react-bootstrap-icons';
+import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
+import { InfoCircle, Trash } from 'react-bootstrap-icons';
+import DeleteGranulesModal from './DeleteGranulesModal';
+import GenerateProductsModal from './GenerateProductsModal';
+import { setGenerateProductParameters } from './actions/productSlice';
+import { GenerateProductParameters, GridTypes } from '../../types/constantTypes';
 
 const GenerateProducts = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+    const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const dispatch = useAppDispatch()
 
-    const [name, setName] = useState('');
-    const [cycle, setCycle] = useState('');
-    const [pass, setPass] = useState('');
-    const [scene, setScene] = useState('');
     const [outputGranuleExtentFlag, setOutputGranuleExtentFlag] = useState(parameterOptionValues.outputGranuleExtentFlag.default as number);
     const [outputSamplingGridType, setOutputSamplingGridType] = useState(parameterOptionValues.outputSamplingGridType.default as string);
     const [rasterResolutionUTM, setRasterResolutionUTM] = useState(parameterOptionValues.rasterResolutionUTM.default as number)
@@ -28,18 +23,6 @@ const GenerateProducts = () => {
     const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
     const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
 
-    const setInitialStates = () => {
-        setName('')
-        setCycle('')
-        setPass('')
-        setScene('')
-        setOutputGranuleExtentFlag(parameterOptionValues.outputGranuleExtentFlag.default as number)
-        setOutputSamplingGridType(parameterOptionValues.outputSamplingGridType.default as string)
-        setRasterResolutionUTM(parameterOptionValues.rasterResolutionUTM.default as number)
-        setRasterResolutionGEO(parameterOptionValues.rasterResolutionGEO.default as number)
-        setUTMZoneAdjust(parameterOptionValues.utmZoneAdjust.default as string)
-        setMGRSBandAdjust(parameterOptionValues.mgrsBandAdjust.default as string)
-    }
 
     useEffect(() => {}, [showGenerateProductsModal, outputSamplingGridType])
 
@@ -59,39 +42,38 @@ const GenerateProducts = () => {
         }
     }
 
-    const handleSave = () => {
-        const rasterResolutionToSet = outputSamplingGridType === 'utm' ? rasterResolutionUTM : rasterResolutionGEO;
-        // check if granule exists with that scene, cycle, and pass
-        const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === scene)
-        if (granuleFoundResult) {
-            // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-            // get the granuleId from it and pass it to the parameters
-            const parameters: allProductParameters = {
-                granuleId: granuleFoundResult.granuleId,
-                name,
-                cycle,
-                pass,
-                scene,
-                outputGranuleExtentFlag,
-                outputSamplingGridType,
-                rasterResolution: rasterResolutionToSet,
-                utmZoneAdjust,
-                mgrsBandAdjust,
-                footprint: granuleFoundResult.footprint as LatLngExpression[]
+    const renderinfoIcon = (parameterId: string) => (
+        <OverlayTrigger
+            placement="right"
+            overlay={
+                <Tooltip id="button-tooltip">
+                {parameterHelp[parameterId]}
+              </Tooltip>
             }
-            dispatch(addProduct([parameters]))
-            dispatch(setShowGenerateProductModalFalse())
-            setInitialStates()
+        >
+            <InfoCircle />
+        </OverlayTrigger>
+    )
+
+    const getRelevantRasterResolution = (resolution: GridTypes) => {
+        if (resolution === 'utm') {
+            return rasterResolutionUTM
         } else {
-            console.log('NO MATCHING GRANULES FOUND') 
+            return rasterResolutionGEO
         }
     }
 
-    const renderInfoTooltip = (props: any) => (
-        <Tooltip id="button-tooltip" {...props}>
-          Output Granule Extent Flag Explination
-        </Tooltip>
-      );
+    const handleGenerateSelected = () => {
+        const selectedProductParameters: GenerateProductParameters = {
+            outputGranuleExtentFlag,
+            outputSamplingGridType,
+            rasterResolution: getRelevantRasterResolution(outputSamplingGridType as GridTypes),
+            utmZoneAdjust,
+            mgrsBandAdjust
+        }
+        dispatch(setGenerateProductParameters(selectedProductParameters))
+        dispatch(setShowGenerateProductModalTrue())
+    }
 
     const utmOptions = (
         <>
@@ -100,13 +82,7 @@ const GenerateProducts = () => {
                     <h5>UTM Zone Adjust</h5>
                 </Col>
                 <Col md={{ span: 1, offset: 0 }}>
-                    <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 250, hide: 400 }}
-                        overlay={renderInfoTooltip}
-                    >
-                    <InfoCircle />
-                    </OverlayTrigger>    
+                    {renderinfoIcon('utmZoneAdjust')}
                 </Col>
                 <Col md={{ span: 4, offset: 1 }}>
                     {parameterOptionValues.utmZoneAdjust.values.map((value, index) => <Form.Check
@@ -125,13 +101,7 @@ const GenerateProducts = () => {
                     <h5>MGRS Band Adjust</h5>
                 </Col>
                 <Col md={{ span: 1, offset: 0 }}>
-                    <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 250, hide: 400 }}
-                        overlay={renderInfoTooltip}
-                    >
-                    <InfoCircle />
-                    </OverlayTrigger>    
+                    {renderinfoIcon('utmZoneAdjust')}
                 </Col>
                 <Col md={{ span: 4, offset: 1 }}>
                     {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => <Form.Check
@@ -151,21 +121,15 @@ const GenerateProducts = () => {
   return (
     <Row>
         <Row className='heading-row'>
-            <h3>Parameter Options</h3>
+            <h4>Parameter Options</h4>
         </Row>
         <Row className='normal-row'>
             <Col md={{ span: 4, offset: 1 }}>
                 <h5>Output Granule Extent Flag</h5>
             </Col>  
             <Col md={{ span: 1, offset: 0 }}>
-                <OverlayTrigger
-                    placement="right"
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={renderInfoTooltip}
-                >
-                    <InfoCircle />
-                </OverlayTrigger>
-            </Col>
+                    {renderinfoIcon('utmZoneAdjust')}
+                </Col>
             <Col md={{ span: 4, offset: 1 }}>
                 <Form.Check 
                     type="switch"
@@ -179,14 +143,8 @@ const GenerateProducts = () => {
                 <h5>Output Sampling Grid Type</h5>
             </Col>  
             <Col md={{ span: 1, offset: 0 }}>
-                <OverlayTrigger
-                    placement="right"
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={renderInfoTooltip}
-                >
-                    <InfoCircle />
-                </OverlayTrigger>    
-            </Col>
+                    {renderinfoIcon('utmZoneAdjust')}
+                </Col>
             <Col md={{ span: 4, offset: 1 }}>
                 {parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
                     <Form.Check 
@@ -205,26 +163,30 @@ const GenerateProducts = () => {
                 <h5>Raster Resolution</h5>
             </Col>  
             <Col md={{ span: 1, offset: 0 }}>
-                <OverlayTrigger
-                    placement="right"
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={renderInfoTooltip}
-                >
-                    <InfoCircle />
-                </OverlayTrigger>    
-            </Col>
+                    {renderinfoIcon('utmZoneAdjust')}
+                </Col>
             <Col md={{ span: 4, offset: 1 }}>
                 {renderRasterResolutionOptions(outputSamplingGridType)}
             </Col>
         </Row>
         {outputSamplingGridType === 'geo' ? null : utmOptions}
-        {/* <Row className='normal-row' style={{paddingTop: '30px'}}>
+
+        <Row className='heading-row'>
+            <h4 className={`${colorModeClass}-text`}>Bulk Actions</h4>
+        </Row>
+        <Row>
             <Col>
-                <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => dispatch(setShowGenerateProductModalTrue())}>
-                    Generate Selected Products
+                <Button disabled={selectedGranules.length === 0} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
+                    <Trash color="white" size={18}/> Delete Selected
+                </Button></Col>
+            <Col>
+                <Button disabled={selectedGranules.length === 0} variant="success" onClick={() => handleGenerateSelected()}>
+                    Generate Selcted
                 </Button>
             </Col>
-        </Row> */}
+            <DeleteGranulesModal />
+            <GenerateProductsModal />
+        </Row>   
     </Row>      
   );
 }

@@ -1,15 +1,23 @@
-import { Form } from 'react-bootstrap';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setDarkMode, setLightMode } from './navbarSlice';
 import swotLogo from '../../assets/swot_mainlogo_portrait.jpg'
+import { Person, PersonSquare } from 'react-bootstrap-icons';
+import { setUserNotAuthenticated } from '../app/appSlice';
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
   const darkMode = useAppSelector((state) => state.navbar.darkMode)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+
+  const renderUserDropdownTitle = () => (
+      <span>
+        <PersonSquare /> {`Username`}
+      </span>
+  )
 
   return (
     <Navbar className={`fixed-top ${colorModeClass}-navbar-background Main-navbar`} expand="lg">
@@ -35,6 +43,11 @@ const MainNavbar = () => {
               onClick={() => darkMode ? dispatch(setLightMode()) : dispatch(setDarkMode())}
             />
         </Nav>
+        <NavDropdown  className={`${colorModeClass}-text`} title={renderUserDropdownTitle()} id="basic-nav-dropdown" align="end" style={{marginRight: '20px'}}>
+          <NavDropdown.Item>Email: username@gmail.com</NavDropdown.Item>
+          <Button variant='danger' onClick={() => dispatch(setUserNotAuthenticated())}>Logout</Button>
+        </NavDropdown>
+        {/* <Nav><PersonSquare />Jimmy</Nav> */}
       </Navbar.Collapse>
     </Navbar>
   );

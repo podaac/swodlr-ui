@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { allProductParameters, generatedProduct } from '../../../types/constantTypes'
+import { allProductParameters, generatedProduct, GenerateProductParameters } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
+import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 
 // Define a type for the slice state
 interface GranuleState {
@@ -9,7 +10,10 @@ interface GranuleState {
     selectedGranules: string[],
     granuleFocus: LatLngExpression,
     generatedProducts: generatedProduct[],
+    generateProductParameters: GenerateProductParameters
 }
+
+const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
 
 // Define the initial state using that type
 const initialState: GranuleState = {
@@ -18,8 +22,9 @@ const initialState: GranuleState = {
     addedProducts: [],
     sampleGranuleDataArray: [],
     selectedGranules: [],
-    granuleFocus: [33.854457, -118.709093],
+    granuleFocus: [33.854457, -118.709093] as LatLngExpression,
     generatedProducts: [],
+    generateProductParameters: generateProductParametersFiltered
 }
 
 
@@ -54,8 +59,11 @@ export const productSlice = createSlice({
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]
-      const newGeneratedProducts: generatedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({granuleId: granuleId, status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE"}))
+      const newGeneratedProducts: generatedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({granuleId: granuleId, status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE", parametersUsedToGenerate: state.generateProductParameters}))
       state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]
+    },
+    setGenerateProductParameters: (state, action: PayloadAction<GenerateProductParameters>) => {
+      state.generateProductParameters = action.payload
     },
   },
 })
@@ -66,7 +74,8 @@ export const {
     deleteProduct,
     setSelectedGranules,
     setGranuleFocus,
-    addGeneratedProducts
+    addGeneratedProducts,
+    setGenerateProductParameters
 } = productSlice.actions
 
 export default productSlice.reducer

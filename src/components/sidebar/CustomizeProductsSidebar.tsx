@@ -9,7 +9,6 @@ import GenerateProducts from './GenerateProducts';
 import ProductActionBar from './ProductActionBar';
 import GeneratedProductHistory from './GeneratedProductHistory';
 import { TabTypes } from '../../types/constantTypes';
-import { act } from 'react-dom/test-utils';
 
 const CustomizeProductsSidebar = () => {
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
@@ -18,7 +17,6 @@ const CustomizeProductsSidebar = () => {
     const activeTab = useAppSelector((state) => state.sidebar.activeTab)
     const footerRef = useRef<HTMLHeadingElement>(null);
     const [sidebarWidth, setSidebarWidth] = useState('')
-    const [tabKey, setTabKey] = useState(activeTab)
 
     const dispatch = useAppDispatch()
 
@@ -44,7 +42,7 @@ const CustomizeProductsSidebar = () => {
                 <>
                     <GranuleTable />
                     <GenerateProducts />
-                    <ProductActionBar />
+                    {/* <ProductActionBar /> */}
                 </>
             )
         } else if (activeTab === 'productHistory') {
@@ -57,16 +55,16 @@ const CustomizeProductsSidebar = () => {
     }
 
     const getTabClass = (tabId: TabTypes) => {
-        console.log()
         return tabId === activeTab ? `${colorModeClass}-active-tab` : `${colorModeClass}-inactive-tab` 
     }
 
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
         <Col>
+            {/* <Row><h3 style={{marginTop: '10px', marginBottom: '20px'}}>SWOT On-Demand L2 Raster Generator</h3></Row> */}
             <Row>
-                <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')}`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Product Customization</Button>
-                <Button id="productHistory" className={`product-tab ${getTabClass('productHistory')}`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productHistory'))}>Product History</Button>
+                <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')} shadow`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Product Customization</Button>
+                <Button id="productHistory" className={`product-tab ${getTabClass('productHistory')} shadow`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productHistory'))}>Product History</Button>
                 <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '1px', opacity: 1}} />
             </Row>
             {renderSidebarContents()}

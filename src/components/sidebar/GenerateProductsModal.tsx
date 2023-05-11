@@ -9,10 +9,12 @@ import { setActiveTab } from './actions/sidebarSlice';
 const GenerateProductsModal = () => {
     const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+    const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
     const dispatch = useAppDispatch()
 
     const handleGenerate = () => {
         // unselect select-all box
+        console.log(generateProductParameters)
         dispatch(addGeneratedProducts(selectedGranules))
         dispatch(setActiveTab('productHistory'))
         dispatch(setShowGenerateProductModalFalse())

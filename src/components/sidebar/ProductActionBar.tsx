@@ -6,6 +6,7 @@ import { deleteProduct, setSelectedGranules } from './actions/productSlice'
 import { Col, Row } from 'react-bootstrap';
 import GenerateProductsModal from './GenerateProductsModal';
 import { Trash } from 'react-bootstrap-icons';
+import DeleteGranulesModal from './DeleteGranulesModal';
 
 const ProductActionBar = () => {
     const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
@@ -14,7 +15,6 @@ const ProductActionBar = () => {
 
     const handleDeleteSelectedGranules = () => {
         dispatch(setShowDeleteProductModalTrue())
-
         dispatch(setSelectedGranules([]))
         // unselect select-all box
     }
@@ -34,6 +34,7 @@ const ProductActionBar = () => {
                     Generate Selcted
                 </Button>
             </Col>
+            <DeleteGranulesModal />
             <GenerateProductsModal />
         </Row>   
     </>  

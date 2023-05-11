@@ -1,10 +1,10 @@
-import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap } from 'react-leaflet'
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow
@@ -22,12 +22,8 @@ const Map = () => {
       map.setView(granuleFocus, 8);
       setPreviousGranuleFocus(granuleFocus)
     }
-    // console.log('previousGranuleFocus',previousGranuleFocus)
-    // console.log('granuleFocus',granuleFocus)
     return null
   }
-
-  // useEffect(() => {}, [granuleFocus])
   
   return (
     <MapContainer className='Map-container' center={[33.854457, -118.709093]} zoom={7} scrollWheelZoom={true} zoomControl={false}>
