@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button, Col, Row, Tab, Tabs} from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 import { ArrowsExpand} from 'react-bootstrap-icons';
 import GranuleTable from './GranulesTable';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setResizeActive, setResizeStartLocation, setResizeEndLocation, setActiveTab } from './actions/sidebarSlice';
 import { mouseLocation } from '../../types/sidebarTypes';
 import GenerateProducts from './GenerateProducts';
-import ProductActionBar from './ProductActionBar';
+// import ProductActionBar from '../misc/ProductActionBar';
 import GeneratedProductHistory from './GeneratedProductHistory';
 import { TabTypes } from '../../types/constantTypes';
 
@@ -37,19 +37,24 @@ const CustomizeProductsSidebar = () => {
     }, [resizeEndLocation])
 
     const renderSidebarContents = () => {
-        if (activeTab === 'productCustomization') {
+        if (activeTab === 'granuleSelection') {
             return (
-                <>
+                <div>
                     <GranuleTable />
-                    <GenerateProducts />
                     {/* <ProductActionBar /> */}
-                </>
+                </ div>
+            )
+        } else if (activeTab === 'productCustomization') {
+            return (
+                <div>
+                    <GenerateProducts />
+                </div>
             )
         } else if (activeTab === 'productHistory') {
             return (
-                <>
+                <div>
                     <GeneratedProductHistory />
-                </>
+                </ div>
             )
         }
     }
@@ -62,14 +67,15 @@ const CustomizeProductsSidebar = () => {
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
         <Col>
             {/* <Row><h3 style={{marginTop: '10px', marginBottom: '20px'}}>SWOT On-Demand L2 Raster Generator</h3></Row> */}
-            <Row>
-                <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')} shadow`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Product Customization</Button>
-                <Button id="productHistory" className={`product-tab ${getTabClass('productHistory')} shadow`} style={{height: '50px', width: '200px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productHistory'))}>Product History</Button>
+            <Row style={{marginLeft: '0px', marginRight: '0px'}}>
+                <Button id="granuleSelection" className={`product-tab ${getTabClass('granuleSelection')} shadow`} style={{height: '50px', width: '210px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>1. Granule Selection</Button>
+                <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')} shadow`} style={{height: '50px', width: '210px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>2. Product Customization</Button>
+                <Button id="productHistory" className={`product-tab ${getTabClass('productHistory')} shadow`} style={{height: '50px', width: '210px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productHistory'))}>3. Product History</Button>
                 <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '1px', opacity: 1}} />
             </Row>
             {renderSidebarContents()}
         </Col>
-        <div className='sidebar-resize'  onMouseDown={(event) => handleResizeClickDown(event)}>
+        <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
         </div>
     </div>

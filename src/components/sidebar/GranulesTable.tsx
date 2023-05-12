@@ -3,16 +3,20 @@ import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
-import { Plus } from 'react-bootstrap-icons';
+import { ArrowReturnRight, Plus, Trash } from 'react-bootstrap-icons';
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus } from './actions/productSlice';
+import { setActiveTab, setGranuleTableEditable } from './actions/sidebarSlice';
+import { setShowDeleteProductModalTrue } from './actions/modalSlice';
+import DeleteGranulesModal from './DeleteGranulesModal';
 
 const GranuleTable = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+  const granuleTableEditable = useAppSelector((state) => state.sidebar.granuleTableEditable)
   const dispatch = useAppDispatch()
   const [allChecked, setAllChecked] = useState(false)
 
@@ -131,20 +135,39 @@ const GranuleTable = () => {
       <Row style={{marginBottom: '10px'}}>
         <h4 className={`${colorModeClass}-text`}>Granule Table</h4>
       </Row>
+      <Row style={{marginBottom: '15px'}}>
+        <Col md={{ span: 4, offset: 1 }}><h6>Edit Mode</h6></Col>
+        <Col md={{ span: 2, offset: 0 }}>
+          <Form.Check 
+              type="switch"
+              defaultChecked={!granuleTableEditable}
+              className={`table-mode-switch ${colorModeClass}-text`}
+              // label="Dark mode"
+              id="dark-mode-switch"
+              // checked={granuleTableEditable}
+              style={{paddingRight: '20px', cursor: 'pointer'}}
+              onClick={() => dispatch(setGranuleTableEditable(!granuleTableEditable))}
+            />
+        </Col>
+        <Col md={{ span: 4, offset: 0 }}><h6>Generate Product Mode</h6></Col>
+      </Row>
       <div className='table-responsive'>
         <Table bordered hover className={`table-responsive ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
           <thead>
             <tr>
-              <th>          
-                <Form.Check
-                  inline
-                  name="group1"
-                  id={`inline-select-all`}
-                  style={{cursor: 'pointer'}}
-                  onChange={() => handleAllChecked()}
-                />
-              </th>
               {Object.entries(granuleEssentialLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
+              {granuleTableEditable ? (
+                <th>          
+                  <Form.Check
+                    inline
+                    name="group1"
+                    label='Delete'
+                    id={`inline-select-all`}
+                    style={{cursor: 'pointer'}}
+                    onChange={() => handleAllChecked()}
+                  />
+                </th>
+              ): null}
             </tr>
           </thead>
           <tbody>
@@ -154,16 +177,6 @@ const GranuleTable = () => {
               const essentialsGranule = {cycle, pass, scene, granuleId}
               return (
               <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => handleGranuleSelected(granuleId)}>
-                <td>
-                  <Form.Check
-                    inline
-                    name="group1"
-                    id={`inline-select-${granuleId}`}
-                    className='table-checkbox'
-                    onChange={event => handleGranuleSelected(granuleId)}
-                    checked={selectedGranules.includes(granuleId)}
-                  />
-                </td>
                 {Object.entries(essentialsGranule).map(entry => {
                   let valueToDisplay = entry[1]
                   if (entry[0] === 'outputSamplingGridType' && typeof valueToDisplay === 'string') {
@@ -171,36 +184,62 @@ const GranuleTable = () => {
                   }
                   return <td>{valueToDisplay}</td>
                 })}
+                {granuleTableEditable  ? (
+                  <td>
+                    <Form.Check
+                      inline
+                      name="group1"
+                      id={`inline-select-${granuleId}`}
+                      className='table-checkbox'
+                      onChange={event => handleGranuleSelected(granuleId)}
+                      checked={selectedGranules.includes(granuleId)}
+                    />
+                  </td>
+                ): null}
               </tr>
             )})}
           </tbody>
         </Table>
       </div>
-      <div className='table-responsive'>
-      <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
-        <thead>
-          <tr className='add-granules' style={{ border: 0 }}>
-            <td></td>
-            <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
-            <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
-            <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
-            <td colSpan={2}>                
-              <Button variant='success' size='sm' onClick={() => handleSave()}>
-                <Plus size={24}/>Add Granule(s)
-              </Button>
-            </td>
-          </tr>
-        </thead>
-      </Table>
-      </div>
+      { granuleTableEditable ? (
+          <div className='table-responsive'>
+            <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
+              <thead>
+                <tr className='add-granules' style={{ border: 0 }}>
+                  <td></td>
+                  <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
+                  <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
+                  <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
+                  <td colSpan={2}>                
+                    <Button variant='success' size='sm' onClick={() => handleSave()}>
+                      <Plus size={24}/>
+                    </Button>
+                  </td>
+                  <td colSpan={2}>
+                    <Button disabled={selectedGranules.length === 0} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
+                        <Trash color="white" size={18}/>
+                    </Button>
+                  </td>
+                </tr>
+              </thead>
+            </Table>
+          </div>
+        ) : null
+      }
       {(showGranuleAddAlert && addGranuleWarning !== '') 
-          ? (<Row style={{paddingTop: '5px', paddingBottom: '30px'}}>
+          ? (<Row style={{paddingTop: '5px', paddingBottom: '10px'}}>
               <Col md={{ span: 6, offset: 3 }}>
                 <Alert variant={`${addGranuleWarningVariant}`}>{addGranuleWarning}</Alert>
               </Col>
             </Row>)
           : null
       }
+      <Row>
+        <Col>
+          <Button variant='success' disabled={granuleTableEditable} style={{marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Customize Products <ArrowReturnRight /></Button>
+        </Col>
+      </Row>
+      <DeleteGranulesModal />
     </Row>
   );
 }

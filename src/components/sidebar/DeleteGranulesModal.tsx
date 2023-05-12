@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setShowDeleteProductModalFalse } from './actions/modalSlice'
 import { Row } from 'react-bootstrap';
-import { DeleteProductModalProps } from '../../types/modalTypes';
 import { deleteProduct, setSelectedGranules } from './actions/productSlice';
 
 const GenerateProductsModal = () => {

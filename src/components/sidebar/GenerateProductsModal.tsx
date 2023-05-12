@@ -8,14 +8,12 @@ import { setActiveTab } from './actions/sidebarSlice';
 
 const GenerateProductsModal = () => {
     const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
-    const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
-    const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
+    const addedGranules = useAppSelector((state) => state.product.addedProducts)
     const dispatch = useAppDispatch()
 
     const handleGenerate = () => {
         // unselect select-all box
-        console.log(generateProductParameters)
-        dispatch(addGeneratedProducts(selectedGranules))
+        dispatch(addGeneratedProducts(addedGranules.map(granuleObj => granuleObj.granuleId)))
         dispatch(setActiveTab('productHistory'))
         dispatch(setShowGenerateProductModalFalse())
     }
@@ -29,7 +27,7 @@ const GenerateProductsModal = () => {
     <Modal.Body className="modal-style">
         <Row>
             <h5>Are you sure you would like to generate products with the following granules:</h5>
-            <h6>{selectedGranules.map((granuleId, index) => index === selectedGranules.length-1 ? `${granuleId} ` : `${granuleId}, `)}</h6>
+            <h6>{addedGranules.map((granuleObj, index) => index === addedGranules.length-1 ? `${granuleObj.granuleId} ` : `${granuleObj.granuleId}, `)}</h6>
         </Row>
     </Modal.Body>
 

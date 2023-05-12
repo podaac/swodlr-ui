@@ -2,15 +2,23 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import swotPosterCropped from '../../assets/swotPosterCropped.png'
 import { setUserAuthenticated } from '../app/appSlice';
-import { checkUserAuthentication, urs_login } from './authentication';
+import { checkUserAuthentication } from './authentication';
+import e from 'express';
+import { AuthenticationResponse } from '../../types/authenticationTypes';
 
 const Welcome = () => {
-  const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+  // const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const dispatch = useAppDispatch()
 
-  const handleLogin = () => {
-    // checkUserAuthentication()
-    dispatch(setUserAuthenticated())
+  const handleLogin = async () => {
+    const response: AuthenticationResponse = await checkUserAuthentication() ?? {status: 'unknown'}
+    console.log(response)
+    if (response.status === 'authenticated') {
+      dispatch(setUserAuthenticated())
+    } else if (response.status === 'unauthenticated') {
+      // redirect
+      window.location.replace(response.redirectUrl as string);
+    }
   }
 
   return (

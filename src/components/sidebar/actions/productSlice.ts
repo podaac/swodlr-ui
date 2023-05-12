@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { allProductParameters, generatedProduct, GenerateProductParameters } from '../../../types/constantTypes'
+import { allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
+import { v4 as uuidv4 } from 'uuid';
 
 // Define a type for the slice state
 interface GranuleState {
@@ -9,7 +10,7 @@ interface GranuleState {
     addedProducts: allProductParameters[],
     selectedGranules: string[],
     granuleFocus: LatLngExpression,
-    generatedProducts: generatedProduct[],
+    generatedProducts: GeneratedProduct[],
     generateProductParameters: GenerateProductParameters
 }
 
@@ -35,7 +36,6 @@ export const productSlice = createSlice({
   reducers: {
     addProduct: (state, action: PayloadAction<allProductParameters[]>) => {
       action.payload.forEach(granuleObjectToAdd => state.addedProducts.push(Object.assign(granuleObjectToAdd)))
-      // state.addedProducts.push(Object.assign(action.payload))
       // add sample granule data
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
@@ -59,7 +59,13 @@ export const productSlice = createSlice({
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]
-      const newGeneratedProducts: generatedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({granuleId: granuleId, status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE", parametersUsedToGenerate: state.generateProductParameters}))
+      const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({
+        productId: uuidv4(),
+        granuleId: granuleId, 
+        status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE", 
+        parametersUsedToGenerate: state.generateProductParameters, 
+        downloadUrl: index % 2 === 0 ? null : `https://test-download-url-${granuleId}.zip` 
+      }))
       state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]
     },
     setGenerateProductParameters: (state, action: PayloadAction<GenerateProductParameters>) => {

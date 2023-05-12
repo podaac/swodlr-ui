@@ -46,16 +46,17 @@ export interface granuleAlertMessageConstantType {
   [key: string]: string
 }
 
-export interface generatedProduct {
+export interface GeneratedProduct {
+  productId: string,
   granuleId: string,
   status: StatusTypes,
   parametersUsedToGenerate: GenerateProductParameters,
-  downloadUrl?: string,
+  downloadUrl?: string | null,
 }
 
 export type StatusTypes = 'IN_PROGRESS' | 'COMPLETE'
 
-export type TabTypes = 'productCustomization' | 'productHistory'
+export type TabTypes = 'granuleSelection' | 'productCustomization' | 'productHistory'
 
 export type GridTypes = 'utm' | 'geo' 
 

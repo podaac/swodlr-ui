@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from './actions/modalSlice'
-import { deleteProduct, setSelectedGranules } from './actions/productSlice'
+import { setShowDeleteProductModalTrue, setShowGenerateProductModalTrue } from '../sidebar/actions/modalSlice'
+import { deleteProduct, setSelectedGranules } from '../sidebar/actions/productSlice'
 import { Col, Row } from 'react-bootstrap';
-import GenerateProductsModal from './GenerateProductsModal';
+import GenerateProductsModal from '../sidebar/GenerateProductsModal';
 import { Trash } from 'react-bootstrap-icons';
-import DeleteGranulesModal from './DeleteGranulesModal';
+import DeleteGranulesModal from '../sidebar/DeleteGranulesModal';
 
 const ProductActionBar = () => {
     const selectedGranules = useAppSelector((state) => state.product.selectedGranules)

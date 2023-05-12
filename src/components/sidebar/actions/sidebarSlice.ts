@@ -9,6 +9,7 @@ interface CustomizeProductsFooterState {
     resizeEndLocation: mouseLocation,
     footerMinimized: boolean
     activeTab: TabTypes,
+    granuleTableEditable: boolean,
 }
 
 // Define the initial state using that type
@@ -23,7 +24,8 @@ const initialState: CustomizeProductsFooterState = {
         top: 0
     },
     footerMinimized: false,
-    activeTab: 'productCustomization'
+    activeTab: 'granuleSelection',
+    granuleTableEditable: false
 }
 
 export const sidebarSlice = createSlice({
@@ -52,6 +54,9 @@ export const sidebarSlice = createSlice({
     setActiveTab: (state, action: PayloadAction<TabTypes>) => {
         state.activeTab = action.payload
     },
+    setGranuleTableEditable: (state, action: PayloadAction<boolean>) => {
+        state.granuleTableEditable = action.payload
+    },
   },
 })
 
@@ -62,7 +67,8 @@ export const {
     setResizeEndLocation, 
     setFooterMinimized, 
     setFooterExpanded,
-    setActiveTab
+    setActiveTab,
+    setGranuleTableEditable
 } = sidebarSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
