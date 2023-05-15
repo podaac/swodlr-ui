@@ -1,23 +1,27 @@
 import { Button, Col, Row } from 'react-bootstrap';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks'
+import { useAppDispatch } from '../../redux/hooks'
 import swotPosterCropped from '../../assets/swotPosterCropped.png'
-import { setUserAuthenticated } from '../app/appSlice';
+import { setCurrentPage, setUserAuthenticated } from '../app/appSlice';
 import { checkUserAuthentication } from './authentication';
-import e from 'express';
 import { AuthenticationResponse } from '../../types/authenticationTypes';
 
 const Welcome = () => {
-  // const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const dispatch = useAppDispatch()
+  const testMode: boolean = true
 
   const handleLogin = async () => {
-    const response: AuthenticationResponse = await checkUserAuthentication() ?? {status: 'unknown'}
-    console.log(response)
-    if (response.status === 'authenticated') {
+    if (testMode) {
+      dispatch(setCurrentPage('productCustomization'))
       dispatch(setUserAuthenticated())
-    } else if (response.status === 'unauthenticated') {
-      // redirect
-      window.location.replace(response.redirectUrl as string);
+    } else {
+      const response: AuthenticationResponse = await checkUserAuthentication() ?? {status: 'unknown'}
+      console.log(response)
+      if (response.status === 'authenticated') {
+        dispatch(setUserAuthenticated())
+      } else if (response.status === 'unauthenticated') {
+        // redirect
+        window.location.replace(response.redirectUrl as string);
+      }
     }
   }
 
@@ -33,7 +37,7 @@ const Welcome = () => {
           <Row style={{marginTop: '5%', marginBottom: '10%'}}><p className='welcome-page-text'>To use this application, you need to sign in via Earthdata Login.</p></Row>
         </Col>
         <Col sm={6} style={{paddingRight: '0px', height: '100%'}}>
-          <img src={swotPosterCropped} alt="SWOT Poster Graphic" style={{height: '100%', width: '100%', padding: '15px', borderRadius: '50px'}}></img>
+          <img src={swotPosterCropped} alt="SWOT Poster Graphic" style={{height: '100%', width: '100%', padding: '0px', borderRadius: '00px'}}></img>
         </Col>
       </Row>  
   )

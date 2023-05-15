@@ -6,7 +6,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setDarkMode, setLightMode } from './navbarSlice';
 // import swotLogo from '../../assets/swot_mainlogo_portrait.jpg'
 import { PersonSquare } from 'react-bootstrap-icons';
-import { setUserNotAuthenticated } from '../app/appSlice';
+import { setCurrentPage, setUserNotAuthenticated } from '../app/appSlice';
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
@@ -21,13 +21,14 @@ const MainNavbar = () => {
 
   return (
     <Navbar className={`fixed-top ${colorModeClass}-navbar-background Main-navbar`} expand="lg">
-      <Navbar.Brand className={`${colorModeClass}-text`} style={{marginLeft: '20px'}} href="#home">SWODLR</Navbar.Brand>
+      <Navbar.Brand className={`${colorModeClass}-text`} style={{marginLeft: '20px', pointerEvents: 'none'}}>SWODLR</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          <Nav.Link className={`${colorModeClass}-text`} href="#home">Home</Nav.Link>
-          <Nav.Link className={`${colorModeClass}-text`} href="#link">About</Nav.Link>
-          <NavDropdown  className={`${colorModeClass}-text`} title="Data Discovery" id="basic-nav-dropdown">
+          <Nav.Link className={`${colorModeClass}-navbar-link`} href="#product-customization" onClick={() => dispatch(setCurrentPage('productCustomization'))}>Customization</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} href="#generated-products-history" onClick={() => dispatch(setCurrentPage('generatedProductsHistory'))}>History</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} href="#about" onClick={() => dispatch(setCurrentPage('about'))}>About</Nav.Link>
+          <NavDropdown  className={`${colorModeClass}-navbar-dropdown`} title="Data Discovery" id="basic-nav-dropdown" menuVariant="dark">
             <NavDropdown.Item href="https://search.earthdata.nasa.gov/search" target="_blank">Earthdata Search</NavDropdown.Item>
             <NavDropdown.Item href="https://podaac.jpl.nasa.gov/" target="_blank">PO.DAAC Portal</NavDropdown.Item>
           </NavDropdown>

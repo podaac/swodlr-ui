@@ -9,6 +9,9 @@ import { setResizeInactive, setResizeEndLocation, setResizeStartLocation } from 
 import CustomizeProductsFooterMin from '../misc/CustomizeProductsFooterMin';
 import Welcome from '../welcome/Welcome'
 import CustomizeProductsSidebar from '../sidebar/CustomizeProductsSidebar';
+import { setCurrentPage } from './appSlice';
+import GeneratedProductHistory from '../history/GeneratedProductHistory';
+import About from '../about/About';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -16,6 +19,8 @@ const App = () => {
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const footerMinimized = useAppSelector((state) => state.sidebar.footerMinimized)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
+  const currentPage = useAppSelector((state) => state.app.currentPage)
+  const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
@@ -41,9 +46,36 @@ const App = () => {
   
   const unauthenticatedApplicationView = <Welcome />
 
+  const renderAuthenticatedApplicationView = () => {
+    let pageToShow
+    switch(currentPage) {
+      case 'productCustomization':
+        pageToShow = (
+          <>
+            <Map />
+            <CustomizeProductsSidebar />
+          </>
+        )
+        break
+      case 'generatedProductsHistory':
+        pageToShow = <GeneratedProductHistory />
+        break
+      case 'about':
+        pageToShow = <About />
+        break
+      default:
+    }
+    return (
+      <>
+        <MainNavbar  />
+        {pageToShow}
+      </>
+    )
+  }
+
   return (
-    <div className={`App ${userAuthenticated ? 'user-authenticated' : ''}`} style={{cursor: footerResizeActive ? 'grabbing' : ''}} onMouseUp={(event) => handleFooterResize(event)} onMouseMove={(event) => handleFooterResize(event)}>
-      {userAuthenticated ? authenticatedApplicationView : unauthenticatedApplicationView}
+    <div className={`App ${userAuthenticated ? 'user-authenticated' : ''} ${colorModeClass}-background`} style={{cursor: footerResizeActive ? 'grabbing' : ''}} onMouseUp={(event) => handleFooterResize(event)} onMouseMove={(event) => handleFooterResize(event)}>
+      {userAuthenticated ? renderAuthenticatedApplicationView() : unauthenticatedApplicationView}
     </div>
   );
 }

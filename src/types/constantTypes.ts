@@ -63,3 +63,5 @@ export type GridTypes = 'utm' | 'geo'
 export interface ParameterHelp {
   [key: string]: string
 }
+
+export type PageTypes = 'welcome' | 'productCustomization' | 'generatedProductsHistory' | 'about'

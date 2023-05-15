@@ -1,9 +1,9 @@
-import { Accordion, Alert, Badge, Button, Card, Col, ListGroup, OverlayTrigger, Row, Spinner, Tooltip } from "react-bootstrap";
+import { Accordion, Alert, Badge, Button, Col, OverlayTrigger, Row, Spinner, Tooltip } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { GenerateProductParameters, StatusTypes } from "../../types/constantTypes";
+import { StatusTypes } from "../../types/constantTypes";
 import { useState } from "react";
-import { Download, Clipboard, ChevronDown } from "react-bootstrap-icons";
-import { setActiveTab } from "./actions/sidebarSlice";
+import { Download, Clipboard } from "react-bootstrap-icons";
+import { setCurrentPage } from "../app/appSlice";
 
 const getBadgeColor = (status: StatusTypes) => {
     if (status === 'IN_PROGRESS') {
@@ -23,46 +23,17 @@ const getBadgeLabel = (status: StatusTypes) => {
 
 const GeneratedProductHistory = () => {
     const generatedProducts = useAppSelector((state) => state.product.generatedProducts)
-    const addedGranules = useAppSelector((state) => state.product.addedProducts)
-    // const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const dispatch = useAppDispatch()
     
-    const [viewType, setViewType] = useState('list')
     const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
 
     const handleCopyClick = (downloadUrl: string) => {
         navigator.clipboard.writeText(downloadUrl)
         setCopyTooltipText('Copied!')
     }
-    
-    // const renderCardContents = generatedProducts.map(genProductObj => (
-    //     <Col style={{margin: '10px'}}>
-    //         <Card className={`${colorModeClass}-text`} style={{ width: '18rem' }}>
-    //             <Card.Header className={`${colorModeClass}-text`} style={{color: 'black'}}>{granuleId}</Card.Header>
-    //             <Card.Title className={`${colorModeClass}-text`} style={{color: 'black'}}>{genProductObj.productId}</Card.Title>
-    //             <Card.Text className={`${colorModeClass}-text`} style={{color: 'black'}}>
-    //                 Parameters Used to Generate
-    //             </Card.Text>
-    //             <Card.Header  style={{color: 'black'}}> Parameters Used to Generate</Card.Header>
-    //             <ListGroup>
-    //                 {Object.entries(genProductObj.parametersUsedToGenerate).map(entry => <ListGroup.Item>{`${entry[0]}: ${entry[1]}`}</ListGroup.Item>)}
-    //             </ListGroup>
-    //             <Badge pill bg={getBadgeColor(genProductObj.status)} style={{margin: '20px', width: '100px', height: '50px'}}>
-    //                 {getBadgeLabel(genProductObj.status)}
-    //             </Badge>
-    //             <Row>
-    //                 <Col><Download style={{color: 'black'}}/></Col>
-    //                 <Col><ChevronDown style={{color: 'black'}}/></Col>
-    //             </Row>
-    //         </Card>
-    //     </Col>
-    // ))
 
     const renderListContents = (
-        <Col style={{marginLeft: '20px', marginRight: '20px', marginBottom: '20px'}}>
-            <Row style={{marginBottom: '10px'}}>
-                <h4>Generated Product History</h4>
-            </Row>
+        <Col style={{marginLeft: '20px', marginRight: '20px', marginBottom: '20px', height: '80vh'}}>
             <Accordion className="shadow" style={{overflowY: 'auto', maxHeight: '80vh'}}>
                 {generatedProducts.map(genProductObj => (
                     <Accordion.Item eventKey={genProductObj.productId}>
@@ -117,24 +88,24 @@ const GeneratedProductHistory = () => {
     )
 
     const productHistoryAlert = () => {
-        let alertMessage = ''
-        if (addedGranules.length === 0) {
-            alertMessage = 'No granules have been added. Go to the (1) Granule Selection tab to add granules for product customization.'
-        } else {
-            alertMessage = 'No products have been generated. Go to the (2) Product Customization tab to generate products.'
-        }
-        return <Col><Alert variant='warning' onClick={() => dispatch(setActiveTab('productCustomization'))} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
+        const alertMessage = 'No products have been generated. Go to the Product Customization page to generate products.'
+        return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => dispatch(setCurrentPage('productCustomization'))} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
     const renderProductHistoryViews = () => {
+        let viewToShow
         if (generatedProducts.length === 0) {
-            return productHistoryAlert()
-        } else if (viewType === 'list') {
-            return renderListContents
+            viewToShow = productHistoryAlert()
+        } else {
+            viewToShow = renderListContents
         } 
-        // else if (viewType === 'grid') {
-        //     return renderCardContents
-        // }
+
+        return (
+            <Row className='normal-row'>
+                <h3>Generated Product History</h3>
+                {viewToShow}
+            </Row>
+        )
     }
 
     return (

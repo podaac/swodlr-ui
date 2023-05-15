@@ -7,12 +7,8 @@ import { deleteProduct, setSelectedGranules } from './actions/productSlice';
 
 const GenerateProductsModal = () => {
     const showDeleteProductModal = useAppSelector((state) => state.modal.showDeleteProductModal)
-    // const addedProducts = useAppSelector((state) => state.product.addedProducts)
     const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
     const dispatch = useAppDispatch()
-    // const productNames = addedProducts.filter(productObject => productsBeingDeleted.includes(productObject.granuleId)).map(object => object.name ?? object.granuleId)
-
-
     const handleDelete = () => {
         dispatch(deleteProduct(selectedGranules))
         dispatch(setSelectedGranules([]))
@@ -23,12 +19,12 @@ const GenerateProductsModal = () => {
   return (
     <Modal show={showDeleteProductModal} onHide={() => dispatch(setShowDeleteProductModalFalse())}>
     <Modal.Header className="modal-style" closeButton>
-        <Modal.Title>Delete Granules</Modal.Title>
+        <Modal.Title>Remove Selected Granules</Modal.Title>
     </Modal.Header>
 
     <Modal.Body className="modal-style">
         <Row>
-            <h5>Are you sure you would like to delete granules:</h5>
+            <h5>Are you sure you would like to remove selected granules:</h5>
             <h6>{selectedGranules.map((granuleId, index) => index === selectedGranules.length-1 ? `${granuleId} ` : `${granuleId}, `)}</h6>
         </Row>
     </Modal.Body>

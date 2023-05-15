@@ -101,8 +101,9 @@ NAVBAR
   cursor: 'pointer';
 }
 .dark-mode-switch .form-check-input:checked {
-  background-color: #5C946E;
-  border-color: #2ab464ff;
+  /* background-color: #5C946E;
+  border-color: #2ab464ff; */
+  /* background-color: ; */
   border: none;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
   cursor: 'pointer';
@@ -128,8 +129,24 @@ NAVBAR
   color: #FAF9F6
 }
 
-.dark-mode-text .dropdown-toggle {
+.dark-mode-navbar-link {
+  color: #C8C7C5;
+}
+
+.dark-mode-navbar-dropdown .dropdown-toggle {
+  color: #C8C7C5 !important;
+}
+
+.dark-mode-navbar-link.active {
   color: #FAF9F6 !important;
+}
+
+.dark-mode-navbar-link:hover {
+  color: #FAF9F6
+}
+
+.dark-mode-navbar-link:active {
+  color: #C8C7C5;
 }
 
 .light-mode-background {
@@ -153,6 +170,26 @@ NAVBAR
 
 .light-mode-text .dropdown-toggle {
   color: black !important;
+}
+
+.light-mode-navbar-link {
+  color: #323231;
+}
+
+.light-mode-navbar-dropdown .dropdown-toggle {
+  color: #323231 !important;
+}
+
+.light-mode-navbar-link.active {
+  color: black !important;
+}
+
+.light-mode-navbar-link:hover {
+  color: black
+}
+
+.light-mode-navbar-link:active {
+  color: #323231;
 }
 
 .Main-navbar {  
@@ -232,6 +269,20 @@ CUSTOMIZE PRODUCT CONTAINER
   padding-bottom: 10px;
 }
 
+.dark-mode-sidebar-section-title {
+  background-color: #1A2535;
+}
+/* .dark-mode-sidebar-section-body {
+  background-color: #26384F;
+} */
+
+.light-mode-sidebar-section-title {
+  background-color: #1A2535;
+}
+/* .light-mode-sidebar-section-body {
+  background-color: #26384F;
+} */
+
 /**************************************************
 PRODUCT TABLE
 **************************************************/
@@ -249,17 +300,15 @@ tfoot {
   position: sticky
 }
 
-.table-checkbox {
-  cursor: pointer;
-}
-
 .table-responsive {
-  max-height: 60vh;
+  max-height: 40vh;
 }
 
 .dark-mode-table {
   color: #FAF9F6;
   border: #FAF9F6 solid 1px;
+  /* margin-right: '50px';
+  margin-left: '50px' */
 }
 
 .dark-mode-table tr {
@@ -313,6 +362,14 @@ tr.add-granules td {
   border-color: #2ab464ff;
   border: none;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
+  cursor: 'pointer';
+}
+
+
+.remove-checkbox .form-check-input:checked {
+  background-color: crimson;
+  /* border-color: #2ab464ff; */
+  border: none;
   cursor: 'pointer';
 }
 

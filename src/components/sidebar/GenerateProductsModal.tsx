@@ -4,7 +4,6 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setShowGenerateProductModalFalse } from './actions/modalSlice'
 import { addGeneratedProducts } from './actions/productSlice'
 import { Row } from 'react-bootstrap';
-import { setActiveTab } from './actions/sidebarSlice';
 
 const GenerateProductsModal = () => {
     const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
@@ -14,7 +13,6 @@ const GenerateProductsModal = () => {
     const handleGenerate = () => {
         // unselect select-all box
         dispatch(addGeneratedProducts(addedGranules.map(granuleObj => granuleObj.granuleId)))
-        dispatch(setActiveTab('productHistory'))
         dispatch(setShowGenerateProductModalFalse())
     }
 

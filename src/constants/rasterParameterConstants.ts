@@ -83,10 +83,12 @@ export const parameterHelp: ParameterHelp = {
 }
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
-    success: 'SUCCESSFULLY ADDED GRANULES!',
-    alreadyAdded: 'SOME GRANULES HAVE ALREADY BEEN ADDED',
-    notFound: 'SOME GRANULES WERE NOT FOUND',
-    alreadyAddedAndNotFound: 'SOME GRANULES HAVE ALREADY BEEN ADDED OR NOT FOUND'
+    success: 'Successfully added granules!',
+    alreadyAdded: 'Some granules have already been added.',
+    notFound: 'Some granules were not found.',
+    alreadyAddedAndNotFound: 'Some granules have already been added or not found',
+    noGranulesAdded: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
+    readyForGeneration: 'Remember: customize your product parameters before starting Generation'
   }
 
   export const parameterOptionHelp = {

@@ -3,12 +3,12 @@ import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
-import { ArrowReturnRight, Plus, Trash } from 'react-bootstrap-icons';
+import { Plus, Trash } from 'react-bootstrap-icons';
 import { allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus } from './actions/productSlice';
-import { setActiveTab, setGranuleTableEditable } from './actions/sidebarSlice';
+import { setGranuleTableEditable } from './actions/sidebarSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 
@@ -32,7 +32,7 @@ const GranuleTable = () => {
   useEffect(() => {  
     const timeId = setTimeout(() => {
       setShowGranuleAddAlert(false)
-    }, 5000)
+    }, 4000)
 
     return () => {
       clearTimeout(timeId)
@@ -55,6 +55,9 @@ const GranuleTable = () => {
   }
 
   const setSaveGranulesAlert = (variant: string, alertMessage: string) => {
+    // TODO: Make a queue for the table aleerts so more than one can be shown at the same time
+    // - make them independed of each other on the timer
+    // - eg: you can have a success alert when toggling onto generation mode and also a warning to remind the user to set product parameters
     setAddGranuleWarningVariant(variant)
     setAddGranuleWarning(granuleAlertMessageConstant[alertMessage]) 
     setShowGranuleAddAlert(true)
@@ -130,27 +133,39 @@ const GranuleTable = () => {
     }
   }
 
+  const handleTableToggle = () => {
+    if (addedProducts.length === 0) {
+      setSaveGranulesAlert('danger', 'noGranulesAdded')
+    } else {
+      if (granuleTableEditable) {
+        setSaveGranulesAlert('warning', 'readyForGeneration')
+      }
+      dispatch(setGranuleTableEditable(!granuleTableEditable))
+    }
+  }
+
   return (
-    <Row>
-      <Row style={{marginBottom: '10px'}}>
-        <h4 className={`${colorModeClass}-text`}>Granule Table</h4>
+    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
+      <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
+            <Col md={{ span: 1, offset: 0 }}>Edit</Col>
+            <Col md={{ span: 1, offset: 0 }}>
+              {(
+                <Form.Check 
+                  type="switch"
+                  defaultChecked={!granuleTableEditable}
+                  className={`table-mode-switch ${colorModeClass}-text`}
+                  // label="Dark mode"
+                  checked={!granuleTableEditable}
+                  id="dark-mode-switch"
+                  style={{ cursor: 'pointer'}}
+                  onClick={() => handleTableToggle()}
+                />
+              )} 
+          </Col>
+          <Col md={{ span: 1, offset: 0 }}>Generate</Col>
+        <Col md={{ span: 4, offset: 1 }}><h4 className={`${colorModeClass}-text`} >Granule Table</h4></Col>
       </Row>
-      <Row style={{marginBottom: '15px'}}>
-        <Col md={{ span: 4, offset: 1 }}><h6>Edit Mode</h6></Col>
-        <Col md={{ span: 2, offset: 0 }}>
-          <Form.Check 
-              type="switch"
-              defaultChecked={!granuleTableEditable}
-              className={`table-mode-switch ${colorModeClass}-text`}
-              // label="Dark mode"
-              id="dark-mode-switch"
-              // checked={granuleTableEditable}
-              style={{paddingRight: '20px', cursor: 'pointer'}}
-              onClick={() => dispatch(setGranuleTableEditable(!granuleTableEditable))}
-            />
-        </Col>
-        <Col md={{ span: 4, offset: 0 }}><h6>Generate Product Mode</h6></Col>
-      </Row>
+      <div style={{padding: '10px 20px 20px 20px'}}>
       <div className='table-responsive'>
         <Table bordered hover className={`table-responsive ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
           <thead>
@@ -161,8 +176,9 @@ const GranuleTable = () => {
                   <Form.Check
                     inline
                     name="group1"
-                    label='Delete'
+                    label='Remove'
                     id={`inline-select-all`}
+                    className='remove-checkbox'
                     style={{cursor: 'pointer'}}
                     onChange={() => handleAllChecked()}
                   />
@@ -190,7 +206,7 @@ const GranuleTable = () => {
                       inline
                       name="group1"
                       id={`inline-select-${granuleId}`}
-                      className='table-checkbox'
+                      className='remove-checkbox'
                       onChange={event => handleGranuleSelected(granuleId)}
                       checked={selectedGranules.includes(granuleId)}
                     />
@@ -198,34 +214,26 @@ const GranuleTable = () => {
                 ): null}
               </tr>
             )})}
-          </tbody>
-        </Table>
-      </div>
-      { granuleTableEditable ? (
-          <div className='table-responsive'>
-            <Table bordered hover className={`table-responsive Products-table ${colorModeClass}-table`}>
-              <thead>
-                <tr className='add-granules' style={{ border: 0 }}>
-                  <td></td>
+            {granuleTableEditable ? (<tr className='add-granules' style={{ border: 0 }}>
                   <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
                   <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
                   <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
-                  <td colSpan={2}>                
-                    <Button variant='success' size='sm' onClick={() => handleSave()}>
-                      <Plus size={24}/>
+                  <td colSpan={1}>                
+                    <Button variant='primary' size='sm' style={{width: '70px'}} onClick={() => handleSave()}>
+                      <Plus size={28}/>
                     </Button>
                   </td>
-                  <td colSpan={2}>
-                    <Button disabled={selectedGranules.length === 0} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
+                  <td colSpan={1}>
+                    <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
                         <Trash color="white" size={18}/>
                     </Button>
                   </td>
-                </tr>
-              </thead>
-            </Table>
-          </div>
-        ) : null
-      }
+                </tr>) : 
+                null
+              }
+          </tbody>
+        </Table>
+      </div>
       {(showGranuleAddAlert && addGranuleWarning !== '') 
           ? (<Row style={{paddingTop: '5px', paddingBottom: '10px'}}>
               <Col md={{ span: 6, offset: 3 }}>
@@ -234,13 +242,9 @@ const GranuleTable = () => {
             </Row>)
           : null
       }
-      <Row>
-        <Col>
-          <Button variant='success' disabled={granuleTableEditable} style={{marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>Customize Products <ArrowReturnRight /></Button>
-        </Col>
-      </Row>
       <DeleteGranulesModal />
-    </Row>
+      </div>
+    </div>
   );
 }
 

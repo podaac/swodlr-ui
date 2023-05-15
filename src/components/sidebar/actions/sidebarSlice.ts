@@ -8,7 +8,6 @@ interface CustomizeProductsFooterState {
     resizeStartLocation: mouseLocation,
     resizeEndLocation: mouseLocation,
     footerMinimized: boolean
-    activeTab: TabTypes,
     granuleTableEditable: boolean,
 }
 
@@ -24,8 +23,7 @@ const initialState: CustomizeProductsFooterState = {
         top: 0
     },
     footerMinimized: false,
-    activeTab: 'granuleSelection',
-    granuleTableEditable: false
+    granuleTableEditable: true
 }
 
 export const sidebarSlice = createSlice({
@@ -51,9 +49,6 @@ export const sidebarSlice = createSlice({
     setFooterExpanded: (state) => {
         state.footerMinimized = false
     },
-    setActiveTab: (state, action: PayloadAction<TabTypes>) => {
-        state.activeTab = action.payload
-    },
     setGranuleTableEditable: (state, action: PayloadAction<boolean>) => {
         state.granuleTableEditable = action.payload
     },
@@ -67,7 +62,6 @@ export const {
     setResizeEndLocation, 
     setFooterMinimized, 
     setFooterExpanded,
-    setActiveTab,
     setGranuleTableEditable
 } = sidebarSlice.actions
 
