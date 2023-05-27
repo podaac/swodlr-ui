@@ -33,7 +33,7 @@ const MainNavbar = () => {
             <NavDropdown.Item href="https://podaac.jpl.nasa.gov/" target="_blank">PO.DAAC Portal</NavDropdown.Item>
           </NavDropdown>
         </Nav>
-        <Nav>
+        {/* <Nav>
             <Form.Check 
               type="switch"
               defaultChecked={darkMode}
@@ -43,7 +43,7 @@ const MainNavbar = () => {
               style={{paddingRight: '20px', cursor: 'pointer'}}
               onClick={() => darkMode ? dispatch(setLightMode()) : dispatch(setDarkMode())}
             />
-        </Nav>
+        </Nav> */}
         <NavDropdown  className={`${colorModeClass}-text`} title={renderUserDropdownTitle()} id="basic-nav-dropdown" align="end" style={{marginRight: '20px'}}>
             <Row>
               <Col>

@@ -11,13 +11,10 @@ const GenerateProducts = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const addedGranules = useAppSelector((state) => state.product.addedProducts)
     const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
-    const granuleTableEditable = useAppSelector((state) => state.sidebar.granuleTableEditable)
 
     const dispatch = useAppDispatch()
 
-    const productCustomizationNotAllowed = addedGranules.length === 0 || granuleTableEditable
-
-    const { outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust } = generateProductParameters
+    const { outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = generateProductParameters
 
     useEffect(() => {}, [showGenerateProductsModal])
 
@@ -25,10 +22,9 @@ const GenerateProducts = () => {
         const selectedProductParameters: GenerateProductParameters = {
             outputGranuleExtentFlag,
             outputSamplingGridType,
-            rasterResolution,
-            utmZoneAdjust,
-            mgrsBandAdjust
+            rasterResolution
         }
+        console.log(selectedProductParameters)
         dispatch(setGenerateProductParameters(selectedProductParameters))
         dispatch(setShowGenerateProductModalTrue())
     }
@@ -36,7 +32,7 @@ const GenerateProducts = () => {
   return (
     <Row style={{marginBottom: '10px'}}>
         <Col>
-            <Button variant='success' disabled={productCustomizationNotAllowed}  onClick={() => handleGenerateProducts()}>Generate Products <ArrowReturnRight /></Button>
+            <Button variant='success' disabled={addedGranules.length === 0}  onClick={() => handleGenerateProducts()}>Generate Products <ArrowReturnRight /></Button>
         </Col>
         <GenerateProductsModal />
     </Row>

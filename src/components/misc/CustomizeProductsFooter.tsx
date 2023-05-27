@@ -23,7 +23,7 @@ const CustomizeProductsFooter = () => {
             </Col>
         </Row>
         <Row>
-            <CustomizedProductTable />
+            <CustomizedProductTable tableType='granuleSelection'/>
         </Row>
         <Row>
             <Col>

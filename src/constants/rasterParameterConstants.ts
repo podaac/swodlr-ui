@@ -45,12 +45,27 @@ export const parameterOptions = {
     mgrsBandAdjust: 'MGRS Band Adjust',
 }
 
-export const granuleEssentialLabels = {
-    // name: 'Name',
+export const granuleSelectionLabels = {
+    granuleId: 'Granule ID',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
-    granuleId: 'ID'
+}
+
+export const productCustomizationLabelsUTM = {
+    granuleId: 'Granule ID',
+    zoneAdjust: 'Zone Adjust',
+    bandAdjust: 'Band Adjust',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+}
+
+export const productCustomizationLabelsGEO = {
+    granuleId: 'Granule ID',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
 }
 
 export const parameterOptionDefaults = {
@@ -82,13 +97,56 @@ export const parameterHelp: ParameterHelp = {
     mgrsBandAdjust: `This parameter allows the UTM grid to use an MGRS latitude band within +/-1 band of the closest band to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
 }
 
+export const parameterHelpGpt: ParameterHelp = {
+    outputGranuleExtentFlag: `This flag determines whether the SAS (System for Atmospheric Soundings) should generate data in non-overlapping or overlapping chunks.
+
+    If you set the flag to '0', the SAS will produce data in non-overlapping chunks that cover an area of 128 km x 128 km.
+    If you set the flag to '1', the SAS will generate data in overlapping chunks that cover a larger area of 256 km x 128 km.`,
+    outputSamplingGridType: `Type of Raster Sampling Grid:
+
+    "utm" refers to a Universal Transverse Mercator (UTM) grid.
+    "geo" refers to a geodetic latitude-longitude grid.`,
+    rasterResolution: `Resolution of Raster Sampling Grid:
+
+    The resolution is given in units of integer meters for UTM grids.
+    For latitude-longitude grids, the resolution is provided in units of integer arc-seconds.`,
+    utmZoneAdjust: `UTM Grid Zone Parameter:
+
+    This parameter enables the UTM grid to utilize a zone that is within +/-1 zone of the nearest zone to the center of the raster scene.
+    The purpose is to allow nearby L2_HR_Raster outputs to be sampled on a common grid.
+    Note that this parameter has no effect if the output grid is not in the UTM format.`,
+    mgrsBandAdjust: `UTM Grid Latitude Band Parameter:
+
+    This parameter enables the UTM grid to utilize an MGRS (Military Grid Reference System) latitude band that is within +/-1 band of the nearest band to the center of the raster scene.
+    The purpose is to allow nearby L2_HR_Raster outputs to be sampled on a common grid.
+    It's important to note that this parameter has no effect if the output grid is not in the UTM format.`
+}
+
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
-    success: 'Successfully added granules!',
-    alreadyAdded: 'Some granules have already been added.',
-    notFound: 'Some granules were not found.',
-    alreadyAddedAndNotFound: 'Some granules have already been added or not found',
-    noGranulesAdded: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
-    readyForGeneration: 'Remember: customize your product parameters before starting Generation'
+    success: {
+        message: 'Successfully added granules!',
+        variant: 'success',
+    },
+    alreadyAdded: {
+        message: 'Some granules have already been added.',
+        variant: 'danger',
+    },
+    notFound:{
+        message: 'Some granules were not found.',
+        variant: "danger",
+    },
+    alreadyAddedAndNotFound: {
+        message: 'Some granules have already been added or not found',
+        variant: 'danger',
+    },
+    noGranulesAdded: {
+        message: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
+        variant: 'danger',
+    },
+    readyForGeneration: {
+        message: 'Remember: customize your product parameters before starting Generation',
+        variant: 'warning',
+    }
   }
 
   export const parameterOptionHelp = {

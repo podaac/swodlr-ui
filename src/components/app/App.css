@@ -297,11 +297,18 @@ thead {
 }
 
 tfoot {
-  position: sticky
+  position: sticky;
+  bottom: 0;
 }
 
-.table-responsive {
+.table-responsive-granuleSelection {
   max-height: 40vh;
+  overflow-y: auto;
+}
+
+.table-responsive-productCustomization {
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .dark-mode-table {
@@ -323,12 +330,14 @@ tfoot {
 
 .dark-mode-table tr.add-granules {
   border-bottom: none;
-  background-color: #314a68;
+  /* background-color: #314a68; */
+  background-color: #1A2535;
 }
 
 .dark-mode-table thead {
   /* border: #FAF9F6 solid 1px; */
-  background-color: #314a68;
+  /* background-color: #314a68; */
+  background-color: #1A2535;
 }
 
 .light-mode-table tr.add-granules {
@@ -365,13 +374,21 @@ tr.add-granules td {
   cursor: 'pointer';
 }
 
-
 .remove-checkbox .form-check-input:checked {
   background-color: crimson;
   /* border-color: #2ab464ff; */
   border: none;
   cursor: 'pointer';
 }
+
+.hoverable-row {
+  background-color: #314a68;
+}
+
+/* .hoverable-row:hover{
+  background-color: red;
+  color: red !important
+} */
 
 /**************************************************
 WELCOME PAGE
