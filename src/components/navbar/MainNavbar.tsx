@@ -26,7 +26,7 @@ const MainNavbar = () => {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
           <Nav.Link className={`${colorModeClass}-navbar-link`} href="#product-customization" onClick={() => dispatch(setCurrentPage('productCustomization'))}>Customization</Nav.Link>
-          <Nav.Link className={`${colorModeClass}-navbar-link`} href="#generated-products-history" onClick={() => dispatch(setCurrentPage('generatedProductsHistory'))}>History</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} href="#generated-products-history" onClick={() => dispatch(setCurrentPage('generatedProductsHistory'))}>My Data</Nav.Link>
           <Nav.Link className={`${colorModeClass}-navbar-link`} href="#about" onClick={() => dispatch(setCurrentPage('about'))}>About</Nav.Link>
           <NavDropdown  className={`${colorModeClass}-navbar-dropdown`} title="Data Discovery" id="basic-nav-dropdown" menuVariant="dark">
             <NavDropdown.Item href="https://search.earthdata.nasa.gov/search" target="_blank">Earthdata Search</NavDropdown.Item>

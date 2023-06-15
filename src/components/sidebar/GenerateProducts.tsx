@@ -19,13 +19,12 @@ const GenerateProducts = () => {
     useEffect(() => {}, [showGenerateProductsModal])
 
     const handleGenerateProducts = () => {
-        const selectedProductParameters: GenerateProductParameters = {
-            outputGranuleExtentFlag,
-            outputSamplingGridType,
-            rasterResolution
-        }
-        console.log(selectedProductParameters)
-        dispatch(setGenerateProductParameters(selectedProductParameters))
+        // const selectedProductParameters: GenerateProductParameters = {
+        //     outputGranuleExtentFlag,
+        //     outputSamplingGridType,
+        //     rasterResolution
+        // }
+        // dispatch(setGenerateProductParameters(selectedProductParameters))
         dispatch(setShowGenerateProductModalTrue())
     }
 

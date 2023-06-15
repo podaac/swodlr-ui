@@ -3,21 +3,19 @@ import MainNavbar from '../navbar/MainNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Map from '../map/Map'
-import CustomizeProductsFooter from '../misc/CustomizeProductsFooter';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setResizeInactive, setResizeEndLocation, setResizeStartLocation } from '../sidebar/actions/sidebarSlice';
-import CustomizeProductsFooterMin from '../misc/CustomizeProductsFooterMin';
 import Welcome from '../welcome/Welcome'
 import CustomizeProductsSidebar from '../sidebar/CustomizeProductsSidebar';
-import { setCurrentPage } from './appSlice';
 import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
+import PodaacNavbar from '../navbar/PodaacNavbar';
+import NavbarContainer from '../navbar/NavbarContainer';
 
 const App = () => {
   const dispatch = useAppDispatch()
   const footerResizeActive = useAppSelector((state) => state.sidebar.footerResizeActive)
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
-  const footerMinimized = useAppSelector((state) => state.sidebar.footerMinimized)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const currentPage = useAppSelector((state) => state.app.currentPage)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
@@ -35,14 +33,6 @@ const App = () => {
 
   // can use this for testing purposes
   // const userAuthenticated = true
-
-  const authenticatedApplicationView = (
-    <>
-      <MainNavbar />
-      <Map />
-      {footerMinimized ? <CustomizeProductsFooterMin /> : <CustomizeProductsSidebar />}
-    </>
-  )
   
   const unauthenticatedApplicationView = <Welcome />
 
@@ -67,7 +57,8 @@ const App = () => {
     }
     return (
       <>
-        <MainNavbar  />
+        <NavbarContainer />
+        {/* <MainNavbar  /> */}
         {pageToShow}
       </>
     )

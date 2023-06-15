@@ -61,11 +61,15 @@ export interface GeneratedProduct {
   productId: string,
   granuleId: string,
   status: StatusTypes,
+  cycle: string,
+  pass: string,
+  scene: string,
   parametersUsedToGenerate: ParametersUsedToGenerate,
   downloadUrl?: string | null,
+  dateGenerated?: Date
 }
 
-export type StatusTypes = 'IN_PROGRESS' | 'COMPLETE'
+export type StatusTypes = 'In Progress' | 'Complete'
 
 export type TabTypes = 'granuleSelection' | 'productCustomization'
 
@@ -86,7 +90,8 @@ export interface AlertMessageObject {
   type: string,
   message: string,
   variant: "danger" | "success" | "warning",
-  timeoutId: ReturnType<typeof setTimeout>
+  timeoutId: ReturnType<typeof setTimeout>,
+  tableType: TableTypes
 }
 
 export type TableTypes = 'granuleSelection' | 'productCustomization'

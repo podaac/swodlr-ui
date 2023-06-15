@@ -1,9 +1,9 @@
 import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues } from '../../constants/rasterParameterConstants';
-import { Button, Col, Form, Row } from 'react-bootstrap';
-import { Plus, Trash } from 'react-bootstrap-icons';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender } from '../../constants/rasterParameterConstants';
+import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, GranuleForTable, GranuleTableProps, TableTypes, allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
@@ -29,7 +29,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
 
-  useEffect(() => {console.log(generateProductParameters)}, [generateProductParameters])
+  // useEffect(() => {console.log(generateProductParameters)}, [generateProductParameters])
 
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
@@ -60,8 +60,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         dispatch(removeGranuleTableAlerts(alert))
       }, 4000)
 
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId }))
-      console.log('add time to alert')
+      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection' }))
     } else {
       // if alert not in queue
       // add alert with timeout
@@ -69,7 +68,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         dispatch(removeGranuleTableAlerts(alert))
       }, 4000)
 
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId }))
+      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection' }))
     }
   }
 
@@ -190,8 +189,8 @@ const GranuleTable = (props: GranuleTableProps) => {
     const formattedGranulesForTable = Object.entries(basicGranuleValues).map(entry => <td>{entry[1]}</td> )
     if (tableType === 'productCustomization' && generateProductParameters.outputSamplingGridType === 'utm') {
       //put two more entries in there
-      formattedGranulesForTable.splice(1, 0, getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
-      formattedGranulesForTable.splice(1, 0, getAdjustRadioGroup('band', basicGranuleValues.granuleId) as ReactElement)
+      formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
+      formattedGranulesForTable.push(getAdjustRadioGroup('band', basicGranuleValues.granuleId) as ReactElement)
     }
 
     return formattedGranulesForTable
@@ -206,6 +205,26 @@ const GranuleTable = (props: GranuleTableProps) => {
       editedProduct!.mgrsBandAdjust = adjustValue
     }
     dispatch(editProduct(editedProduct as allProductParameters))
+  }
+
+  const renderInfoIcon = (parameterId: string) => (
+    <OverlayTrigger
+        placement="right"
+        overlay={
+            <Tooltip id="button-tooltip">
+            {parameterHelp[parameterId]}
+          </Tooltip>
+        }
+    >
+       <InfoCircle/>
+    </OverlayTrigger>
+)
+
+  const renderColTitle = (labelEntry: string[]) => {
+    let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
+    return (
+      <th>{labelEntry[1]} {infoIcon}</th>
+    )
   }
 
   return (
@@ -233,7 +252,7 @@ const GranuleTable = (props: GranuleTableProps) => {
               ): (
                 null
               )}
-              {tableType === 'granuleSelection' ? Object.entries(granuleSelectionLabels).map(labelEntry => <th>{labelEntry[1]}</th>) : Object.entries(generateProductParameters.outputSamplingGridType === 'utm' ? productCustomizationLabelsUTM : productCustomizationLabelsGEO).map(labelEntry => <th>{labelEntry[1]}</th>)}
+              {tableType === 'granuleSelection' ? Object.entries(granuleSelectionLabels).map(labelEntry => renderColTitle(labelEntry)) : Object.entries(generateProductParameters.outputSamplingGridType === 'utm' ? productCustomizationLabelsUTM : productCustomizationLabelsGEO).map(labelEntry => renderColTitle(labelEntry))}
             </tr>
           </thead>
           <tbody>
@@ -280,15 +299,15 @@ const GranuleTable = (props: GranuleTableProps) => {
         </Table>
       </div>
       {tableType === 'granuleSelection' ? (
-            <Row>
-              <Col style={{marginTop: '10px'}}>
-                <Button variant='primary' size='sm' onClick={() => handleSave()}>
-                  <Plus size={28}/> Add Scenes
-                </Button>
-              </Col>
-            </Row>
-          ) : null
-        }
+          <Row>
+            <Col style={{marginTop: '10px'}}>
+              <Button variant='primary' size='sm' onClick={() => handleSave()}>
+                <Plus size={28}/> Add Scenes
+              </Button>
+            </Col>
+          </Row>
+        ) : null
+      }
       <DeleteGranulesModal />
       </div>
     </div>

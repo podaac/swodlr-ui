@@ -12,7 +12,8 @@ interface GranuleState {
     granuleFocus: LatLngExpression,
     generatedProducts: GeneratedProduct[],
     generateProductParameters: GenerateProductParameters,
-    granuleTableAlerts: AlertMessageObject[]
+    granuleTableAlerts: AlertMessageObject[],
+    productCustomizationTableAlerts: AlertMessageObject[],
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -28,6 +29,7 @@ const initialState: GranuleState = {
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
+    productCustomizationTableAlerts: []
 }
 
 
@@ -65,17 +67,21 @@ export const productSlice = createSlice({
       const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => {
         const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
 
+        const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
         return ({
           productId: uuidv4(),
           granuleId: granuleId, 
-          status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE", 
+          status: index % 2 === 0 ? "In Progress" : "Complete", 
+          cycle,
+          pass,
+          scene,
           parametersUsedToGenerate: {
             batchGenerateProductParameters: state.generateProductParameters,
-            utmZoneAdjust: relevantAddedProduct.utmZoneAdjust,
-            mgrsBandAdjust: relevantAddedProduct.mgrsBandAdjust
-          }, 
-          // downloadUrl: index % 2 === 0 ? null : `https://test-download-url-${granuleId}.zip` 
-          downloadUrl: `https://test-download-url-${granuleId}.zip`
+            utmZoneAdjust: utmZoneAdjust,
+            mgrsBandAdjust: mgrsBandAdjust
+          },
+          downloadUrl: `https://test-download-url-${granuleId}.zip`,
+          dateGenerated: new Date(),
         })
       })
       state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]

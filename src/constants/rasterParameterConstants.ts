@@ -11,7 +11,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
         default: 0
     },
     outputSamplingGridType: {
-        values: ['utm', 'geo'],
+        values: ['utm', 'lat/long'],
         default: 'utm'
     },
     rasterResolutionUTM: {
@@ -38,7 +38,7 @@ export const parameterOptions = {
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
-    outputGranuleExtentFlag: 'Output Granule Extent Flag',
+    outputGranuleExtentFlag: 'Output Granule Extent',
     outputSamplingGridType: 'Output Sampling Grid Type',
     rasterResolution: 'Raster Resolution',
     utmZoneAdjust: 'UTM Zone Adjust',
@@ -54,11 +54,11 @@ export const granuleSelectionLabels = {
 
 export const productCustomizationLabelsUTM = {
     granuleId: 'Granule ID',
-    zoneAdjust: 'Zone Adjust',
-    bandAdjust: 'Band Adjust',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
+    utmZoneAdjust: 'UTM Zone Adjust',
+    mgrsBandAdjust: 'MGRS Band Adjust',
 }
 
 export const productCustomizationLabelsGEO = {
@@ -67,6 +67,24 @@ export const productCustomizationLabelsGEO = {
     pass: 'Pass',
     scene: 'Scene',
 }
+
+export const generatedProductsLabels = {
+    productId: 'Product ID',
+    granuleId: 'Granule ID',
+    status: 'Status',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+    outputGranuleExtentFlag: 'Outpus Granule Extent Flag',
+    outputSamplingGridType: 'Outpus Sampling Grid Type',
+    rasterResolution: 'Raster Resolution',
+    utmZoneAdjust: 'UTM Zone Adjust',
+    mgrsBandAdjust: 'MGRS Band Adjust',
+    downloadUrl: 'Download URL',
+    dateGenerated: 'Date Generated'
+}
+
+export const infoIconsToRender = ['outputGranuleExtentFlag', 'outputSamplingGridType', 'rasterResolution', 'utmZoneAdjust', 'mgrsBandAdjust', 'cycle', 'pass', 'scene']
 
 export const parameterOptionDefaults = {
     name: '',
@@ -81,45 +99,14 @@ export const parameterOptionDefaults = {
 }
 
 export const parameterHelp: ParameterHelp = {
-    outputGranuleExtentFlag: `	
-    Flag indicating whether the SAS should produce a non-overlapping or overlapping granule
-    
-    “0” for a non-overlapping, 128 km x 128 km granule extent
-    “1” for an overlapping, 256 km x 128 km granule extent`,
-    outputSamplingGridType: `	
-    Type of the raster sampling grid
-    
-    “utm” for a Universal Transverse Mercator (UTM) grid
-    “geo” for a geodetic latitude-longitude grid`,
-    rasterResolution: `	
-    Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids`,
-    utmZoneAdjust: `This parameter allows the UTM grid to use a zone within +/-1 zone of the closest zone to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
-    mgrsBandAdjust: `This parameter allows the UTM grid to use an MGRS latitude band within +/-1 band of the closest band to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
-}
-
-export const parameterHelpGpt: ParameterHelp = {
-    outputGranuleExtentFlag: `This flag determines whether the SAS (System for Atmospheric Soundings) should generate data in non-overlapping or overlapping chunks.
-
-    If you set the flag to '0', the SAS will produce data in non-overlapping chunks that cover an area of 128 km x 128 km.
-    If you set the flag to '1', the SAS will generate data in overlapping chunks that cover a larger area of 256 km x 128 km.`,
-    outputSamplingGridType: `Type of Raster Sampling Grid:
-
-    "utm" refers to a Universal Transverse Mercator (UTM) grid.
-    "geo" refers to a geodetic latitude-longitude grid.`,
-    rasterResolution: `Resolution of Raster Sampling Grid:
-
-    The resolution is given in units of integer meters for UTM grids.
-    For latitude-longitude grids, the resolution is provided in units of integer arc-seconds.`,
-    utmZoneAdjust: `UTM Grid Zone Parameter:
-
-    This parameter enables the UTM grid to utilize a zone that is within +/-1 zone of the nearest zone to the center of the raster scene.
-    The purpose is to allow nearby L2_HR_Raster outputs to be sampled on a common grid.
-    Note that this parameter has no effect if the output grid is not in the UTM format.`,
-    mgrsBandAdjust: `UTM Grid Latitude Band Parameter:
-
-    This parameter enables the UTM grid to utilize an MGRS (Military Grid Reference System) latitude band that is within +/-1 band of the nearest band to the center of the raster scene.
-    The purpose is to allow nearby L2_HR_Raster outputs to be sampled on a common grid.
-    It's important to note that this parameter has no effect if the output grid is not in the UTM format.`
+    outputGranuleExtentFlag: `There are two sizing options for raster granules: square (128 km x 128 km) or rectangular (256 km x 128 km). The square granule extent utilizes the data from only the specific square scene ID indicated, whereas the rectangular granule extent utilizes the specific square scene ID indicated and data from the two adjacent scene IDs along the SWOT swath. At the very edges of scenes, there is a risk that the pixels SWOT measures will not be aggregated as accurately into the raster product. The rectangular extent addresses this issue and could be most helpful with points of interest near the edges of scenes.`,
+    outputSamplingGridType: `Specifies the type of the raster sampling grid. It can be either a Universal Transverse Mercator (UTM) grid or a geodetic latitude-longitude grid.`,
+    rasterResolution: `Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids.`,
+    utmZoneAdjust: `The Universal Transverse Mercator (UTM) projection is divided into 60 local zones 6° wide in Longitude. By default, UTM raster processing uses the UTM zone at the scene center. If a common grid is desired for scenes near each other, the zone per scene can be adjusted (+/- 1 zone) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    mgrsBandAdjust: `The Military Grid Reference System (MGRS) defines alphabetic Latitude bands. By default, UTM raster processing uses the MGRS band at the scene center. If a common grid is desired for scenes near each other, the band per scene can be adjusted (+/- 1 band) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    cycle: `The repeat orbit cycle number of the observation. SWOT’s orbit is 21 days and thus observations in the same 21-day orbit period would have the same cycle number.`,
+    pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
+    scene: `Predefined 128 x 128 km squares of the SWOT observations.`
 }
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {

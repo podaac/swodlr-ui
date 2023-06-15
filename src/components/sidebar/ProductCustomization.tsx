@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import Form from 'react-bootstrap/Form';
 import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { parameterHelp, parameterHelpGpt, parameterOptionValues } from '../../constants/rasterParameterConstants'
+import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
 import { setGenerateProductParameters } from "./actions/productSlice";
 import { GenerateProductParameters } from '../../types/constantTypes';
@@ -15,20 +15,12 @@ const ProductCustomization = () => {
 
     const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = generateProductParameters
 
-    // const [outputGranuleExtentFlag, setOutputGranuleExtentFlag] = useState(parameterOptionValues.outputGranuleExtentFlag.default as number);
-    // const [outputSamplingGridType, setOutputSamplingGridType] = useState(parameterOptionValues.outputSamplingGridType.default as string);
-    // const [rasterResolutionUTM, setRasterResolutionUTM] = useState(parameterOptionValues.rasterResolutionUTM.default as number)
-    // const [rasterResolutionGEO, setRasterResolutionGEO] = useState(parameterOptionValues.rasterResolutionGEO.default as number)
-
     const setOutputGranuleExtentFlag = (outputGranuleExtentFlag: number) => dispatch(setGenerateProductParameters({...generateProductParameters, outputGranuleExtentFlag}))
     const setOutputSamplingGridType = (outputSamplingGridType: string) => dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType}))
     const setRasterResolutionUTM = (rasterResolutionUTM: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionUTM}))
     const setRasterResolutionGEO = (rasterResolutionGEO: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionGEO}))
-    // const handleProductParameterChange = (parameterName: string, value: string | number) => {
-    //     const genParametersToEdit = {...generateProductParameters}
-    //     genParametersToEdit[parameterName as keyof GenerateProductParameters] = value
-    //     dispatch(setGenerateProductParameters(genParametersToEdit))
-    // }
+
+    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
     useEffect(() => {}, [showGenerateProductsModal, outputSamplingGridType])
 
@@ -39,7 +31,7 @@ const ProductCustomization = () => {
                     {parameterOptionValues.rasterResolutionUTM.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
-        } else if (outputSamplingGridType === 'geo') {
+        } else if (outputSamplingGridType === 'lat/long') {
             return (
                 <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' defaultValue={parameterOptionValues.rasterResolutionGEO.default} value={rasterResolution} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionGEO.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
@@ -53,25 +45,53 @@ const ProductCustomization = () => {
             return (
                <p>meters</p>
             )
-        } else if (outputSamplingGridType === 'geo') {
+        } else if (outputSamplingGridType === 'lat/long') {
             return (
                 <p>arc-seconds</p>
             )
         }
     }
 
-    const renderinfoIcon = (parameterId: string) => (
+    const renderInfoIcon = (parameterId: string) => (
         <OverlayTrigger
             placement="right"
             overlay={
                 <Tooltip id="button-tooltip">
-                {parameterHelpGpt[parameterId]}
+                {parameterHelp[parameterId]}
               </Tooltip>
             }
         >
             <InfoCircle />
         </OverlayTrigger>
     )
+
+    const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
+        const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
+            <Form.Check 
+                defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
+                inline 
+                label={String(value).toUpperCase()} 
+                name="outputSamplingGridTypeGroup" 
+                type={'radio'} 
+                id={`outputSamplingGridTypeGroup-radio-${index}`} 
+                onChange={() => setOutputSamplingGridType(value as string)}
+            />
+        )
+        if (outputSamplingGridType === 'utm') {
+            inputArray.push(
+                (
+                    <Form.Check 
+                    type="switch"
+                    id="outputGranuleExtentFlag-switch"
+                    checked={showAdvancedOptions}
+                    onChange={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    label={'advanced options'} 
+                />
+                )
+            )
+        }
+        return inputArray
+    }
 
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px'}} className='g-0 shadow'>
@@ -81,18 +101,32 @@ const ProductCustomization = () => {
         <div style={{padding: '0px 20px 15px 20px'}}>
             <Row className='normal-row'>
                 <Col md={{ span: 5, offset: 0 }}>
-                    <h5>Output Granule Extent Flag</h5>
+                    <h5>Output Granule Extent</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('outputGranuleExtentFlag')}
+                        {renderInfoIcon('outputGranuleExtentFlag')}
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
-                    <Form.Check 
+                    {/* <Form.Check 
                         type="switch"
                         id="outputGranuleExtentFlag-switch"
                         checked={!!outputGranuleExtentFlag}
                         onChange={() => setOutputGranuleExtentFlag(outputGranuleExtentFlag ? 0 : 1)}
-                    />
+                    /> */}
+                    {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
+
+                        return (
+                            <Form.Check 
+                                defaultChecked={value === parameterOptionValues.outputGranuleExtentFlag.default} 
+                                inline 
+                                label={value ? 'RECTANGLE' : 'SQUARE'} 
+                                name="outputGranuleExtentFlagTypeGroup" 
+                                type={'radio'} 
+                                id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
+                                onChange={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                            />
+                        )
+                    })}
                 </Col>
             </Row>
             <Row className='normal-row'>
@@ -100,19 +134,11 @@ const ProductCustomization = () => {
                     <h5>Output Sampling Grid Type</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('outputSamplingGridType')}
+                        {renderInfoIcon('outputSamplingGridType')}
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
-                    {parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
-                        <Form.Check 
-                            defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
-                            inline 
-                            label={String(value).toUpperCase()} 
-                            name="outputSamplingGridTypeGroup" 
-                            type={'radio'} 
-                            id={`outputSamplingGridTypeGroup-radio-${index}`} 
-                            onChange={() => setOutputSamplingGridType(value as string)}
-                            />)}
+                    {renderOutputSamplingGridTypeInputs(outputSamplingGridType)}
+                   
                 </Col>
             </Row>
             <Row className='normal-row'>
@@ -120,14 +146,13 @@ const ProductCustomization = () => {
                     <h5>Raster Resolution</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('rasterResolution')}
+                        {renderInfoIcon('rasterResolution')}
                     </Col>
                 <Col md={{ span: 3, offset: 1 }} >
                     {renderRasterResolutionOptions(outputSamplingGridType)}
                 </Col>
                 <Col md={{ span: 2, offset: 0 }} style={{paddingLeft: '0px'}}>{renderRasterResolutionUnits(outputSamplingGridType)}</Col>
             </Row>
-            {/* {outputSamplingGridType === 'geo' ? null : bandAdjustOptions} */}
         </div>
     </div>      
   );

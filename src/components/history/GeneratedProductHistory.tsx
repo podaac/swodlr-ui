@@ -1,28 +1,14 @@
-import { Accordion, Alert, Badge, Button, Card, Col, ListGroup, OverlayTrigger, Row, Spinner, Tooltip } from "react-bootstrap";
+import { Accordion, Alert, Badge, Button, Card, Col, ListGroup, OverlayTrigger, Row, Spinner, Table, Tooltip } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { GeneratedProduct, StatusTypes } from "../../types/constantTypes";
 import { useState } from "react";
-import { Download, Clipboard } from "react-bootstrap-icons";
+import { Download, Clipboard, InfoCircle } from "react-bootstrap-icons";
 import { setCurrentPage } from "../app/appSlice";
-
-const getBadgeColor = (status: StatusTypes) => {
-    if (status === 'IN_PROGRESS') {
-        return 'secondary'
-    } else if (status === 'COMPLETE') {
-        return 'success'
-    }
-}
-
-const getBadgeLabel = (status: StatusTypes) => {
-    if (status === 'IN_PROGRESS') {
-        return 'Generation In Progress'
-    } else if (status === 'COMPLETE') {
-        return 'Complete'
-    }
-}
+import { generatedProductsLabels, infoIconsToRender, parameterHelp } from "../../constants/rasterParameterConstants";
 
 const GeneratedProductHistory = () => {
     const generatedProducts = useAppSelector((state) => state.product.generatedProducts)
+    const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const dispatch = useAppDispatch()
     
     const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
@@ -32,124 +18,54 @@ const GeneratedProductHistory = () => {
         setCopyTooltipText('Copied!')
     }
 
-    const renderHistoryContents = (
-        <Row style={{marginLeft: '20px', marginRight: '20px', marginBottom: '20px', height: '80vh', overflowY: 'auto'}}>
-            {generatedProducts.map((genProductObj: GeneratedProduct) => {
-                const {productId, status, granuleId, parametersUsedToGenerate, downloadUrl} = genProductObj
-                const {batchGenerateProductParameters, utmZoneAdjust, mgrsBandAdjust} = parametersUsedToGenerate
-                return (
-                    <Col style={{marginTop: '20px'}}>
-                        <Card style={{ width: '18rem' }}>
-                        {/* <Card.Img variant="top" src="holder.js/100px180" /> */}
-                        <Card.Body>
-                            <Card.Title style={{color: 'black'}}>{granuleId}</Card.Title>
-
-                                <Row style={{color: 'black'}}><h6>Parameters Used to Generate Product</h6></Row>
-                                {Object.entries(batchGenerateProductParameters).map(entry => <Row><Col style={{color: 'black'}}>{`${entry[0]}: ${entry[1]}`}</Col></Row>)}
-                                {batchGenerateProductParameters.outputSamplingGridType === 'utm' ? (
-                                    <>
-                                        <Row><Col style={{color: 'black'}}>{`utmZoneAdjust: ${utmZoneAdjust}`}</Col></Row>
-                                        <Row><Col style={{color: 'black'}}>{`mgrsBandAdjust: ${mgrsBandAdjust}`}</Col></Row>
-                                    </>
-                                ): null}
-
-                            {/* <Card.Text style={{color: 'black'}}>
-                            Some quick example text to build on the card title and make up the
-                            bulk of the card's content.
-                            </Card.Text> */}
-                            <Row style={{color: 'black'}}><h6>Download URL</h6></Row>
-                            <Row>{<a href={downloadUrl as string}>{downloadUrl}</a>}</Row>
-                            <Row>
-                                <Col>
-                                <OverlayTrigger
-                                        placement="right"
-                                        overlay={
-                                            <Tooltip id="button-tooltip">{copyTooltipText}</Tooltip>
-                                        }
-                                    >
-                                    <Button style={{backgroundColor: 'transparent', borderColor: 'white', color: 'black'}} onClick={() => {handleCopyClick(downloadUrl as string)}} onMouseLeave={() => setCopyTooltipText('Click to Copy URL')}><Clipboard/></Button>
-                                    </OverlayTrigger>
-                                </Col>
-                                <Col>
-                                <Button style={{backgroundColor: 'transparent', borderColor: 'white', color: 'black'}} onClick={() => alert(`downloading url for ${granuleId}`)}><Download/></Button>
-                                </Col>
-                            </Row>
-                            {/* <Button variant="primary">Go somewhere</Button> */}
-                        </Card.Body>
-                        </Card>
-                    </Col>
-                )
-            })}
-        </Row>
+    const renderInfoIcon = (parameterId: string) => (
+        <OverlayTrigger
+            placement="right"
+            overlay={
+                <Tooltip id="button-tooltip">
+                {parameterHelp[parameterId]}
+              </Tooltip>
+            }
+        >
+           <InfoCircle/>
+        </OverlayTrigger>
     )
+    
+      const renderColTitle = (labelEntry: string[]) => {
+        let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
+        return (
+          <th>{labelEntry[1]} {infoIcon}</th>
+        )
+      }
 
-    const renderListContents = (
-        <Col style={{marginLeft: '20px', marginRight: '20px', marginBottom: '20px', height: '80vh'}}>
-            <Accordion className="shadow" style={{overflowY: 'auto', maxHeight: '80vh'}}>
-                {generatedProducts.map((genProductObj: GeneratedProduct) => {
-                    const {productId, status, granuleId, parametersUsedToGenerate, downloadUrl} = genProductObj
-                    const {batchGenerateProductParameters, utmZoneAdjust, mgrsBandAdjust} = parametersUsedToGenerate
-                    return(
-                        <Accordion.Item eventKey={genProductObj.productId}>
-                                <Accordion.Header>
-                                <Col>
-                                    {/* <Badge pill bg={getBadgeColor(status)} style={{ width: '170px', height: '20px'}}>
-                                        {getBadgeLabel(status)}
-                                    </Badge> */}
-                                    {`Granule ID: ${granuleId}`}
-                                    </Col>
-                                    {/* <Col>
-                                        {`Product ID: ${productId}`}
-                                    </Col> */}
-                                    <Col>
-                                    {downloadUrl ? `Download URL: ${(<a href={downloadUrl}>{downloadUrl}</a>)}` : null}
-                                    </Col>
-                                </Accordion.Header>
-                                <Accordion.Body>
-                                    <Row>
-                                        <Col>
-                                            <Row><h6>Parameters Used to Generate Product</h6></Row>
-                                            {Object.entries(batchGenerateProductParameters).map(entry => <Row><Col>{`${entry[0]}: ${entry[1]}`}</Col></Row>)}
-                                            {batchGenerateProductParameters.outputSamplingGridType === 'utm' ? (
-                                                <>
-                                                    <Row><Col>{`utmZoneAdjust: ${utmZoneAdjust}`}</Col></Row>
-                                                    <Row><Col>{`mgrsBandAdjust: ${mgrsBandAdjust}`}</Col></Row>
-                                                </>
-                                            ): null}
-                                        </Col>
-                                        <Col>
-                                            <Row><h6>{status === 'COMPLETE' ? 'Download URL' : 'Product Generation Still in Progress'}</h6></Row>
-                                            <Row>
-                                                {status === 'COMPLETE' ? <a href={downloadUrl as string}>{downloadUrl}</a> : <Col><Spinner animation="border" /></Col>}
-                                            </Row>
-                                            {status === 'COMPLETE' ? (
-                                                <Row>
-                                                    <Col>
-                                                    <OverlayTrigger
-                                                            placement="right"
-                                                            overlay={
-                                                                <Tooltip id="button-tooltip">{copyTooltipText}</Tooltip>
-                                                            }
-                                                        >
-                                                            <Button style={{backgroundColor: 'transparent', borderColor: 'white', color: 'black'}} onClick={() => {handleCopyClick(downloadUrl as string)}} onMouseLeave={() => setCopyTooltipText('Click to Copy URL')}><Clipboard/></Button>
-                                                        </OverlayTrigger>
-                                                    </Col>
-                                                    <Col>
-                                                    <Button style={{backgroundColor: 'transparent', borderColor: 'white', color: 'black'}}><Download/></Button>
-                                                    </Col>
-                                                </Row>
-                                            ) : null
-                                            }
-
-                                        </Col>
-                                    </Row>
-                                </Accordion.Body>
-                        </Accordion.Item>
-                    )}
-                )}
-            </Accordion>
-        </Col>
-    )
+    const renderHistoryTable = () => {
+        return (
+            <div style={{padding: '10px 20px 20px 20px'}}>
+                <div className={`table-responsive-generatedProducts`}>
+                    <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
+                    <thead>
+                    <tr>
+                        {Object.entries(generatedProductsLabels).map(labelEntry => renderColTitle(labelEntry))}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {generatedProducts.map((generatedProductObject, index) => {
+                        const {productId, status, granuleId, parametersUsedToGenerate, downloadUrl, dateGenerated, cycle, pass, scene} = generatedProductObject
+                        const {batchGenerateProductParameters, utmZoneAdjust, mgrsBandAdjust} = parametersUsedToGenerate
+                        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = batchGenerateProductParameters
+                        const dateToShow = dateGenerated?.toUTCString()
+                        const productRowValues = {productId, granuleId, status, cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust, downloadUrl, dateToShow}
+                        return (
+                        <tr className={`${colorModeClass}-table hoverable-row`}>
+                        {Object.entries(productRowValues).map(entry => <td>{entry[1]}</td> )}
+                        </tr>
+                    )})}
+                    </tbody>
+                </Table>
+            </div>
+          </div>
+        )
+    }
     
 
     const productHistoryAlert = () => {
@@ -162,14 +78,14 @@ const GeneratedProductHistory = () => {
         if (generatedProducts.length === 0) {
             viewToShow = productHistoryAlert()
         } else {
-            viewToShow = renderHistoryContents
+            viewToShow = renderHistoryTable()
         } 
 
         return (
-            <Row className='normal-row'>
-                <h3>Generated Product History</h3>
-                {viewToShow}
-            </Row>
+            <Col>
+                <Row className='normal-row' style={{marginRight: '0px'}}><h2>Generated Products Data</h2></Row>
+                <Row className='normal-row' style={{marginRight: '0px'}}>{viewToShow}</Row>
+            </Col>
         )
     }
 
