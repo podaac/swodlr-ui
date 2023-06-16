@@ -14,6 +14,7 @@ interface GranuleState {
     generateProductParameters: GenerateProductParameters,
     granuleTableAlerts: AlertMessageObject[],
     productCustomizationTableAlerts: AlertMessageObject[],
+    showUTMAdvancedOptions: boolean,
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -29,7 +30,8 @@ const initialState: GranuleState = {
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
-    productCustomizationTableAlerts: []
+    productCustomizationTableAlerts: [],
+    showUTMAdvancedOptions: false
 }
 
 
@@ -102,6 +104,9 @@ export const productSlice = createSlice({
       const newAlerts = [...state.granuleTableAlerts].filter(alertObject => alertObject.type !== action.payload)
       state.granuleTableAlerts = newAlerts
     },
+    setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
+      state.showUTMAdvancedOptions = action.payload
+    },
   },
 })
 
@@ -114,7 +119,8 @@ export const {
     addGeneratedProducts,
     setGenerateProductParameters,
     addGranuleTableAlerts,
-    removeGranuleTableAlerts
+    removeGranuleTableAlerts,
+    setShowUTMAdvancedOptions
 } = productSlice.actions
 
 export default productSlice.reducer

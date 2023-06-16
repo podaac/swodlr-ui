@@ -4,13 +4,13 @@ import Form from 'react-bootstrap/Form';
 import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
-import { setGenerateProductParameters } from "./actions/productSlice";
-import { GenerateProductParameters } from '../../types/constantTypes';
+import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actions/productSlice";
 
 const ProductCustomization = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
+    const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
     const dispatch = useAppDispatch()
 
     const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = generateProductParameters
@@ -81,12 +81,13 @@ const ProductCustomization = () => {
             inputArray.push(
                 (
                     <Form.Check 
-                    type="switch"
-                    id="outputGranuleExtentFlag-switch"
-                    checked={showAdvancedOptions}
-                    onChange={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                    label={'advanced options'} 
-                />
+                        type="switch"
+                        inline
+                        id="outputGranuleExtentFlag-switch"
+                        checked={showUTMAdvancedOptions}
+                        onChange={() => dispatch(setShowUTMAdvancedOptions(!showUTMAdvancedOptions))}
+                        label={'advanced options'} 
+                    />
                 )
             )
         }

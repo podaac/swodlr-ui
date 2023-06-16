@@ -112,6 +112,7 @@ NAVBAR
 .dark-mode-background {
   /* background-color: #274c61ff; */
   background-color: #3d5d82;
+  /* background-color: #25325c; */
   color: #FAF9F6
 }
 
@@ -122,6 +123,7 @@ NAVBAR
 
 .dark-mode-container-background {
   background-color: #3D5D82;
+  /* background-color: #25325c; */
   color: #FAF9F6
 }
 
@@ -236,7 +238,8 @@ CUSTOMIZE PRODUCT CONTAINER
   top: 0;
   left: 0;
   z-index: 1000;
-  padding-top: 60px;
+  padding-top: 125px;
+  padding-bottom: 80px
 }
 
 .sidebar-resize {
@@ -402,7 +405,8 @@ WELCOME PAGE
 .welcome-page-container {
   height: 100%;
   padding-top: 0px !important;
-  background-color: #3d5d82;
+  /* background-color: #3d5d82; */
+  background-color: #25325c;
 }
 
 .welcome-page-text {

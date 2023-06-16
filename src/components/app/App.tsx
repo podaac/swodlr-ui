@@ -11,6 +11,7 @@ import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
 import PodaacNavbar from '../navbar/PodaacNavbar';
 import NavbarContainer from '../navbar/NavbarContainer';
+import PodaacFooter from '../navbar/PodaacFooter';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -34,7 +35,11 @@ const App = () => {
   // can use this for testing purposes
   // const userAuthenticated = true
   
-  const unauthenticatedApplicationView = <Welcome />
+  const unauthenticatedApplicationView = (<>
+    <NavbarContainer showMainNavbar={false}/>
+    <Welcome />
+    <PodaacFooter />
+  </>)
 
   const renderAuthenticatedApplicationView = () => {
     let pageToShow
@@ -57,9 +62,9 @@ const App = () => {
     }
     return (
       <>
-        <NavbarContainer />
-        {/* <MainNavbar  /> */}
+        <NavbarContainer showMainNavbar={true}/>
         {pageToShow}
+        <PodaacFooter />
       </>
     )
   }

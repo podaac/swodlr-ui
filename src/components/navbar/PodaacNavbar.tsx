@@ -3,7 +3,7 @@ import Navbar from 'react-bootstrap/Navbar';
 
 const PodaacNavbar = () => {
   return (
-    <Navbar className={`fixed-top Podaac-navbar`} expand="lg">
+    <Navbar className={`Podaac-navbar`} expand="lg" style={{height: '70px'}}>
       {/* <Navbar.Brand href="#home">
         <a href="https://www.nasa.gov/" target="_blank" rel="noreferrer">
           <img
@@ -44,7 +44,7 @@ const PodaacNavbar = () => {
             <img
               alt=""
               src="https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/logo@x2.png"
-              height="70"
+              height="60"
               className="d-inline-block align-top"
             />{' '}
           </a>
@@ -53,7 +53,7 @@ const PodaacNavbar = () => {
           <img
             alt=""
             src="https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/satellite@x1.png"
-            height="70"
+            height="60"
             className="d-inline-block align-top d-flex"
           />{' '}
         </Col>
