@@ -49,17 +49,17 @@ const GeneratedProductHistory = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {generatedProducts.map((generatedProductObject, index) => {
-                        const {productId, status, granuleId, parametersUsedToGenerate, downloadUrl, dateGenerated, cycle, pass, scene} = generatedProductObject
-                        const {batchGenerateProductParameters, utmZoneAdjust, mgrsBandAdjust} = parametersUsedToGenerate
-                        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = batchGenerateProductParameters
-                        const dateToShow = dateGenerated?.toUTCString()
-                        const productRowValues = {productId, granuleId, status, cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust, downloadUrl, dateToShow}
-                        return (
-                        <tr className={`${colorModeClass}-table hoverable-row`}>
-                        {Object.entries(productRowValues).map(entry => <td>{entry[1]}</td> )}
-                        </tr>
-                    )})}
+                        {generatedProducts.map((generatedProductObject, index) => {
+                            const {productId, status, granuleId, parametersUsedToGenerate, downloadUrl, dateGenerated, cycle, pass, scene} = generatedProductObject
+                            const {batchGenerateProductParameters, utmZoneAdjust, mgrsBandAdjust} = parametersUsedToGenerate
+                            const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = batchGenerateProductParameters
+                            const dateToShow = dateGenerated?.toUTCString()
+                            const productRowValues = {productId, granuleId, status, cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust, downloadUrl, dateToShow}
+                            return (
+                            <tr className={`${colorModeClass}-table hoverable-row`}>
+                            {Object.entries(productRowValues).map(entry => <td>{entry[1]}</td> )}
+                            </tr>
+                        )})}
                     </tbody>
                 </Table>
             </div>
@@ -82,7 +82,7 @@ const GeneratedProductHistory = () => {
         } 
 
         return (
-            <Col>
+            <Col style={{marginRight: '50px', marginLeft: '50px'}}>
                 <Row className='normal-row' style={{marginRight: '0px'}}><h2>Generated Products Data</h2></Row>
                 <Row className='normal-row' style={{marginRight: '0px'}}>{viewToShow}</Row>
             </Col>

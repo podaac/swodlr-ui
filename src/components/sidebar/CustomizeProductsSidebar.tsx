@@ -68,7 +68,7 @@ const CustomizeProductsSidebar = () => {
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
         <Col>
-            <Row><h2 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h2></Row>
+            <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row>
             <SidebarTabs />
             <div style={{}}>
             {renderSidebarContents()}

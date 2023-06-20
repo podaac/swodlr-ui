@@ -29,7 +29,7 @@ APP
 
 .App {
   text-align: center;
-  height: 100%;
+  height: 97%;
 }
 
 .App-logo {
@@ -422,6 +422,16 @@ WELCOME PAGE
 .button-style {
   background-color: #5C946E;
   border-color: #5C946E;
+}
+
+.loginButtonCard {
+  background-color: #1A2535;
+}
+
+.howToListItem {
+  background-color: #1A2535;
+  color: white;
+  border-bottom: white;
 }
 
 /**************************************************

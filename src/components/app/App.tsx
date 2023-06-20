@@ -1,5 +1,4 @@
 import React from 'react';
-import MainNavbar from '../navbar/MainNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Map from '../map/Map'
@@ -9,7 +8,6 @@ import Welcome from '../welcome/Welcome'
 import CustomizeProductsSidebar from '../sidebar/CustomizeProductsSidebar';
 import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
-import PodaacNavbar from '../navbar/PodaacNavbar';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 

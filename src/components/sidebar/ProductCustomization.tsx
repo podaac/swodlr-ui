@@ -70,7 +70,7 @@ const ProductCustomization = () => {
             <Form.Check 
                 defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
                 inline 
-                label={String(value).toUpperCase()} 
+                label={String(value)} 
                 name="outputSamplingGridTypeGroup" 
                 type={'radio'} 
                 id={`outputSamplingGridTypeGroup-radio-${index}`} 
@@ -87,6 +87,7 @@ const ProductCustomization = () => {
                         checked={showUTMAdvancedOptions}
                         onChange={() => dispatch(setShowUTMAdvancedOptions(!showUTMAdvancedOptions))}
                         label={'advanced options'} 
+                        style={{marginTop: '10px'}}
                     />
                 )
             )
@@ -120,7 +121,7 @@ const ProductCustomization = () => {
                             <Form.Check 
                                 defaultChecked={value === parameterOptionValues.outputGranuleExtentFlag.default} 
                                 inline 
-                                label={value ? 'RECTANGLE' : 'SQUARE'} 
+                                label={value ? 'rectangle' : 'square'} 
                                 name="outputGranuleExtentFlagTypeGroup" 
                                 type={'radio'} 
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
