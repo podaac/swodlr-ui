@@ -315,7 +315,7 @@ tfoot {
 }
 
 .table-responsive-generatedProducts {
-  max-height: 80vh;
+  max-height: 75vh;
   overflow-y: auto;
 }
 
@@ -396,6 +396,15 @@ tr.add-granules td {
 .hoverable-row:hover td{
   background-color: blue;
   color: white !important
+}
+
+/**************************************************
+ABOUT PAGE
+**************************************************/
+
+.about-page {
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 /**************************************************

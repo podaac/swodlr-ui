@@ -1,4 +1,4 @@
-import { ParameterHelp, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
+import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -11,7 +11,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
         default: 0
     },
     outputSamplingGridType: {
-        values: ['utm', 'lat/long'],
+        values: ['utm', 'lat/lon'],
         default: 'utm'
     },
     rasterResolutionUTM: {
@@ -32,7 +32,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
     },
 }
 
-export const parameterOptions = {
+export const parameterOptions: ParameterOptions = {
     granuleId: 'ID',
     name: 'Name',
     cycle: 'Cycle',
@@ -75,8 +75,8 @@ export const generatedProductsLabels = {
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
-    outputGranuleExtentFlag: 'Outpus Granule Extent Flag',
-    outputSamplingGridType: 'Outpus Sampling Grid Type',
+    outputGranuleExtentFlag: 'Output Granule Extent Flag',
+    outputSamplingGridType: 'Output Sampling Grid Type',
     rasterResolution: 'Raster Resolution',
     utmZoneAdjust: 'UTM Zone Adjust',
     mgrsBandAdjust: 'MGRS Band Adjust',

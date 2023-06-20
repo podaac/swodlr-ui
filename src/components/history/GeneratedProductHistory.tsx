@@ -40,7 +40,7 @@ const GeneratedProductHistory = () => {
 
     const renderHistoryTable = () => {
         return (
-            <div style={{padding: '10px 20px 20px 20px'}}>
+            <div style={{padding: '0px 20px 20px 20px'}}>
                 <div className={`table-responsive-generatedProducts`}>
                     <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>
@@ -82,8 +82,8 @@ const GeneratedProductHistory = () => {
         } 
 
         return (
-            <Col style={{marginRight: '50px', marginLeft: '50px'}}>
-                <Row className='normal-row' style={{marginRight: '0px'}}><h2>Generated Products Data</h2></Row>
+            <Col style={{marginRight: '50px', marginLeft: '50px', marginTop: '70px'}}>
+                <Row className='normal-row' style={{marginRight: '0px'}}><h3>Generated Products Data</h3></Row>
                 <Row className='normal-row' style={{marginRight: '0px'}}>{viewToShow}</Row>
             </Col>
         )

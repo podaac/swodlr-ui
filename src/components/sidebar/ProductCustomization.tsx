@@ -31,7 +31,7 @@ const ProductCustomization = () => {
                     {parameterOptionValues.rasterResolutionUTM.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
-        } else if (outputSamplingGridType === 'lat/long') {
+        } else if (outputSamplingGridType === 'lat/lon') {
             return (
                 <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' defaultValue={parameterOptionValues.rasterResolutionGEO.default} value={rasterResolution} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionGEO.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
@@ -45,7 +45,7 @@ const ProductCustomization = () => {
             return (
                <p>meters</p>
             )
-        } else if (outputSamplingGridType === 'lat/long') {
+        } else if (outputSamplingGridType === 'lat/lon') {
             return (
                 <p>arc-seconds</p>
             )
@@ -109,12 +109,6 @@ const ProductCustomization = () => {
                         {renderInfoIcon('outputGranuleExtentFlag')}
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
-                    {/* <Form.Check 
-                        type="switch"
-                        id="outputGranuleExtentFlag-switch"
-                        checked={!!outputGranuleExtentFlag}
-                        onChange={() => setOutputGranuleExtentFlag(outputGranuleExtentFlag ? 0 : 1)}
-                    /> */}
                     {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
 
                         return (
@@ -140,7 +134,6 @@ const ProductCustomization = () => {
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
                     {renderOutputSamplingGridTypeInputs(outputSamplingGridType)}
-                   
                 </Col>
             </Row>
             <Row className='normal-row'>

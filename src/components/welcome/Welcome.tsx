@@ -54,28 +54,28 @@ const Welcome = () => {
                 <Row style={{marginTop: '20px', marginBottom: '20px'}}>
                   <Col md={{ span: 1, offset: 1 }}><h4>1.</h4></Col>
                   <Col md={{ span: 3, offset: 0 }}><h4>Select Scenes</h4></Col>
-                  <Col md={{ span: 4, offset: 2 }}><h6>Select scenes to turn into customized raster products and visualize them on a map.</h6></Col>
+                  <Col md={{ span: 5, offset: 1 }}><h6>Select scenes to turn into customized raster products and visualize them on a map.</h6></Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item className='howToListItem'>
                 <Row style={{marginTop: '20px', marginBottom: '20px'}}>
                   <Col md={{ span: 1, offset: 1 }}><h4>2.</h4></Col>
                   <Col md={{ span: 3, offset: 0 }}><h4>Customize</h4></Col>
-                  <Col md={{ span: 4, offset: 2 }}><h6>Customize generation parameters to fit with your use case.</h6></Col>
+                  <Col md={{ span: 5, offset: 1 }}><h6>Customize generation parameters to fit with your use case.</h6></Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item className='howToListItem'>
                 <Row style={{marginTop: '20px', marginBottom: '20px'}}>
                   <Col md={{ span: 1, offset: 1 }}><h4>3.</h4></Col>
                   <Col md={{ span: 3, offset: 0 }}><h4>Generate</h4></Col>
-                  <Col md={{ span: 4, offset: 2 }}><h6>Generate multiple rasters at once with  custom parameters.</h6></Col>
+                  <Col md={{ span: 5, offset: 1 }}><h6>Generate multiple rasters at once with  custom parameters.</h6></Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item className='howToListItem'>
                 <Row style={{marginTop: '20px', marginBottom: '20px'}}>
                   <Col md={{ span: 1, offset: 1 }}><h4>4.</h4></Col>
                   <Col md={{ span: 3, offset: 0 }}><h4>Download</h4></Col>
-                  <Col md={{ span: 4, offset: 2 }}><h6>Download generated products once processing is complete.</h6></Col>
+                  <Col md={{ span: 5, offset: 1 }}><h6>Download generated products once processing is complete.</h6></Col>
                 </Row>
               </ListGroup.Item>
             </ListGroup>
