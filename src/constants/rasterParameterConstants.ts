@@ -1,4 +1,4 @@
-import { ParameterHelp, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
+import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -11,7 +11,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
         default: 0
     },
     outputSamplingGridType: {
-        values: ['utm', 'geo'],
+        values: ['utm', 'lat/lon'],
         default: 'utm'
     },
     rasterResolutionUTM: {
@@ -32,9 +32,46 @@ export const parameterOptionValues: parameterValuesDictionary = {
     },
 }
 
-export const parameterOptions = {
+export const parameterOptions: ParameterOptions = {
     granuleId: 'ID',
     name: 'Name',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+    outputGranuleExtentFlag: 'Output Granule Extent',
+    outputSamplingGridType: 'Output Sampling Grid Type',
+    rasterResolution: 'Raster Resolution',
+    utmZoneAdjust: 'UTM Zone Adjust',
+    mgrsBandAdjust: 'MGRS Band Adjust',
+}
+
+export const granuleSelectionLabels = {
+    granuleId: 'Granule ID',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+}
+
+export const productCustomizationLabelsUTM = {
+    granuleId: 'Granule ID',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+    utmZoneAdjust: 'UTM Zone Adjust',
+    mgrsBandAdjust: 'MGRS Band Adjust',
+}
+
+export const productCustomizationLabelsGEO = {
+    granuleId: 'Granule ID',
+    cycle: 'Cycle',
+    pass: 'Pass',
+    scene: 'Scene',
+}
+
+export const generatedProductsLabels = {
+    productId: 'Product ID',
+    granuleId: 'Granule ID',
+    status: 'Status',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
@@ -43,15 +80,11 @@ export const parameterOptions = {
     rasterResolution: 'Raster Resolution',
     utmZoneAdjust: 'UTM Zone Adjust',
     mgrsBandAdjust: 'MGRS Band Adjust',
+    downloadUrl: 'Download URL',
+    dateGenerated: 'Date Generated'
 }
 
-export const granuleEssentialLabels = {
-    // name: 'Name',
-    cycle: 'Cycle',
-    pass: 'Pass',
-    scene: 'Scene',
-    granuleId: 'ID'
-}
+export const infoIconsToRender = ['outputGranuleExtentFlag', 'outputSamplingGridType', 'rasterResolution', 'utmZoneAdjust', 'mgrsBandAdjust', 'cycle', 'pass', 'scene']
 
 export const parameterOptionDefaults = {
     name: '',
@@ -66,29 +99,41 @@ export const parameterOptionDefaults = {
 }
 
 export const parameterHelp: ParameterHelp = {
-    outputGranuleExtentFlag: `	
-    Flag indicating whether the SAS should produce a non-overlapping or overlapping granule
-    
-    “0” for a non-overlapping, 128 km x 128 km granule extent
-    “1” for an overlapping, 256 km x 128 km granule extent`,
-    outputSamplingGridType: `	
-    Type of the raster sampling grid
-    
-    “utm” for a Universal Transverse Mercator (UTM) grid
-    “geo” for a geodetic latitude-longitude grid`,
-    rasterResolution: `	
-    Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids`,
-    utmZoneAdjust: `This parameter allows the UTM grid to use a zone within +/-1 zone of the closest zone to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
-    mgrsBandAdjust: `This parameter allows the UTM grid to use an MGRS latitude band within +/-1 band of the closest band to the center of the raster scene in order to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    outputGranuleExtentFlag: `There are two sizing options for raster granules: square (128 km x 128 km) or rectangular (256 km x 128 km). The square granule extent utilizes the data from only the specific square scene ID indicated, whereas the rectangular granule extent utilizes the specific square scene ID indicated and data from the two adjacent scene IDs along the SWOT swath. At the very edges of scenes, there is a risk that the pixels SWOT measures will not be aggregated as accurately into the raster product. The rectangular extent addresses this issue and could be most helpful with points of interest near the edges of scenes.`,
+    outputSamplingGridType: `Specifies the type of the raster sampling grid. It can be either a Universal Transverse Mercator (UTM) grid or a geodetic latitude-longitude grid.`,
+    rasterResolution: `Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids.`,
+    utmZoneAdjust: `The Universal Transverse Mercator (UTM) projection is divided into 60 local zones 6° wide in Longitude. By default, UTM raster processing uses the UTM zone at the scene center. If a common grid is desired for scenes near each other, the zone per scene can be adjusted (+/- 1 zone) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    mgrsBandAdjust: `The Military Grid Reference System (MGRS) defines alphabetic Latitude bands. By default, UTM raster processing uses the MGRS band at the scene center. If a common grid is desired for scenes near each other, the band per scene can be adjusted (+/- 1 band) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
+    cycle: `The repeat orbit cycle number of the observation. SWOT’s orbit is 21 days and thus observations in the same 21-day orbit period would have the same cycle number.`,
+    pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
+    scene: `Predefined 128 x 128 km squares of the SWOT observations.`
 }
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
-    success: 'Successfully added granules!',
-    alreadyAdded: 'Some granules have already been added.',
-    notFound: 'Some granules were not found.',
-    alreadyAddedAndNotFound: 'Some granules have already been added or not found',
-    noGranulesAdded: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
-    readyForGeneration: 'Remember: customize your product parameters before starting Generation'
+    success: {
+        message: 'Successfully added granules!',
+        variant: 'success',
+    },
+    alreadyAdded: {
+        message: 'Some granules have already been added.',
+        variant: 'danger',
+    },
+    notFound:{
+        message: 'Some granules were not found.',
+        variant: "danger",
+    },
+    alreadyAddedAndNotFound: {
+        message: 'Some granules have already been added or not found',
+        variant: 'danger',
+    },
+    noGranulesAdded: {
+        message: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
+        variant: 'danger',
+    },
+    readyForGeneration: {
+        message: 'Remember: customize your product parameters before starting Generation',
+        variant: 'warning',
+    }
   }
 
   export const parameterOptionHelp = {

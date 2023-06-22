@@ -29,7 +29,7 @@ APP
 
 .App {
   text-align: center;
-  height: 100%;
+  height: 97.5%;
 }
 
 .App-logo {
@@ -112,6 +112,7 @@ NAVBAR
 .dark-mode-background {
   /* background-color: #274c61ff; */
   background-color: #3d5d82;
+  /* background-color: #25325c; */
   color: #FAF9F6
 }
 
@@ -122,6 +123,7 @@ NAVBAR
 
 .dark-mode-container-background {
   background-color: #3D5D82;
+  /* background-color: #25325c; */
   color: #FAF9F6
 }
 
@@ -236,7 +238,8 @@ CUSTOMIZE PRODUCT CONTAINER
   top: 0;
   left: 0;
   z-index: 1000;
-  padding-top: 60px;
+  padding-top: 125px;
+  padding-bottom: 80px
 }
 
 .sidebar-resize {
@@ -297,11 +300,23 @@ thead {
 }
 
 tfoot {
-  position: sticky
+  position: sticky;
+  bottom: 0;
 }
 
-.table-responsive {
+.table-responsive-granuleSelection {
   max-height: 40vh;
+  overflow-y: auto;
+}
+
+.table-responsive-productCustomization {
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+.table-responsive-generatedProducts {
+  max-height: 75vh;
+  overflow-y: auto;
 }
 
 .dark-mode-table {
@@ -323,12 +338,14 @@ tfoot {
 
 .dark-mode-table tr.add-granules {
   border-bottom: none;
-  background-color: #314a68;
+  /* background-color: #314a68; */
+  background-color: #1A2535;
 }
 
 .dark-mode-table thead {
   /* border: #FAF9F6 solid 1px; */
-  background-color: #314a68;
+  /* background-color: #314a68; */
+  background-color: #1A2535;
 }
 
 .light-mode-table tr.add-granules {
@@ -365,12 +382,28 @@ tr.add-granules td {
   cursor: 'pointer';
 }
 
-
 .remove-checkbox .form-check-input:checked {
   background-color: crimson;
-  /* border-color: #2ab464ff; */
   border: none;
   cursor: 'pointer';
+}
+
+.hoverable-row {
+  background-color: #314a68;
+}
+
+.hoverable-row:hover td{
+  background-color: blue;
+  color: white !important
+}
+
+/**************************************************
+ABOUT PAGE
+**************************************************/
+
+.about-page {
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 /**************************************************
@@ -380,7 +413,8 @@ WELCOME PAGE
 .welcome-page-container {
   height: 100%;
   padding-top: 0px !important;
-  background-color: #3d5d82;
+  /* background-color: #3d5d82; */
+  background-color: #25325c;
 }
 
 .welcome-page-text {
@@ -398,6 +432,90 @@ WELCOME PAGE
   border-color: #5C946E;
 }
 
+.loginButtonCard {
+  background-color: #1A2535;
+}
+
+.howToListItem {
+  background-color: #1A2535;
+  color: white;
+  border-bottom: white;
+}
+
+/**************************************************
+PODAAC HEADER FOOTER
+**************************************************/
+
+.jpl-icon {
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/modules/custom/podaac_helper/images/jpl-sprite@x1.png');
+	background-repeat: no-repeat;
+	-webkit-background-size: 170px 80px;
+	-moz-background-size: 170px 80px;
+	-o-background-size: 170px 80px;
+	background-size: 170px 80px;
+}
+
+#podaac-header-banner {
+	position: absolute;
+	z-index: 5;
+	bottom: 0;
+	width: 1500px;
+	height: 195px;
+	min-width: 1500px;
+	max-width: none;
+	left: 50%;
+	margin-left: -750px;
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/header-banner@x1.jpg');
+	background-repeat: no-repeat;
+	-webkit-background-size: 1500px 195px;
+	-moz-background-size: 1500px 195px;
+	-o-background-size: 1500px 195px;
+	background-size: 1500px 195px;
+}
+
+#podaac-header-satellite {
+	position: absolute;
+	z-index: 5;
+	bottom: 10px;
+	right: 10px;
+	width: 420px;
+	height: 84px;
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/satellite@x1.png');
+	background-repeat: no-repeat;
+	-webkit-background-size: 420px 84px;
+	-moz-background-size: 420px 84px;
+	-o-background-size: 420px 84px;
+	background-size: 420px 84px;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+	filter: alpha(opacity=70);
+	opacity: 0.7;
+}
+
+.Podaac-navbar {
+  background-color: #1A2535;
+  color: #FAF9F6;
+  background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/header-banner@x1.jpg');
+  height: '60';
+  background-size: 100% 100%;
+  /* margin-right: 12px; */
+}
+#JPL-home {
+	position: relative;
+	float: left;
+	width: 300px;
+}
+#JPL-home-link,
+#JPL-caltech-link {
+	float: left;
+	padding-left: 80px;
+}
+#JPL-home-link {
+	font-size: 18px;
+	margin-top: 20px;
+}
+#JPL-caltech-link {
+	font-size: 14px;
+}
 /**************************************************
 TABS
 **************************************************/
