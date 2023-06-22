@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender } from '../../constants/rasterParameterConstants';
@@ -17,7 +17,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
   const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
-  const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
 
   const dispatch = useAppDispatch()

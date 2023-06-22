@@ -4,27 +4,16 @@ import { setShowGenerateProductModalTrue } from './actions/modalSlice'
 import { Button, Col, Row } from 'react-bootstrap';
 import { ArrowReturnRight } from 'react-bootstrap-icons';
 import GenerateProductsModal from './GenerateProductsModal';
-import { setGenerateProductParameters } from './actions/productSlice';
-import { GenerateProductParameters } from '../../types/constantTypes';
 
 const GenerateProducts = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const addedGranules = useAppSelector((state) => state.product.addedProducts)
-    const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
 
     const dispatch = useAppDispatch()
-
-    const { outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = generateProductParameters
 
     useEffect(() => {}, [showGenerateProductsModal])
 
     const handleGenerateProducts = () => {
-        // const selectedProductParameters: GenerateProductParameters = {
-        //     outputGranuleExtentFlag,
-        //     outputSamplingGridType,
-        //     rasterResolution
-        // }
-        // dispatch(setGenerateProductParameters(selectedProductParameters))
         dispatch(setShowGenerateProductModalTrue())
     }
 

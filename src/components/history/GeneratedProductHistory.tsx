@@ -1,22 +1,22 @@
-import { Accordion, Alert, Badge, Button, Card, Col, ListGroup, OverlayTrigger, Row, Spinner, Table, Tooltip } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { GeneratedProduct, StatusTypes } from "../../types/constantTypes";
 import { useState } from "react";
-import { Download, Clipboard, InfoCircle } from "react-bootstrap-icons";
 import { setCurrentPage } from "../app/appSlice";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp } from "../../constants/rasterParameterConstants";
+import { InfoCircle } from "react-bootstrap-icons";
 
 const GeneratedProductHistory = () => {
     const generatedProducts = useAppSelector((state) => state.product.generatedProducts)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const dispatch = useAppDispatch()
     
-    const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
+    // TODO: add copy download link feature
+    // const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
 
-    const handleCopyClick = (downloadUrl: string) => {
-        navigator.clipboard.writeText(downloadUrl)
-        setCopyTooltipText('Copied!')
-    }
+    // const handleCopyClick = (downloadUrl: string) => {
+    //     navigator.clipboard.writeText(downloadUrl)
+    //     setCopyTooltipText('Copied!')
+    // }
 
     const renderInfoIcon = (parameterId: string) => (
         <OverlayTrigger

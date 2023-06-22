@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, AlertMessageObjectConstant, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
-import { granuleAlertMessageConstant, parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
+import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 
 // Define a type for the slice state

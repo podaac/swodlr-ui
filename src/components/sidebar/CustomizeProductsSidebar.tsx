@@ -9,7 +9,6 @@ import GenerateProducts from './GenerateProducts';
 import ProductCustomization from './ProductCustomization';
 import GranuleTableAlerts from './GranuleTableAlerts';
 import SidebarTabs from './SidebarTabs';
-import { TabTypes } from '../../types/constantTypes';
 
 const CustomizeProductsSidebar = () => {
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
