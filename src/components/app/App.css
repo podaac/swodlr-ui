@@ -29,7 +29,7 @@ APP
 
 .App {
   text-align: center;
-  height: 97%;
+  height: 97.5%;
 }
 
 .App-logo {
@@ -611,4 +611,3 @@ TABS
   border-color: #9EB2A6 !important;
   color: black !important
 }
-
