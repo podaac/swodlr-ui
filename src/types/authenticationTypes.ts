@@ -3,3 +3,9 @@ export interface AuthenticationResponse {
   redirectUrl?: string,
   errorMessage?: string
 }
+
+export interface TestAuthenticationResponse {
+  authenticated: boolean,
+  redirectUri?: string,
+  error?: string
+}

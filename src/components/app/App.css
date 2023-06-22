@@ -384,7 +384,6 @@ tr.add-granules td {
 
 .remove-checkbox .form-check-input:checked {
   background-color: crimson;
-  /* border-color: #2ab464ff; */
   border: none;
   cursor: 'pointer';
 }
@@ -403,7 +402,7 @@ ABOUT PAGE
 **************************************************/
 
 .about-page {
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
 }
 
@@ -498,6 +497,7 @@ PODAAC HEADER FOOTER
   background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/header-banner@x1.jpg');
   height: '60';
   background-size: 100% 100%;
+  /* margin-right: 12px; */
 }
 #JPL-home {
 	position: relative;

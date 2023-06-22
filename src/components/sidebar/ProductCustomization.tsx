@@ -13,9 +13,8 @@ const ProductCustomization = () => {
     const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
     const dispatch = useAppDispatch()
 
-    const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = generateProductParameters
+    const {outputSamplingGridType, rasterResolution} = generateProductParameters
 
-    const setOutputGranuleExtentFlag = (outputGranuleExtentFlag: number) => dispatch(setGenerateProductParameters({...generateProductParameters, outputGranuleExtentFlag}))
     const setOutputSamplingGridType = (outputSamplingGridType: string) => dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType}))
     const setRasterResolutionUTM = (rasterResolutionUTM: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionUTM}))
     const setRasterResolutionGEO = (rasterResolutionGEO: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionGEO}))
@@ -70,7 +69,7 @@ const ProductCustomization = () => {
             <Form.Check 
                 defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
                 inline 
-                label={String(value)} 
+                label={String(value).toUpperCase()} 
                 name="outputSamplingGridTypeGroup" 
                 type={'radio'} 
                 id={`outputSamplingGridTypeGroup-radio-${index}`} 
@@ -115,7 +114,7 @@ const ProductCustomization = () => {
                             <Form.Check 
                                 defaultChecked={value === parameterOptionValues.outputGranuleExtentFlag.default} 
                                 inline 
-                                label={value ? 'rectangle' : 'square'} 
+                                label={value ? '256 x 128 km' : '128 x 128 km'} 
                                 name="outputGranuleExtentFlagTypeGroup" 
                                 type={'radio'} 
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 

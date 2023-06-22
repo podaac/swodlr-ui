@@ -16,7 +16,7 @@ const About = () => {
                 </ListGroup>
             </Row>
             <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>Definitions</h4></Row>
-            <Row>
+            <Row style={{paddingBottom: '20px'}}>
                 <ListGroup>
                     {Object.entries(parameterHelp).map((entry, index) => {
                         return (
