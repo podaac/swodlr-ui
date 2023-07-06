@@ -76,21 +76,20 @@ const ProductCustomization = () => {
                 onChange={() => setOutputSamplingGridType(value as string)}
             />
         )
-        if (outputSamplingGridType === 'utm') {
-            inputArray.push(
-                (
-                    <Form.Check 
-                        type="switch"
-                        inline
-                        id="outputGranuleExtentFlag-switch"
-                        checked={showUTMAdvancedOptions}
-                        onChange={() => dispatch(setShowUTMAdvancedOptions(!showUTMAdvancedOptions))}
-                        label={'advanced options'} 
-                        style={{marginTop: '10px'}}
-                    />
-                )
+        inputArray.push(
+            (
+                <Form.Check 
+                    type="switch"
+                    inline
+                    id="outputGranuleExtentFlag-switch"
+                    checked={showUTMAdvancedOptions}
+                    onChange={() => dispatch(setShowUTMAdvancedOptions(!showUTMAdvancedOptions))}
+                    label={'advanced options'} 
+                    style={{marginTop: '10px'}}
+                    disabled={!(outputSamplingGridType === 'utm')}
+                />
             )
-        }
+        )
         return inputArray
     }
 

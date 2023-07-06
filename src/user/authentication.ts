@@ -1,8 +1,9 @@
 import { TestAuthenticationResponse } from "../types/authenticationTypes";
+import configData from "../config.json"
 
 export const checkUserAuthentication = async () => {
-    const baseUri = 'https://d15gds5czd9p7k.cloudfront.net';
-    const redirectUri = "?redirect=http://localhost:3000/"
+    const baseUri = configData.SWODLR_API_BASE_URI;
+    const redirectUri = configData.DEV_REDIRECT_URI
 
 // const userIdQuery = gql`
 //   {
@@ -13,6 +14,7 @@ export const checkUserAuthentication = async () => {
 // `
     try {
         let config = await ((await fetch(`${baseUri}/config`)).json());
+        console.log(config)
         let res = await fetch(`${baseUri}/graphql`, {
             method: "POST",
             redirect: "manual",

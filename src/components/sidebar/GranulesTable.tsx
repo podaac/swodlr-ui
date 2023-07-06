@@ -24,6 +24,8 @@ const GranuleTable = (props: GranuleTableProps) => {
   
   const [allChecked, setAllChecked] = useState(false)
 
+  const {outputSamplingGridType} = generateProductParameters
+
   // add granules
   const [cycle, setCycle] = useState('');
   const [pass, setPass] = useState('');
@@ -188,7 +190,7 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   const getValuesForRow = (tableType: TableTypes, basicGranuleValues: GranuleForTable) => {
     const formattedGranulesForTable = Object.entries(basicGranuleValues).map(entry => <td>{entry[1]}</td> )
-    if (tableType === 'productCustomization' && showUTMAdvancedOptions) {
+    if (tableType === 'productCustomization' && showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) {
       //put two more entries in there
       formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
       formattedGranulesForTable.push(getAdjustRadioGroup('band', basicGranuleValues.granuleId) as ReactElement)
@@ -253,7 +255,7 @@ const GranuleTable = (props: GranuleTableProps) => {
               ): (
                 null
               )}
-              {tableType === 'granuleSelection' ? Object.entries(granuleSelectionLabels).map(labelEntry => renderColTitle(labelEntry)) : Object.entries(showUTMAdvancedOptions ? productCustomizationLabelsUTM : productCustomizationLabelsGEO).map(labelEntry => renderColTitle(labelEntry))}
+              {tableType === 'granuleSelection' ? Object.entries(granuleSelectionLabels).map(labelEntry => renderColTitle(labelEntry)) : Object.entries((showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) ? productCustomizationLabelsUTM : productCustomizationLabelsGEO).map(labelEntry => renderColTitle(labelEntry))}
             </tr>
           </thead>
           <tbody>
