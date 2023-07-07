@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
+import { AlertMessageObject, AlertMessageObjectConstant, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
-import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
+import { granuleAlertMessageConstant, parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 
 // Define a type for the slice state
@@ -11,7 +11,10 @@ interface GranuleState {
     selectedGranules: string[],
     granuleFocus: LatLngExpression,
     generatedProducts: GeneratedProduct[],
-    generateProductParameters: GenerateProductParameters
+    generateProductParameters: GenerateProductParameters,
+    granuleTableAlerts: AlertMessageObject[],
+    productCustomizationTableAlerts: AlertMessageObject[],
+    showUTMAdvancedOptions: boolean,
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -25,7 +28,10 @@ const initialState: GranuleState = {
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093] as LatLngExpression,
     generatedProducts: [],
-    generateProductParameters: generateProductParametersFiltered
+    generateProductParameters: generateProductParametersFiltered,
+    granuleTableAlerts: [],
+    productCustomizationTableAlerts: [],
+    showUTMAdvancedOptions: false
 }
 
 
@@ -59,17 +65,47 @@ export const productSlice = createSlice({
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]
-      const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => ({
-        productId: uuidv4(),
-        granuleId: granuleId, 
-        status: index % 2 === 0 ? "IN_PROGRESS" : "COMPLETE", 
-        parametersUsedToGenerate: state.generateProductParameters, 
-        downloadUrl: index % 2 === 0 ? null : `https://test-download-url-${granuleId}.zip` 
-      }))
+
+      const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => {
+        const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
+
+        const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
+        return ({
+          productId: uuidv4(),
+          granuleId: granuleId, 
+          status: index % 2 === 0 ? "In Progress" : "Complete", 
+          cycle,
+          pass,
+          scene,
+          parametersUsedToGenerate: {
+            batchGenerateProductParameters: state.generateProductParameters,
+            utmZoneAdjust: utmZoneAdjust,
+            mgrsBandAdjust: mgrsBandAdjust
+          },
+          downloadUrl: `https://test-download-url-${granuleId}.zip`,
+          dateGenerated: new Date(),
+        })
+      })
       state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]
     },
     setGenerateProductParameters: (state, action: PayloadAction<GenerateProductParameters>) => {
       state.generateProductParameters = action.payload
+    },
+    addGranuleTableAlerts: (state, action: PayloadAction<AlertMessageObject>) => {
+      const newAlert = action.payload
+      if (state.granuleTableAlerts.map(alertObj => alertObj.message).includes(newAlert.message)) {
+        // alert already in there so just up the time for that alert
+      } else {
+        // alert not in there yet so add it and start with the default time
+        state.granuleTableAlerts = [...state.granuleTableAlerts, newAlert]
+      }
+    },
+    removeGranuleTableAlerts: (state, action: PayloadAction<string>) => {
+      const newAlerts = [...state.granuleTableAlerts].filter(alertObject => alertObject.type !== action.payload)
+      state.granuleTableAlerts = newAlerts
+    },
+    setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
+      state.showUTMAdvancedOptions = action.payload
     },
   },
 })
@@ -81,7 +117,10 @@ export const {
     setSelectedGranules,
     setGranuleFocus,
     addGeneratedProducts,
-    setGenerateProductParameters
+    setGenerateProductParameters,
+    addGranuleTableAlerts,
+    removeGranuleTableAlerts,
+    setShowUTMAdvancedOptions
 } = productSlice.actions
 
 export default productSlice.reducer

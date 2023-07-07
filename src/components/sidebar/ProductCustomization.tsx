@@ -1,41 +1,57 @@
 import { useState, useEffect } from 'react';
-import { useAppSelector } from '../../redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import Form from 'react-bootstrap/Form';
 import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
-import { GridTypes } from '../../types/constantTypes';
+import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actions/productSlice";
 
 const ProductCustomization = () => {
     const showGenerateProductsModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+    const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
+    const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
+    const dispatch = useAppDispatch()
 
-    const [outputGranuleExtentFlag, setOutputGranuleExtentFlag] = useState(parameterOptionValues.outputGranuleExtentFlag.default as number);
-    const [outputSamplingGridType, setOutputSamplingGridType] = useState(parameterOptionValues.outputSamplingGridType.default as string);
-    const [rasterResolutionUTM, setRasterResolutionUTM] = useState(parameterOptionValues.rasterResolutionUTM.default as number)
-    const [rasterResolutionGEO, setRasterResolutionGEO] = useState(parameterOptionValues.rasterResolutionGEO.default as number)
-    const [utmZoneAdjust, setUTMZoneAdjust] = useState(parameterOptionValues.utmZoneAdjust.default as string);
-    const [mgrsBandAdjust, setMGRSBandAdjust] = useState(parameterOptionValues.mgrsBandAdjust.default as string);
+    const {outputSamplingGridType, rasterResolution} = generateProductParameters
+
+    const setOutputSamplingGridType = (outputSamplingGridType: string) => dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType}))
+    const setRasterResolutionUTM = (rasterResolutionUTM: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionUTM}))
+    const setRasterResolutionGEO = (rasterResolutionGEO: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionGEO}))
+
+    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
     useEffect(() => {}, [showGenerateProductsModal, outputSamplingGridType])
 
     const renderRasterResolutionOptions = (outputSamplingGridType: string) => {
         if (outputSamplingGridType === 'utm') {
             return (
-                <Form.Select id='rasterResolutionUTMId' aria-label='rasterResolutionUTM' defaultValue={parameterOptionValues.rasterResolutionUTM.default} value={rasterResolutionUTM} onChange={event => setRasterResolutionUTM(parseInt(event.target.value))}>
+                <Form.Select id='rasterResolutionUTMId' aria-label='rasterResolutionUTM' defaultValue={parameterOptionValues.rasterResolutionUTM.default} value={rasterResolution} onChange={event => setRasterResolutionUTM(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionUTM.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
-        } else if (outputSamplingGridType === 'geo') {
+        } else if (outputSamplingGridType === 'lat/lon') {
             return (
-                <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' defaultValue={parameterOptionValues.rasterResolutionGEO.default} value={rasterResolutionGEO} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
+                <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' defaultValue={parameterOptionValues.rasterResolutionGEO.default} value={rasterResolution} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionGEO.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
         }
     }
 
-    const renderinfoIcon = (parameterId: string) => (
+    const renderRasterResolutionUnits = (outputSamplingGridType: string) => {
+        if (outputSamplingGridType === 'utm') {
+            return (
+               <p>meters</p>
+            )
+        } else if (outputSamplingGridType === 'lat/lon') {
+            return (
+                <p>arc-seconds</p>
+            )
+        }
+    }
+
+    const renderInfoIcon = (parameterId: string) => (
         <OverlayTrigger
             placement="right"
             overlay={
@@ -48,60 +64,34 @@ const ProductCustomization = () => {
         </OverlayTrigger>
     )
 
-    const getRelevantRasterResolution = (resolution: GridTypes) => {
-        if (resolution === 'utm') {
-            return rasterResolutionUTM
-        } else {
-            return rasterResolutionGEO
-        }
+    const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
+        const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
+            <Form.Check 
+                defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
+                inline 
+                label={String(value).toUpperCase()} 
+                name="outputSamplingGridTypeGroup" 
+                type={'radio'} 
+                id={`outputSamplingGridTypeGroup-radio-${index}`} 
+                onChange={() => setOutputSamplingGridType(value as string)}
+            />
+        )
+        inputArray.push(
+            (
+                <Form.Check 
+                    type="switch"
+                    inline
+                    id="outputGranuleExtentFlag-switch"
+                    checked={showUTMAdvancedOptions}
+                    onChange={() => dispatch(setShowUTMAdvancedOptions(!showUTMAdvancedOptions))}
+                    label={'advanced options'} 
+                    style={{marginTop: '10px'}}
+                    disabled={!(outputSamplingGridType === 'utm')}
+                />
+            )
+        )
+        return inputArray
     }
-
-    const bandAdjustOptions = (
-        <>
-            <Row className='normal-row'>
-                <Col md={{ span: 4, offset: 1 }}>
-                    <h5>UTM Zone Adjust</h5>
-                </Col>
-                <Col md={{ span: 1, offset: 0 }}>
-                    {renderinfoIcon('utmZoneAdjust')}
-                </Col>
-                <Col md={{ span: 4, offset: 1 }}>
-                    {parameterOptionValues.utmZoneAdjust.values.map((value, index) => 
-                        <Form.Check
-                            defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
-                            inline
-                            label={value}
-                            name="utmZoneAdjustGroup"
-                            type={'radio'}
-                            id={`utmZoneAdjustGroup-${'radio'}-${index}`}
-                            onChange={() => setUTMZoneAdjust(value as string)} 
-                        />
-                    )}
-                </Col>
-            </Row>
-            <Row className='normal-row'>
-                <Col md={{ span: 4, offset: 1 }}>
-                    <h5>MGRS Band Adjust</h5>
-                </Col>
-                <Col md={{ span: 1, offset: 0 }}>
-                    {renderinfoIcon('mgrsBandAdjust')}
-                </Col>
-                <Col md={{ span: 4, offset: 1 }}>
-                    {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => 
-                        <Form.Check
-                            defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
-                            inline
-                            label={value}
-                            name="mgrsBandAdjustGroup"
-                            type={'radio'}
-                            id={`mgrsBandAdjustGroup-${'radio'}-${index}`}
-                            onChange={() => setMGRSBandAdjust(value as string)} 
-                        />
-                    )}
-                </Col>
-            </Row>
-        </>
-    )
 
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px'}} className='g-0 shadow'>
@@ -110,52 +100,52 @@ const ProductCustomization = () => {
         </Row>
         <div style={{padding: '0px 20px 15px 20px'}}>
             <Row className='normal-row'>
-                <Col md={{ span: 4, offset: 1 }}>
-                    <h5>Output Granule Extent Flag</h5>
+                <Col md={{ span: 5, offset: 0 }}>
+                    <h5>Output Granule Extent</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('outputGranuleExtentFlag')}
+                        {renderInfoIcon('outputGranuleExtentFlag')}
                     </Col>
-                <Col md={{ span: 4, offset: 1 }}>
-                    <Form.Check 
-                        type="switch"
-                        id="outputGranuleExtentFlag-switch"
-                        onChange={() => setOutputGranuleExtentFlag(outputGranuleExtentFlag ? 0 : 1)}
-                    />
+                <Col md={{ span: 5, offset: 1 }}>
+                    {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
+
+                        return (
+                            <Form.Check 
+                                defaultChecked={value === parameterOptionValues.outputGranuleExtentFlag.default} 
+                                inline 
+                                label={value ? '256 x 128 km' : '128 x 128 km'} 
+                                name="outputGranuleExtentFlagTypeGroup" 
+                                type={'radio'} 
+                                id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
+                                onChange={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                            />
+                        )
+                    })}
                 </Col>
             </Row>
             <Row className='normal-row'>
-                <Col md={{ span: 4, offset: 1 }}>
+                <Col md={{ span: 5, offset: 0 }}>
                     <h5>Output Sampling Grid Type</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('outputSamplingGridType')}
+                        {renderInfoIcon('outputSamplingGridType')}
                     </Col>
-                <Col md={{ span: 4, offset: 1 }}>
-                    {parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
-                        <Form.Check 
-                            defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
-                            inline 
-                            label={String(value).toUpperCase()} 
-                            name="outputSamplingGridTypeGroup" 
-                            type={'radio'} 
-                            id={`outputSamplingGridTypeGroup-radio-${index}`} 
-                            onChange={() => setOutputSamplingGridType(value as string)}
-                            />)}
+                <Col md={{ span: 5, offset: 1 }}>
+                    {renderOutputSamplingGridTypeInputs(outputSamplingGridType)}
                 </Col>
             </Row>
             <Row className='normal-row'>
-                <Col md={{ span: 4, offset: 1 }}>
+                <Col md={{ span: 5, offset: 0 }}>
                     <h5>Raster Resolution</h5>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
-                        {renderinfoIcon('rasterResolution')}
+                        {renderInfoIcon('rasterResolution')}
                     </Col>
-                <Col md={{ span: 4, offset: 1 }}>
+                <Col md={{ span: 3, offset: 1 }} >
                     {renderRasterResolutionOptions(outputSamplingGridType)}
                 </Col>
+                <Col md={{ span: 2, offset: 0 }} style={{paddingLeft: '0px'}}>{renderRasterResolutionUnits(outputSamplingGridType)}</Col>
             </Row>
-            {outputSamplingGridType === 'geo' ? null : bandAdjustOptions}
         </div>
     </div>      
   );

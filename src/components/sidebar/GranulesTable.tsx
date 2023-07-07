@@ -1,43 +1,38 @@
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleEssentialLabels, parameterOptionValues } from '../../constants/rasterParameterConstants';
-import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
-import { Plus, Trash } from 'react-bootstrap-icons';
-import { allProductParameters } from '../../types/constantTypes';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender } from '../../constants/rasterParameterConstants';
+import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
+import { AdjustType, GranuleForTable, GranuleTableProps, TableTypes, allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
-import { addProduct, setSelectedGranules, setGranuleFocus } from './actions/productSlice';
-import { setGranuleTableEditable } from './actions/sidebarSlice';
+import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 
-const GranuleTable = () => {
+const GranuleTable = (props: GranuleTableProps) => {
+  const { tableType } = props
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
-  const granuleTableEditable = useAppSelector((state) => state.sidebar.granuleTableEditable)
+  const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
+  const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
+  const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
+
   const dispatch = useAppDispatch()
+  
   const [allChecked, setAllChecked] = useState(false)
+
+  const {outputSamplingGridType} = generateProductParameters
 
   // add granules
   const [cycle, setCycle] = useState('');
   const [pass, setPass] = useState('');
   const [scene, setScene] = useState('');
-  const [addGranuleWarning, setAddGranuleWarning] = useState('')
-  const [addGranuleWarningVariant, setAddGranuleWarningVariant] = useState('')
-  const [showGranuleAddAlert, setShowGranuleAddAlert] = useState(false)
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
 
-  useEffect(() => {  
-    const timeId = setTimeout(() => {
-      setShowGranuleAddAlert(false)
-    }, 4000)
-
-    return () => {
-      clearTimeout(timeId)
-    }
-  }, [showGranuleAddAlert])
+  // useEffect(() => {console.log(generateProductParameters)}, [generateProductParameters])
 
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
@@ -54,13 +49,30 @@ const GranuleTable = () => {
     return scenesArray
   }
 
-  const setSaveGranulesAlert = (variant: string, alertMessage: string) => {
-    // TODO: Make a queue for the table aleerts so more than one can be shown at the same time
-    // - make them independed of each other on the timer
-    // - eg: you can have a success alert when toggling onto generation mode and also a warning to remind the user to set product parameters
-    setAddGranuleWarningVariant(variant)
-    setAddGranuleWarning(granuleAlertMessageConstant[alertMessage]) 
-    setShowGranuleAddAlert(true)
+  const setSaveGranulesAlert = (alert: string) => {
+    const {message, variant} = granuleAlertMessageConstant[alert]
+    const alertThatExists = granuleTableAlerts.find(alertObj => alertObj.type === alert)
+    if (alertThatExists) {
+      // if alert already in queue
+      // delete alert
+      dispatch(removeGranuleTableAlerts(alert))
+      // stop timeout
+      clearTimeout(alertThatExists.timeoutId)
+      // add alert again with timeout
+      let newTimeoutId = setTimeout(() => {
+        dispatch(removeGranuleTableAlerts(alert))
+      }, 4000)
+
+      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection' }))
+    } else {
+      // if alert not in queue
+      // add alert with timeout
+      let timeoutId = setTimeout(() => {
+        dispatch(removeGranuleTableAlerts(alert))
+      }, 4000)
+
+      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection' }))
+    }
   }
 
   const handleSave = () => {
@@ -73,23 +85,23 @@ const GranuleTable = () => {
       const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
       // const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
       if (granuleFoundResult && !allAddedGranules.includes(granuleFoundResult.granuleId)) {
-          // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-          // get the granuleId from it and pass it to the parameters
-          const parameters: allProductParameters = {
-              granuleId: granuleFoundResult.granuleId,
-              name: '',
-              cycle,
-              pass,
-              scene: sceneId,
-              outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
-              outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
-              rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
-              utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
-              mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-              footprint: granuleFoundResult.footprint as LatLngExpression[]
-          }
+        // NOTE: this is using sample json array but will be hooked up to the get granule API result later
+        // get the granuleId from it and pass it to the parameters
+        const parameters: allProductParameters = {
+          granuleId: granuleFoundResult.granuleId,
+          name: '',
+          cycle,
+          pass,
+          scene: sceneId,
+          outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
+          outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
+          rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
+          utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
+          mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
+          footprint: granuleFoundResult.footprint as LatLngExpression[]
+        }
 
-          granulesToAdd.push(parameters)
+        granulesToAdd.push(parameters)
       } else if (!granuleFoundResult){
         granuleNotFound = true
       } else if (allAddedGranules.includes(granuleFoundResult.granuleId)) {
@@ -99,13 +111,13 @@ const GranuleTable = () => {
     
     // check if any granules could not be found or they were already added
     if (granuleNotFound && granuleAlreadyAdded) {
-      setSaveGranulesAlert('danger', 'alreadyAddedAndNotFound')
+      setSaveGranulesAlert('alreadyAddedAndNotFound')
     } else if (granuleNotFound) {
-      setSaveGranulesAlert('danger', 'notFound')
+      setSaveGranulesAlert('notFound')
     } else if  (granuleAlreadyAdded) {
-      setSaveGranulesAlert('danger', 'alreadyAdded')
+      setSaveGranulesAlert('alreadyAdded')
     } else {
-      setSaveGranulesAlert('success', 'success')
+      setSaveGranulesAlert('success')
       dispatch(addProduct(granulesToAdd))
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
     }
@@ -124,54 +136,111 @@ const GranuleTable = () => {
   }
 
   const handleGranuleSelected = (granuleBeingSelected: string) => {
-    if (selectedGranules.includes(granuleBeingSelected)) {
-      // remove granuleId from selected list
-      dispatch(setSelectedGranules(selectedGranules.filter(id => id !== granuleBeingSelected)))
-    } else {
-      // add granuleId to selected list
-      dispatch(setSelectedGranules([...selectedGranules, granuleBeingSelected]))
+    dispatch(setGranuleFocus(granuleBeingSelected))
+    if (tableType === 'granuleSelection') {
+      if (selectedGranules.includes(granuleBeingSelected)) {
+        // remove granuleId from selected list
+        dispatch(setSelectedGranules(selectedGranules.filter(id => id !== granuleBeingSelected)))
+      } else {
+        // add granuleId to selected list
+        dispatch(setSelectedGranules([...selectedGranules, granuleBeingSelected]))
+      }
     }
   }
 
-  const handleTableToggle = () => {
-    if (addedProducts.length === 0) {
-      setSaveGranulesAlert('danger', 'noGranulesAdded')
-    } else {
-      if (granuleTableEditable) {
-        setSaveGranulesAlert('warning', 'readyForGeneration')
-      }
-      dispatch(setGranuleTableEditable(!granuleTableEditable))
+  const getAdjustRadioGroup = (adjustType: AdjustType, granuleId: string) => {
+    if (adjustType === 'zone') {
+      return (                    
+        <td>  
+          <Form>              
+              {parameterOptionValues.utmZoneAdjust.values.map((value, index) => 
+                <Form.Check
+                    defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
+                    inline
+                    label={value}
+                    name="utmZoneAdjustGroup"
+                    type={'radio'}
+                    id={`utmZoneAdjustGroup-radio-${granuleId}`}
+                    onChange={() => handleAdjustSelection('zone', granuleId, value as string)} 
+                />
+              )}
+          </Form>
+        </td>
+      )
+    } else if (adjustType === 'band') {
+      return (
+        <td>  
+          <Form>              
+            {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => 
+              <Form.Check
+                  defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
+                  inline
+                  label={value}
+                  name="mgrsBandAdjustGroup"
+                  type={'radio'}
+                  id={`mgrsBandAdjustGroup-radio-${granuleId}`}
+                  onChange={() => handleAdjustSelection('band', granuleId, value as string)} 
+              />
+            )}
+          </Form>
+        </td>
+      )
     }
+  }
+
+  const getValuesForRow = (tableType: TableTypes, basicGranuleValues: GranuleForTable) => {
+    const formattedGranulesForTable = Object.entries(basicGranuleValues).map(entry => <td>{entry[1]}</td> )
+    if (tableType === 'productCustomization' && showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) {
+      //put two more entries in there
+      formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
+      formattedGranulesForTable.push(getAdjustRadioGroup('band', basicGranuleValues.granuleId) as ReactElement)
+    }
+
+    return formattedGranulesForTable
+  }
+
+  const handleAdjustSelection = (adjustType: AdjustType, granuleId: string, adjustValue: string) => {
+    const productToEdit = addedProducts.find(granuleObj => granuleId === granuleObj.granuleId)
+    const editedProduct = {...productToEdit}
+    if (adjustType === 'zone') {
+      editedProduct!.utmZoneAdjust = adjustValue
+    } else if (adjustType === 'band') {
+      editedProduct!.mgrsBandAdjust = adjustValue
+    }
+    dispatch(editProduct(editedProduct as allProductParameters))
+  }
+
+  const renderInfoIcon = (parameterId: string) => (
+    <OverlayTrigger
+        placement="right"
+        overlay={
+            <Tooltip id="button-tooltip">
+            {parameterHelp[parameterId]}
+          </Tooltip>
+        }
+    >
+       <InfoCircle/>
+    </OverlayTrigger>
+)
+
+  const renderColTitle = (labelEntry: string[]) => {
+    let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
+    return (
+      <th>{labelEntry[1]} {infoIcon}</th>
+    )
   }
 
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
-            <Col md={{ span: 1, offset: 0 }}>Edit</Col>
-            <Col md={{ span: 1, offset: 0 }}>
-              {(
-                <Form.Check 
-                  type="switch"
-                  defaultChecked={!granuleTableEditable}
-                  className={`table-mode-switch ${colorModeClass}-text`}
-                  // label="Dark mode"
-                  checked={!granuleTableEditable}
-                  id="dark-mode-switch"
-                  style={{ cursor: 'pointer'}}
-                  onClick={() => handleTableToggle()}
-                />
-              )} 
-          </Col>
-          <Col md={{ span: 1, offset: 0 }}>Generate</Col>
-        <Col md={{ span: 4, offset: 1 }}><h4 className={`${colorModeClass}-text`} >Granule Table</h4></Col>
+        <Col><h4 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h4></Col>
       </Row>
       <div style={{padding: '10px 20px 20px 20px'}}>
-      <div className='table-responsive'>
-        <Table bordered hover className={`table-responsive ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
+      <div className={`table-responsive-${tableType}`}>
+        <Table bordered hover className={`table-responsive-${tableType} ${colorModeClass}-table`} style={{marginBottom: '0px'}}>
           <thead>
             <tr>
-              {Object.entries(granuleEssentialLabels).map(labelEntry => <th>{labelEntry[1]}</th>)}
-              {granuleTableEditable ? (
+              {tableType === 'granuleSelection' ? (
                 <th>          
                   <Form.Check
                     inline
@@ -183,64 +252,64 @@ const GranuleTable = () => {
                     onChange={() => handleAllChecked()}
                   />
                 </th>
-              ): null}
+              ): (
+                null
+              )}
+              {tableType === 'granuleSelection' ? Object.entries(granuleSelectionLabels).map(labelEntry => renderColTitle(labelEntry)) : Object.entries((showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) ? productCustomizationLabelsUTM : productCustomizationLabelsGEO).map(labelEntry => renderColTitle(labelEntry))}
             </tr>
           </thead>
           <tbody>
             {addedProducts.map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
               const { cycle, pass, scene, granuleId} = productParameterObject
-              const essentialsGranule = {cycle, pass, scene, granuleId}
+              const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
               <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => handleGranuleSelected(granuleId)}>
-                {Object.entries(essentialsGranule).map(entry => {
-                  let valueToDisplay = entry[1]
-                  if (entry[0] === 'outputSamplingGridType' && typeof valueToDisplay === 'string') {
-                    valueToDisplay = valueToDisplay.toUpperCase()
-                  }
-                  return <td>{valueToDisplay}</td>
-                })}
-                {granuleTableEditable  ? (
+                {tableType === 'granuleSelection'  ? (
                   <td>
                     <Form.Check
                       inline
                       name="group1"
                       id={`inline-select-${granuleId}`}
                       className='remove-checkbox'
-                      onChange={event => handleGranuleSelected(granuleId)}
+                      onChange={() => handleGranuleSelected(granuleId)}
                       checked={selectedGranules.includes(granuleId)}
                     />
                   </td>
-                ): null}
+                ): (null)
+                }
+                {getValuesForRow(tableType, essentialsGranule)}
               </tr>
             )})}
-            {granuleTableEditable ? (<tr className='add-granules' style={{ border: 0 }}>
-                  <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
-                  <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
-                  <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
-                  <td colSpan={1}>                
-                    <Button variant='primary' size='sm' style={{width: '70px'}} onClick={() => handleSave()}>
-                      <Plus size={28}/>
-                    </Button>
-                  </td>
+          </tbody>
+          <tfoot>
+            {tableType === 'granuleSelection' ? (
+                <tr className='add-granules'>
                   <td colSpan={1}>
                     <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
                         <Trash color="white" size={18}/>
                     </Button>
                   </td>
-                </tr>) : 
+                  <td></td>
+                  <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
+                  <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
+                  <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
+                </tr>
+                ) : 
                 null
               }
-          </tbody>
+          </tfoot>
         </Table>
       </div>
-      {(showGranuleAddAlert && addGranuleWarning !== '') 
-          ? (<Row style={{paddingTop: '5px', paddingBottom: '10px'}}>
-              <Col md={{ span: 6, offset: 3 }}>
-                <Alert variant={`${addGranuleWarningVariant}`}>{addGranuleWarning}</Alert>
-              </Col>
-            </Row>)
-          : null
+      {tableType === 'granuleSelection' ? (
+          <Row>
+            <Col style={{marginTop: '10px'}}>
+              <Button variant='primary' size='sm' onClick={() => handleSave()}>
+                <Plus size={28}/> Add Scenes
+              </Button>
+            </Col>
+          </Row>
+        ) : null
       }
       <DeleteGranulesModal />
       </div>

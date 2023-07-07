@@ -1,17 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { Col, Row } from 'react-bootstrap';
-import { ArrowsExpand} from 'react-bootstrap-icons';
+import { Button, Col, Row } from 'react-bootstrap';
+import { ArrowReturnRight, ArrowsExpand} from 'react-bootstrap-icons';
 import GranuleTable from './GranulesTable';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './actions/sidebarSlice';
+import { setResizeActive, setResizeStartLocation, setResizeEndLocation, setActiveTab } from './actions/sidebarSlice';
 import { mouseLocation } from '../../types/sidebarTypes';
 import GenerateProducts from './GenerateProducts';
 import ProductCustomization from './ProductCustomization';
+import GranuleTableAlerts from './GranuleTableAlerts';
+import SidebarTabs from './SidebarTabs';
+import { TabTypes } from '../../types/constantTypes';
 
 const CustomizeProductsSidebar = () => {
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
     const resizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+    const activeTab = useAppSelector((state) => state.sidebar.activeTab)
+    const addedProducts = useAppSelector((state) => state.product.addedProducts)
     const footerRef = useRef<HTMLHeadingElement>(null);
     const [sidebarWidth, setSidebarWidth] = useState('')
 
@@ -21,6 +26,33 @@ const CustomizeProductsSidebar = () => {
         dispatch(setResizeStartLocation({left: event.pageX, top: event.pageY}))
         dispatch(setResizeEndLocation({left: event.pageX, top: event.pageY}))
         dispatch(setResizeActive())
+    }
+
+    const renderSidebarContents = () => {
+        if (activeTab === 'granuleSelection') {
+            return (
+                <>
+                    <GranuleTable tableType='granuleSelection'/>
+                    <GranuleTableAlerts />
+                    <hr></hr>
+                    <Row style={{marginBottom: '10px'}}>
+                        <Col>
+                            <Button variant='success' disabled={addedProducts.length === 0} onClick={() => dispatch(setActiveTab('productCustomization'))}>Configure Products <ArrowReturnRight /></Button>
+                        </Col>
+                    </Row>
+                </>
+            )
+        } else if (activeTab === 'productCustomization') {
+            return (
+                <>
+                    <ProductCustomization />
+                    <GranuleTable tableType='productCustomization'/>
+                    {/* <GranuleTableAlerts /> */}
+                    <hr></hr>
+                    <GenerateProducts />
+                </>
+            )
+        }
     }
 
     const calculateSidebarWidthAfterResize = (mouseDownLocation: mouseLocation, mouseUpLocation: mouseLocation, currentSidebarWidth: number): number => {
@@ -36,14 +68,11 @@ const CustomizeProductsSidebar = () => {
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
         <Col>
-            <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand L2 Raster Generator</h3></Row>
-            <hr></hr>
-            <div style={{overflowY: 'auto', maxHeight: '75vh'}}>
-            <GranuleTable />
-            <ProductCustomization />
+            <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row>
+            <SidebarTabs />
+            <div style={{}}>
+            {renderSidebarContents()}
             </div>
-            <hr></hr>
-            <GenerateProducts />
         </Col>
         <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
