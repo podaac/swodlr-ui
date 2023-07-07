@@ -27,7 +27,6 @@ export const getUserData = async () => {
         
         // const userInfoResponse = await request(graphqlUri, userIdQuery, undefined, options)
         const userInfoResponse = await graphQLClient.request(userIdQuery)
-        console.log(userInfoResponse)
     } catch (err) {
         console.log (err)
         if (err instanceof Error) {

@@ -22,8 +22,7 @@ const Welcome = () => {
   const testAuthentication = async () => {
     const response: TestAuthenticationResponse = await checkUserAuthentication()
     if (response.authenticated) {
-      const userData = getUserData()
-      console.log(userData)
+      // const userData = getUserData()
       dispatch(setCurrentPage('productCustomization'))
       dispatch(setUserAuthenticated())
     } else {

@@ -14,14 +14,12 @@ export const checkUserAuthentication = async () => {
 // `
     try {
         let config = await ((await fetch(`${baseUri}/config`)).json());
-        console.log(config)
         let res = await fetch(`${baseUri}/graphql`, {
             method: "POST",
             redirect: "manual",
             mode: "cors",
             credentials: "include"
           });
-          console.log(res)
           if (res.type === 'opaqueredirect') {
             // RETURN redirect uri to be used for login
             const testAuthenticationObj: TestAuthenticationResponse = {authenticated: false, redirectUri: baseUri + config.authenticationUri + redirectUri}
@@ -32,7 +30,6 @@ export const checkUserAuthentication = async () => {
             return testAuthenticationObj
 
             // const graphqlResponse = await request(`${baseUri}/graphql`, userIdQuery)
-            // console.log(graphqlResponse)
           } else {
             return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
           }
