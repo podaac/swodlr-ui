@@ -1,17 +1,9 @@
 import { TestAuthenticationResponse } from "../types/authenticationTypes";
-import configData from "../config.json"
+
+const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
+const redirectUri = process.env.REACT_APP_DEV_REDIRECT_URI
 
 export const checkUserAuthentication = async () => {
-    const baseUri = configData.SWODLR_API_BASE_URI;
-    const redirectUri = configData.DEV_REDIRECT_URI
-
-// const userIdQuery = gql`
-//   {
-//     currentUser {
-//       id
-//     }
-//   }
-// `
     try {
         let config = await ((await fetch(`${baseUri}/config`)).json());
         let res = await fetch(`${baseUri}/graphql`, {
@@ -28,8 +20,6 @@ export const checkUserAuthentication = async () => {
             // RETURN authenticated response
             const testAuthenticationObj: TestAuthenticationResponse = {authenticated: true}
             return testAuthenticationObj
-
-            // const graphqlResponse = await request(`${baseUri}/graphql`, userIdQuery)
           } else {
             return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
           }

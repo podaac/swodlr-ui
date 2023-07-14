@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Map from '../map/Map'
@@ -10,6 +10,9 @@ import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
+import { getUserData } from '../../user/userData';
+import { setCurrentUser } from './appSlice';
+import { CurrentUser } from '../../types/graphqlTypes';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -18,6 +21,19 @@ const App = () => {
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const currentPage = useAppSelector((state) => state.app.currentPage)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+
+  useEffect(() => {
+    if (userAuthenticated) {
+      const fetchData = async () => {
+        const userInfoResponse: CurrentUser = await getUserData() as CurrentUser;
+        console.log(userInfoResponse)
+        dispatch(setCurrentUser(userInfoResponse))
+      }
+
+      fetchData()
+      .catch(console.error);
+    }
+  });
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {

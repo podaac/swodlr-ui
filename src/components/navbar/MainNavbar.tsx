@@ -9,10 +9,13 @@ import { setCurrentPage, setUserNotAuthenticated } from '../app/appSlice';
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+  const userData = useAppSelector((state) => state.app.currentUser)
+
+  const { id, email, firstName, lastName } = userData
 
   const renderUserDropdownTitle = () => (
       <span>
-        <PersonSquare /> {`Username`}
+        <PersonSquare /> {`${firstName} ${lastName}`}
       </span>
   )
 
@@ -33,7 +36,7 @@ const MainNavbar = () => {
         <NavDropdown  className={`${colorModeClass}-text`} title={renderUserDropdownTitle()} id="basic-nav-dropdown" align="end" style={{marginRight: '20px'}} menuVariant="dark">
             <Row>
               <Col>
-                <NavDropdown.Item>Email: username@gmail.com</NavDropdown.Item>
+                <NavDropdown.Item>Email: {email}</NavDropdown.Item>
               </Col>
             </Row>
             <Row>

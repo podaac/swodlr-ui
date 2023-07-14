@@ -104,3 +104,7 @@ export interface GranuleTableProps {
 }
 
 export type AdjustType = "zone" | "band"
+
+export interface UserData {
+  id: string
+}

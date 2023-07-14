@@ -437,9 +437,11 @@ WELCOME PAGE
 }
 
 .howToListItem {
-  background-color: #1A2535;
+  background-color: #2c415c;
+  border: solid 3px #1A2535;
+  
   color: white;
-  border-bottom: white;
+  /* border-bottom: white; */
 }
 
 /**************************************************
@@ -610,4 +612,8 @@ TABS
   background-color: #9EB2A6 !important;
   border-color: #9EB2A6 !important;
   color: black !important
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">" !important;
 }
