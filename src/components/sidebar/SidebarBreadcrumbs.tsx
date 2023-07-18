@@ -15,23 +15,16 @@ const SidebarBreadcrumbs = () => {
     return tabId === activeTab ? `${colorModeClass}-active-tab` : `${colorModeClass}-inactive-tab` 
 }
   return (
-    <div>
-      {/* <Col>
-      <Button id="granuleSelection" className={`product-tab ${getTabClass('granuleSelection')}`} style={{height: '50px', width: '230px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>1. Select Scenes</Button>
-      </Col>
-      <Col><ChevronDoubleRight size={42} /></Col>
-      <Col>
-      <Button id="productCustomization" className={`product-tab ${getTabClass('productCustomization')}`} style={{height: '50px', width: '230px', marginTop: '10px'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>2. Configure Options</Button>
-      </Col> */}
-      <Breadcrumb style={{backgroundColor: '#1A2535', padding: '5px'}}>
-        <Breadcrumb.Item onClick={() => dispatch(setActiveTab('granuleSelection'))}>
-          <h5 style={{color: ''}}>Select Scenes</h5>
+    <div style={{marginTop: '10px'}}>
+      {/* <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '0px', opacity: 1}} /> */}
+      <Breadcrumb style={{color: 'black'}}>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" style={{fontSize: '24px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>
+          Select Scenes
         </Breadcrumb.Item>
-        <Breadcrumb.Item active={activeTab === 'productCustomization'} onClick={() => dispatch(setActiveTab('productCustomization'))}>
-          <h5 style={{color: ''}}>Configure Options</h5>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" active={activeTab === 'productCustomization'} style={{fontSize: '24px', color: '#1a2535'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>
+          Configure Options
         </Breadcrumb.Item>
       </Breadcrumb>
-      <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '0px', opacity: 1}} />
     </div>
   );
 }

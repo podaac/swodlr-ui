@@ -68,10 +68,10 @@ const CustomizeProductsSidebar = () => {
 
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
-        <Col>
-            <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row>
-            <SidebarTabs />
-            {/* <SidebarBreadcrumbs /> */}
+        <Col style={{overflowY: 'scroll', height: '100%'}}>
+            {/* <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row> */}
+            {/* <SidebarTabs /> */}
+            <SidebarBreadcrumbs />
             <div style={{}}>
             {renderSidebarContents()}
             </div>

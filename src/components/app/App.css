@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+3');
+
 html, body, #root, .App {
   height: 100%;
+  font-family: 'Source Sans 3', sans-serif;
 }
 
 body {
@@ -29,7 +32,7 @@ APP
 
 .App {
   text-align: center;
-  height: 97.5%;
+  height: 100%;
 }
 
 .App-logo {
@@ -232,14 +235,14 @@ CUSTOMIZE PRODUCT CONTAINER
 }
 
 .Customize-products-container-sidebar-all {
-  height: 100vh;
+  height: 100%;
   width: 65%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 1000;
   padding-top: 125px;
-  padding-bottom: 80px
+  padding-bottom: 58px
 }
 
 .sidebar-resize {
@@ -615,5 +618,15 @@ TABS
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
-  content: ">" !important;
+  /* content: ">" !important; */
+}
+
+/* .sidebar-breadcrumb-item {
+  color: '#1a2535' !important;
+  font-size: '24px' !important
+} */
+
+.sidebar-breadcrumb-item:active {
+  color: 'black' !important;
+  font-size: '24px' !important
 }
