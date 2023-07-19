@@ -108,3 +108,9 @@ export type AdjustType = "zone" | "band"
 export interface UserData {
   id: string
 }
+
+export type InputType = 'cycle' | 'pass' | 'scene'
+
+export interface inputValuesDictionary {
+  [key: string]: {max: number, min: number}
+}

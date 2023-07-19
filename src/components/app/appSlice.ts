@@ -1,12 +1,12 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { PageTypes } from '../../types/constantTypes'
-import { CurrentUser } from '../../types/graphqlTypes'
+import { CurrentUser, CurrentUserData } from '../../types/graphqlTypes'
 
 // Define a type for the slice state
 interface AppState {
   userAuthenticated: boolean,
   currentPage: PageTypes,
-  currentUser: CurrentUser
+  currentUser: CurrentUserData
 }
 
 // Define the initial state using that type
@@ -30,7 +30,7 @@ export const appSlice = createSlice({
     setCurrentPage: (state, action: PayloadAction<PageTypes>) => {
       state.currentPage = action.payload
     },
-    setCurrentUser: (state, action: PayloadAction<CurrentUser>) => {
+    setCurrentUser: (state, action: PayloadAction<CurrentUserData>) => {
       state.currentUser = action.payload
     },
   },

@@ -1,5 +1,5 @@
 import { request, gql, GraphQLClient } from 'graphql-request'
-import { userQuery } from '../constants/graphqlQueries';
+import { generateL2RasterProductQuery, userProductsQuery, userQuery } from '../constants/graphqlQueries';
 import { CurrentUser, UserResponse } from '../types/graphqlTypes';
 
 const userIdQuery = gql`${userQuery}`
@@ -13,20 +13,6 @@ const graphQLClient = new GraphQLClient(graphqlUri, {
 
 export const getUserData = async () => {
     try {
-        // let config = await ((await fetch(`${baseUri}/config`)).json());
-        // const headers = {
-        //         method: "POST",
-        //         redirect: "manual",
-        //         mode: "cors",
-        //         credentials: "include"
-        //       }
-
-        //      const options = {  
-        //         credentials: 'include',
-        //         mode: 'cors',
-        //     }
-        
-        // const userInfoResponse = await request(graphqlUri, userIdQuery, undefined, options)
         const userInfoResponse = await graphQLClient.request(userIdQuery).then((result: unknown | UserResponse) => {
           console.log(result)
           const userResult: CurrentUser = (result as UserResponse).currentUser
@@ -43,11 +29,59 @@ export const getUserData = async () => {
     }
 }
 
-// export const getUserInfo = async () => {
-//   try {
-//     const graphqlResponse = await request(`${baseUri}/graphql`, userIdQuery)
-//     return graphqlResponse
-//   } catch (err) {
-//     console.log(err)
-//   }
-// }
+export const generateL2RasterProduct = async (
+  cycle: string,
+  pass: string,
+  scene: string,
+  outputGranuleExtentFlag: number,
+  outputSamplingGridType: string,
+  rasterResolution: number,
+  utmZoneAdjust: string,
+  mgrsBandAdjust: string
+  ) => {
+  try {
+      const variables = {
+        cycle: parseInt(cycle),
+        pass: parseInt(pass),
+        scene: parseInt(scene),
+        outputGranuleExtentFlag: Boolean(outputGranuleExtentFlag),
+        outputSamplingGridType: outputSamplingGridType === 'lat/lon' ? 'GEO' : outputSamplingGridType.toUpperCase(),
+        rasterResolution,
+        utmZoneAdjust: parseInt(utmZoneAdjust),
+        mgrsBandAdjust: parseInt(mgrsBandAdjust)
+      }
+      console.log(variables)
+      const generateL2RasterProductResponse = await graphQLClient.request(generateL2RasterProductQuery, variables).then((result: unknown | UserResponse) => {
+        console.log(result)
+        // const userResult: CurrentUser = (result as UserResponse).currentUser
+        // return userResult
+      })
+      console.log(generateL2RasterProductResponse)
+      // return userInfoResponse
+  } catch (err) {
+      console.log (err)
+      if (err instanceof Error) {
+          return err
+        } else {
+          return 'something happened'
+        }
+  }
+}
+
+export const getUserProducts = async () => {
+  try {
+      const userProductResponse = await graphQLClient.request(userProductsQuery).then(result => {
+        console.log(result)
+        const userProductsResult = (result as UserResponse).currentUser.products
+        return userProductsResult
+      })
+      return userProductResponse
+  } catch (err) {
+      console.log (err)
+      if (err instanceof Error) {
+          return err
+        } else {
+          return 'something happened'
+        }
+  }
+}

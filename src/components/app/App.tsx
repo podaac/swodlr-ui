@@ -12,7 +12,7 @@ import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 import { getUserData } from '../../user/userData';
 import { setCurrentUser } from './appSlice';
-import { CurrentUser } from '../../types/graphqlTypes';
+import { CurrentUser, CurrentUserData } from '../../types/graphqlTypes';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -25,7 +25,7 @@ const App = () => {
   useEffect(() => {
     if (userAuthenticated) {
       const fetchData = async () => {
-        const userInfoResponse: CurrentUser = await getUserData() as CurrentUser;
+        const userInfoResponse: CurrentUserData = await getUserData() as CurrentUserData;
         console.log(userInfoResponse)
         dispatch(setCurrentUser(userInfoResponse))
       }

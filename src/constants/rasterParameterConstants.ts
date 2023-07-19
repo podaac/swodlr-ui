@@ -1,4 +1,4 @@
-import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, parameterValuesDictionary } from "../types/constantTypes"
+import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -109,6 +109,28 @@ export const parameterHelp: ParameterHelp = {
     scene: `Predefined 128 x 128 km squares of the SWOT observations.`
 }
 
+export interface InputBounds {
+    InputType: {
+        min: number,
+        max: number
+    }
+  }
+
+  export const inputBounds: inputValuesDictionary = {
+    cycle: {
+        min: 1,
+        max: 154
+    },
+    pass: {
+        min: 1,
+        max: 584
+    },
+    scene: {
+        min: 0,
+        max: 399
+    }
+  }
+
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: {
         message: 'Successfully added granules!',
@@ -133,6 +155,18 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     readyForGeneration: {
         message: 'Remember: customize your product parameters before starting Generation',
         variant: 'warning',
+    },
+    invalidCycle: {
+        message: `Check that your inputed cycle is within the allowed range of ${inputBounds.cycle.min} - ${inputBounds.cycle.max} and doesn't contain invalid characters`,
+        variant: 'danger',
+    },
+    invalidPass: {
+        message: `Check that your inputed pass is within the allowed range of ${inputBounds.pass.min} - ${inputBounds.pass.max} and doesn't contain invalid characters`,
+        variant: 'danger',
+    },
+    invalidScene: {
+        message: `Check that your inputed scene is within the allowed range of ${inputBounds.scene.min} - ${inputBounds.scene.max} and doesn't contain invalid characters`,
+        variant: 'danger',
     }
   }
 

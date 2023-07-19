@@ -3,6 +3,7 @@ import { AlertMessageObject, AlertMessageObjectConstant, allProductParameters, G
 import L, { LatLngExpression } from 'leaflet'
 import { granuleAlertMessageConstant, parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
+import { generateL2RasterProduct } from '../../../user/userData';
 
 // Define a type for the slice state
 interface GranuleState {
@@ -68,8 +69,17 @@ export const productSlice = createSlice({
 
       const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => {
         const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
-
         const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
+        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = state.generateProductParameters
+        console.log('fetch data next')
+        const fetchData = async () => {
+          console.log('running fetch data')
+          const userInfoResponse = await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
+          console.log(userInfoResponse)
+        }
+        
+        fetchData().catch(console.error);
+
         return ({
           productId: uuidv4(),
           granuleId: granuleId, 
