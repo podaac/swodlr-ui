@@ -36,7 +36,7 @@ const CustomizeProductsSidebar = () => {
                     <GranuleTable tableType='granuleSelection'/>
                     <GranuleTableAlerts />
                     <hr></hr>
-                    <Row style={{marginBottom: '10px'}}>
+                    <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
                         <Col>
                             <Button variant='success' disabled={addedProducts.length === 0} onClick={() => dispatch(setActiveTab('productCustomization'))}>Configure Products <ArrowReturnRight /></Button>
                         </Col>
@@ -68,7 +68,7 @@ const CustomizeProductsSidebar = () => {
 
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
-        <Col style={{overflowY: 'scroll', height: '100%'}}>
+        <Col style={{overflowY: 'auto', height: '100%'}}>
             {/* <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row> */}
             {/* <SidebarTabs /> */}
             <SidebarBreadcrumbs />

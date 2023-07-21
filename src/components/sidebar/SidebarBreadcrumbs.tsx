@@ -11,17 +11,16 @@ const SidebarBreadcrumbs = () => {
   const dispatch = useAppDispatch()
 
   const getTabClass = (tabId: TabTypes) => {
-    console.log()
     return tabId === activeTab ? `${colorModeClass}-active-tab` : `${colorModeClass}-inactive-tab` 
 }
   return (
     <div style={{marginTop: '10px'}}>
       {/* <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '0px', opacity: 1}} /> */}
-      <Breadcrumb style={{color: 'black'}}>
-        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" style={{fontSize: '24px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>
+      <Breadcrumb style={{color: 'black', backgroundColor: '#1A2535', paddingLeft: '20px', paddingBottom: '1px', paddingTop: '8px'}}>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" style={{fontSize: '22px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>
           Select Scenes
         </Breadcrumb.Item>
-        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" active={activeTab === 'productCustomization'} style={{fontSize: '24px', color: '#1a2535'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" active={activeTab === 'productCustomization'} style={{fontSize: '22px', color: 'white'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>
           Configure Options
         </Breadcrumb.Item>
       </Breadcrumb>

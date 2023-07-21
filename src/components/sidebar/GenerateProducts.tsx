@@ -29,7 +29,7 @@ const GenerateProducts = () => {
     }
 
   return (
-    <Row style={{marginBottom: '10px'}}>
+    <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
         <Col>
             <Button variant='success' disabled={addedGranules.length === 0}  onClick={() => handleGenerateProducts()}>Generate Products <ArrowReturnRight /></Button>
         </Col>

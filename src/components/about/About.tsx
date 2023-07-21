@@ -4,8 +4,8 @@ import { parameterHelp, parameterOptions } from '../../constants/rasterParameter
 const About = () => {
 
     return (
-        <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '12px'}}>
-            <Row><h3 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h3></Row>
+        <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '12px', height: '100%'}}>
+            <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h4></Row>
             <Row style={{marginRight: '20%', marginLeft: '20%'}}>
                 <div className='howToListItem'>
                 <p>
@@ -16,7 +16,7 @@ const About = () => {
                 </p>
                 </div>
             </Row>
-            <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>Use Cases</h4></Row>
+            <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>Use Cases</h5></Row>
             <Row>
                 <ListGroup>
                     <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}}>Comparing SWOT water extent products to other NASA products like Landsat with alternate resolutions</ListGroup.Item>
@@ -25,21 +25,21 @@ const About = () => {
                     <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}}>Using lat/lon coordinates is easier to stitch data tiles together than using the UTM coordinate system.</ListGroup.Item>
                 </ListGroup>
             </Row>
-            <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>FAQ</h4></Row>
-            <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>Definitions</h4></Row>
+            <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>FAQ</h5></Row>
+            <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>Definitions</h5></Row>
             <Row style={{paddingBottom: '20px'}}>
                 <ListGroup>
                     {Object.entries(parameterHelp).map((entry, index) => {
                         return (
                             <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}}>
-                                <Row><h5>{parameterOptions[entry[0] ]}</h5></Row>
+                                <Row><h6><b>{parameterOptions[entry[0] ]}</b></h6></Row>
                                 <Row>{entry[1]}</Row>
                             </ListGroup.Item>
                             )
                     })}
                 </ListGroup>
             </Row>
-            <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>Citations</h4></Row>
+            <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>Citations</h5></Row>
         </Col>
     );
 }

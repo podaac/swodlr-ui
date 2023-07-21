@@ -157,15 +157,15 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
         variant: 'warning',
     },
     invalidCycle: {
-        message: `Check that your inputed cycle is within the allowed range of ${inputBounds.cycle.min} - ${inputBounds.cycle.max} and doesn't contain invalid characters`,
+        message: `Cycle is either not in range [${inputBounds.cycle.min} - ${inputBounds.cycle.max}] or contains invalid characters`,
         variant: 'danger',
     },
     invalidPass: {
-        message: `Check that your inputed pass is within the allowed range of ${inputBounds.pass.min} - ${inputBounds.pass.max} and doesn't contain invalid characters`,
+        message: `Pass is either not in range [${inputBounds.pass.min} - ${inputBounds.pass.max}] or contains invalid characters`,
         variant: 'danger',
     },
     invalidScene: {
-        message: `Check that your inputed scene is within the allowed range of ${inputBounds.scene.min} - ${inputBounds.scene.max} and doesn't contain invalid characters`,
+        message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters`,
         variant: 'danger',
     }
   }

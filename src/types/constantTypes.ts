@@ -1,4 +1,5 @@
 import { LatLngExpression } from "leaflet"
+import { Product } from "./graphqlTypes"
 
 export interface parameterValuesObject {
    values: string[] | number[],
@@ -67,6 +68,15 @@ export interface GeneratedProduct {
   parametersUsedToGenerate: ParametersUsedToGenerate,
   downloadUrl?: string | null,
   dateGenerated?: Date
+}
+
+// Get generated data products
+export type responseType = 'success' | 'error' | 'unknown'
+
+export interface getUserProductsResponse {
+  status: string,
+  products?: Product[],
+  error?: Error | string,
 }
 
 export interface ParameterOptions {

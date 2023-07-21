@@ -10,7 +10,6 @@ const SidebarTabs = () => {
   const dispatch = useAppDispatch()
 
   const getTabClass = (tabId: TabTypes) => {
-    console.log()
     return tabId === activeTab ? `${colorModeClass}-active-tab` : `${colorModeClass}-inactive-tab` 
 }
   return (

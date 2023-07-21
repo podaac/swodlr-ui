@@ -126,7 +126,9 @@ NAVBAR
 
 .dark-mode-container-background {
   background-color: #3D5D82;
+  /* background-color:#2C3E50; */
   /* background-color: #25325c; */
+  /* background: rgba(51, 170, 51, .7); */
   color: #FAF9F6
 }
 
@@ -307,7 +309,7 @@ tfoot {
   bottom: 0;
 }
 
-.table-responsive-granuleSelection {
+.table-responsive-granulesion {
   max-height: 40vh;
   overflow-y: auto;
 }
@@ -621,10 +623,10 @@ TABS
   /* content: ">" !important; */
 }
 
-/* .sidebar-breadcrumb-item {
+.sidebar-breadcrumb-item a{
   color: '#1a2535' !important;
   font-size: '24px' !important
-} */
+}
 
 .sidebar-breadcrumb-item:active {
   color: 'black' !important;

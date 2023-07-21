@@ -1,6 +1,3 @@
-import { request, gql, GraphQLClient } from 'graphql-request'
-import { CurrentUser, UserResponse } from '../types/graphqlTypes';
-
 export const userQuery = `
     {
         currentUser {
@@ -26,6 +23,7 @@ export const generateL2RasterProductQuery = `
         }
     }
 `
+
 export const userProductsQuery = `
     {
         currentUser {
@@ -47,7 +45,7 @@ export const userProductsQuery = `
                     uri
                 }
                 
-                status {
+                status (limit: 1) {
                     id
                     timestamp
                     state

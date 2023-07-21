@@ -26,7 +26,6 @@ const App = () => {
     if (userAuthenticated) {
       const fetchData = async () => {
         const userInfoResponse: CurrentUserData = await getUserData() as CurrentUserData;
-        console.log(userInfoResponse)
         dispatch(setCurrentUser(userInfoResponse))
       }
 

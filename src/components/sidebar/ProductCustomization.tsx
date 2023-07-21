@@ -96,12 +96,12 @@ const ProductCustomization = () => {
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px'}} className='g-0 shadow'>
         <Row style={{marginRight: '0px', marginLeft: '0px',}}>
-            <h4 className={`${colorModeClass}-sidebar-section-title`} style={{paddingTop: '10px', paddingBottom: '10px'}}>Parameter Options</h4>
+            <h5 className={`${colorModeClass}-sidebar-section-title`} style={{paddingTop: '10px', paddingBottom: '10px'}}>Parameter Options</h5>
         </Row>
         <div style={{padding: '0px 20px 15px 20px'}}>
             <Row className='normal-row'>
                 <Col md={{ span: 5, offset: 0 }}>
-                    <h5>Output Granule Extent</h5>
+                    <h6>Output Granule Extent</h6>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
                         {renderInfoIcon('outputGranuleExtentFlag')}
@@ -125,7 +125,7 @@ const ProductCustomization = () => {
             </Row>
             <Row className='normal-row'>
                 <Col md={{ span: 5, offset: 0 }}>
-                    <h5>Output Sampling Grid Type</h5>
+                    <h6>Output Sampling Grid Type</h6>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
                         {renderInfoIcon('outputSamplingGridType')}
@@ -136,7 +136,7 @@ const ProductCustomization = () => {
             </Row>
             <Row className='normal-row'>
                 <Col md={{ span: 5, offset: 0 }}>
-                    <h5>Raster Resolution</h5>
+                    <h6>Raster Resolution</h6>
                 </Col>  
                 <Col md={{ span: 1, offset: 0 }}>
                         {renderInfoIcon('rasterResolution')}

@@ -27,21 +27,21 @@ const Map = () => {
   }
   
   return (
-    <Row style={{height: '96.5%'}}>
-    <MapContainer className='Map-container' center={[33.854457, -118.709093]} zoom={7} scrollWheelZoom={true} zoomControl={false}>
-        <TileLayer
-          url="https://gibs-{s}.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default//EPSG3857_500m/{z}/{y}/{x}.jpeg"
-          attribution="&copy; NASA Blue Marble, image service by OpenGeo"
-          maxNativeZoom={8}
-        />
-        <ChangeView />
-        <ZoomControl position='bottomright'/>
-        {addedProducts.map(productObject => (
-        <Polygon positions={productObject.footprint as LatLngExpression[]}>
-          <Tooltip sticky>{productObject.granuleId}</Tooltip>
-        </Polygon>
-        ))}
-    </MapContainer>
+    <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '34px', marginRight: '0%'}}>
+      <MapContainer className='Map-container' center={[33.854457, -118.709093]} zoom={7} scrollWheelZoom={true} zoomControl={false}>
+          <TileLayer
+            url="https://gibs-{s}.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default//EPSG3857_500m/{z}/{y}/{x}.jpeg"
+            attribution="&copy; NASA Blue Marble, image service by OpenGeo"
+            maxNativeZoom={8}
+          />
+          <ChangeView />
+          <ZoomControl position='bottomright'/>
+          {addedProducts.map(productObject => (
+          <Polygon positions={productObject.footprint as LatLngExpression[]}>
+            <Tooltip sticky>{productObject.granuleId}</Tooltip>
+          </Polygon>
+          ))}
+      </MapContainer>
     </Row>
   );
 }

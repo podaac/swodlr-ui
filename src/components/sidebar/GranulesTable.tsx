@@ -32,8 +32,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
 
-  // useEffect(() => {console.log(generateProductParameters)}, [generateProductParameters])
-
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
     if (sceneString.includes('-')) {
@@ -103,10 +101,6 @@ const GranuleTable = (props: GranuleTableProps) => {
     const invalidPass = !pass && !validateInputs('pass', pass)
     const invalidScene = !scene && !validateInputs('scene', scene)
 
-    console.log('invalidCycle: ', invalidCycle)
-    console.log('invalidPass: ', invalidPass)
-    console.log('invalidScene: ', invalidScene)
-
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
     // const granulesAlreadyAdded: sampleGranuleData[] = []
@@ -142,7 +136,6 @@ const GranuleTable = (props: GranuleTableProps) => {
     
     // check if any granules could not be found or they were already added    
     if (invalidCycle || invalidPass || invalidScene) {
-      console.log(invalidCycle, invalidPass, invalidScene)
       if (invalidCycle) setSaveGranulesAlert('invalidCycle')
       if (invalidPass) setSaveGranulesAlert('invalidPass')
       if (invalidScene) setSaveGranulesAlert('invalidScene')
@@ -177,6 +170,9 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   const handleGranuleSelected = (granuleBeingSelected: string) => {
     dispatch(setGranuleFocus(granuleBeingSelected))
+  }
+
+  const handleSelectRemoveGranuleCheckbox = (granuleBeingSelected: string) => {
     if (tableType === 'granuleSelection') {
       if (selectedGranules.includes(granuleBeingSelected)) {
         // remove granuleId from selected list
@@ -273,7 +269,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
-        <Col><h4 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h4></Col>
+        <Col><h5 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h5></Col>
       </Row>
       <div style={{padding: '10px 20px 20px 20px'}}>
       <div className={`table-responsive-${tableType}`}>
@@ -290,6 +286,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                     className='remove-checkbox'
                     style={{cursor: 'pointer'}}
                     onChange={() => handleAllChecked()}
+                    // checked={!(allChecked && !addedProducts.length)}
                   />
                 </th>
               ): (
@@ -304,7 +301,7 @@ const GranuleTable = (props: GranuleTableProps) => {
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => handleGranuleSelected(granuleId)}>
+              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
                 {tableType === 'granuleSelection'  ? (
                   <td>
                     <Form.Check
@@ -312,7 +309,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                       name="group1"
                       id={`inline-select-${granuleId}`}
                       className='remove-checkbox'
-                      onChange={() => handleGranuleSelected(granuleId)}
+                      onChange={() => handleSelectRemoveGranuleCheckbox(granuleId)}
                       checked={selectedGranules.includes(granuleId)}
                     />
                   </td>
@@ -350,6 +347,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           </tfoot>
         </Table>
       </div>
+      {tableType === 'granuleSelection' ? <Row style={{marginTop: '5px', marginBottom: '5px'}}><Col>To enter a range of values, enter two numbers separated by a hyphen (e.g. 1-10)</Col></Row> : null}
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>
