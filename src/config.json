@@ -1,0 +1,4 @@
+{
+    "SWODLR_API_BASE_URI": "https://d15gds5czd9p7k.cloudfront.net",
+    "DEV_REDIRECT_URI": "?redirect=http://localhost:3000/"
+}
