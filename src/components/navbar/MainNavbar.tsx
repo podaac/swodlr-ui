@@ -11,7 +11,7 @@ const MainNavbar = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const userData = useAppSelector((state) => state.app.currentUser)
 
-  const { id, email, firstName, lastName } = userData
+  const { email, firstName, lastName } = userData
 
   const renderUserDropdownTitle = () => (
       <span>

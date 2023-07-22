@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { PageTypes } from '../../types/constantTypes'
-import { CurrentUser, CurrentUserData } from '../../types/graphqlTypes'
+import { CurrentUserData } from '../../types/graphqlTypes'
 
 // Define a type for the slice state
 interface AppState {

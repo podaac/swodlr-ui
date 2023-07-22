@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import { allProductParameters } from '../../../types/constantTypes'
 
 // Define a type for the slice state

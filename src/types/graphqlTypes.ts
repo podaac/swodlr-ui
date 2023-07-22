@@ -59,3 +59,15 @@ export interface CurrentUserProducts {
 export interface UserResponse {
     currentUser: CurrentUser
 }
+
+export type ProductState = 'NEW' | 'UNAVAILABLE' | 'GENERATING' | 'ERROR' | 'READY' | 'AVAILABLE;'
+
+export type GraphqlResponseStatus = 'success' | 'error' | 'unknown'
+
+// Get generated data products
+export interface getUserProductsResponse {
+    status: GraphqlResponseStatus,
+    products?: Product[],
+    error?: Error | string,
+  }
+  

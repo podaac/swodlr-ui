@@ -1,7 +1,6 @@
-import { request, gql, GraphQLClient } from 'graphql-request'
+import { gql, GraphQLClient } from 'graphql-request'
 import { generateL2RasterProductQuery, userProductsQuery, userQuery } from '../constants/graphqlQueries';
-import { CurrentUser, Product, UserResponse } from '../types/graphqlTypes';
-import { GeneratedProduct, getUserProductsResponse } from '../types/constantTypes';
+import { CurrentUser, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
 
 const userIdQuery = gql`${userQuery}`
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
@@ -89,7 +88,7 @@ export const generateL2RasterProduct = async (
       rasterResolution,
     }
 
-    const generateL2RasterProductResponse = await graphQLClient.request(generateL2RasterProductQuery, outputSamplingGridType === 'lat/lon' ? geoVariables : utmVariables)
+    await graphQLClient.request(generateL2RasterProductQuery, outputSamplingGridType === 'lat/lon' ? geoVariables : utmVariables)
   } catch (err) {
       console.log (err)
       if (err instanceof Error) {

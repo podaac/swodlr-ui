@@ -12,7 +12,7 @@ import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 import { getUserData } from '../../user/userData';
 import { setCurrentUser } from './appSlice';
-import { CurrentUser, CurrentUserData } from '../../types/graphqlTypes';
+import { CurrentUserData } from '../../types/graphqlTypes';
 
 const App = () => {
   const dispatch = useAppDispatch()

@@ -1,7 +1,7 @@
 import Navbar from 'react-bootstrap/Navbar';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import { setCurrentPage } from '../app/appSlice';
-import { Col, Nav, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 const PodaacFooter = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
@@ -31,16 +31,6 @@ const PodaacFooter = () => {
             </Navbar.Text>
           </Col>
         </Row></Col>
-        {/* <Nav> */}
-          {/* <Navbar.Text className={`${colorModeClass}-navbar-link`} style={{marginLeft: '20px'}}>
-          |
-          </Navbar.Text>
-
-          <Navbar.Text className={`${colorModeClass}-navbar-link`} style={{marginLeft: '20px'}}>
-          |
-          </Navbar.Text> */}
-
-        {/* </Nav> */}
       </Row>
     </Navbar>
   );

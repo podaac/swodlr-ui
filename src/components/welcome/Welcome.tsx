@@ -4,7 +4,6 @@ import { setCurrentPage, setUserAuthenticated } from '../app/appSlice';
 import { checkUserAuthentication } from '../../user/authentication';
 import { TestAuthenticationResponse } from '../../types/authenticationTypes';
 import { useEffect, useState } from 'react';
-import { getUserData } from '../../user/userData';
 
 const Welcome = () => {
   const dispatch = useAppDispatch()

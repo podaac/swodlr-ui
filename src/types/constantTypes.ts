@@ -70,15 +70,6 @@ export interface GeneratedProduct {
   dateGenerated?: Date
 }
 
-// Get generated data products
-export type responseType = 'success' | 'error' | 'unknown'
-
-export interface getUserProductsResponse {
-  status: string,
-  products?: Product[],
-  error?: Error | string,
-}
-
 export interface ParameterOptions {
   [key: string]: string
 }

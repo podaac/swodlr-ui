@@ -4,17 +4,6 @@ import Navbar from 'react-bootstrap/Navbar';
 const PodaacNavbar = () => {
   return (
     <Navbar className={`Podaac-navbar`} expand="lg" style={{height: '70px'}}>
-      {/* <Navbar.Brand href="#home">
-        <a href="https://www.nasa.gov/" target="_blank" rel="noreferrer">
-          <img
-            alt=""
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/2449px-NASA_logo.svg.png"
-            width="70"
-            height="60"
-            className="d-inline-block align-top"
-          />{' '}
-        </a>
-      </Navbar.Brand> */}
       <Row style={{width: '100%'}}>
         <Col md={{ span: 1, offset: 0 }} style={{paddingRight: '0px'}}>
           <a href="https://www.nasa.gov/" target="_blank" rel="noreferrer">

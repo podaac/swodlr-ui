@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, AlertMessageObjectConstant, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
-import { granuleAlertMessageConstant, parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
+import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
 
@@ -72,7 +72,7 @@ export const productSlice = createSlice({
         const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
         const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = state.generateProductParameters
         const fetchData = async () => {
-          const userInfoResponse = await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
+          await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
         }
         
         fetchData().catch(console.error);

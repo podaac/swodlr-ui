@@ -18,6 +18,10 @@
 .env.test.local
 .env.production.local
 .env
+.env.*
+
+# include .env.sample
+!.env.sample
 
 npm-debug.log*
 yarn-debug.log*
