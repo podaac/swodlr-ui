@@ -67,6 +67,7 @@ export const generateL2RasterProduct = async (
     //   variablesToUse.mgrsBandAdjust = parseInt(mgrsBandAdjust)
     //   variablesToUse.outputSamplingGridType = outputSamplingGridType.toUpperCase()
     // }
+    console.log(rasterResolution)
 
     const utmVariables = {
       cycle: parseInt(cycle),
@@ -87,12 +88,8 @@ export const generateL2RasterProduct = async (
       outputSamplingGridType: 'GEO',
       rasterResolution,
     }
-    // console.log(outputSamplingGridType === 'lat/lon' ? utmVariables : geoVariables)
 
     const generateL2RasterProductResponse = await graphQLClient.request(generateL2RasterProductQuery, outputSamplingGridType === 'lat/lon' ? geoVariables : utmVariables)
-    // .then((result: unknown | UserResponse) => {
-    //   console.log(result)
-    // })
   } catch (err) {
       console.log (err)
       if (err instanceof Error) {

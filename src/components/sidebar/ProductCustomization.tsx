@@ -15,7 +15,7 @@ const ProductCustomization = () => {
 
     const {outputSamplingGridType, rasterResolution} = generateProductParameters
 
-    const setOutputSamplingGridType = (outputSamplingGridType: string) => dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType}))
+    const setOutputSamplingGridType = (outputSamplingGridType: string, rasterResolution: number) => dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType, rasterResolution}))
     const setRasterResolutionUTM = (rasterResolutionUTM: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionUTM}))
     const setRasterResolutionGEO = (rasterResolutionGEO: number) => dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolution: rasterResolutionGEO}))
 
@@ -65,16 +65,19 @@ const ProductCustomization = () => {
     )
 
     const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
-        const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => 
-            <Form.Check 
-                defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
-                inline 
-                label={String(value).toUpperCase()} 
-                name="outputSamplingGridTypeGroup" 
-                type={'radio'} 
-                id={`outputSamplingGridTypeGroup-radio-${index}`} 
-                onChange={() => setOutputSamplingGridType(value as string)}
-            />
+        const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => {
+            const resolutionToUse: number = value === 'utm' ? parseInt(parameterOptionValues.rasterResolutionUTM.default as string) : parseInt(parameterOptionValues.rasterResolutionGEO.default as string)
+            return (
+                <Form.Check 
+                    defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
+                    inline 
+                    label={String(value).toUpperCase()} 
+                    name="outputSamplingGridTypeGroup" 
+                    type={'radio'} 
+                    id={`outputSamplingGridTypeGroup-radio-${index}`} 
+                    onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
+                />
+            )}
         )
         inputArray.push(
             (

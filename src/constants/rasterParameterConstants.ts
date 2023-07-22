@@ -20,7 +20,7 @@ export const parameterOptionValues: parameterValuesDictionary = {
     },
     rasterResolutionGEO: {
         values: rasterResolutionOptions.GEO,
-        default: 60
+        default: 3
     },
     utmZoneAdjust: {
         values: ['+1', '0', '-1'],
