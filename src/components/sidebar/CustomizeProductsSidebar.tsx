@@ -8,8 +8,7 @@ import { mouseLocation } from '../../types/sidebarTypes';
 import GenerateProducts from './GenerateProducts';
 import ProductCustomization from './ProductCustomization';
 import GranuleTableAlerts from './GranuleTableAlerts';
-import SidebarTabs from './SidebarTabs';
-import { TabTypes } from '../../types/constantTypes';
+import SidebarBreadcrumbs from './SidebarBreadcrumbs';
 
 const CustomizeProductsSidebar = () => {
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
@@ -35,7 +34,7 @@ const CustomizeProductsSidebar = () => {
                     <GranuleTable tableType='granuleSelection'/>
                     <GranuleTableAlerts />
                     <hr></hr>
-                    <Row style={{marginBottom: '10px'}}>
+                    <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
                         <Col>
                             <Button variant='success' disabled={addedProducts.length === 0} onClick={() => dispatch(setActiveTab('productCustomization'))}>Configure Products <ArrowReturnRight /></Button>
                         </Col>
@@ -47,7 +46,6 @@ const CustomizeProductsSidebar = () => {
                 <>
                     <ProductCustomization />
                     <GranuleTable tableType='productCustomization'/>
-                    {/* <GranuleTableAlerts /> */}
                     <hr></hr>
                     <GenerateProducts />
                 </>
@@ -67,9 +65,8 @@ const CustomizeProductsSidebar = () => {
 
   return (
     <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
-        <Col>
-            <Row><h3 style={{marginTop: '10px'}}>SWOT On-Demand Level-2 Raster Generator</h3></Row>
-            <SidebarTabs />
+        <Col style={{overflowY: 'auto', height: '100%'}}>
+            <SidebarBreadcrumbs />
             <div style={{}}>
             {renderSidebarContents()}
             </div>

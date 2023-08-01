@@ -1,10 +1,10 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, GranuleForTable, GranuleTableProps, TableTypes, allProductParameters } from '../../types/constantTypes';
+import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
@@ -31,8 +31,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [pass, setPass] = useState('');
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
-
-  // useEffect(() => {console.log(generateProductParameters)}, [generateProductParameters])
 
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
@@ -75,7 +73,34 @@ const GranuleTable = (props: GranuleTableProps) => {
     }
   }
 
+  const checkInBounds = (inputType: string, inputValue: string): boolean => {
+    return parseInt(inputValue) >= inputBounds[inputType].min && parseInt(inputValue) <= inputBounds[inputType].max
+  }
+
+  const validateInputs = (inputType: InputType, inputValue: string): boolean => {
+    let validInput = false
+    // TODO: error checking if not in the 1-10 format
+    // check for more than one -
+    // check for characters other than integers and one -
+    if (inputValue.includes('-')) {
+      const inputBoundsValue = inputValue.split('-')
+      const min: string = inputBoundsValue[0].trim()
+      const max: string = inputBoundsValue[1].trim()
+      const minIsValid = checkInBounds(inputType, min)
+      const maxIsValid = checkInBounds(inputType, max)
+      validInput = minIsValid && maxIsValid
+    } else {
+      validInput = checkInBounds(inputType, inputValue.trim())
+    }
+    return validInput
+  }
+
   const handleSave = () => {
+    // check if cycle pass and scene are all within a valid range
+    const invalidCycle = !cycle && !validateInputs('cycle', cycle)
+    const invalidPass = !pass && !validateInputs('pass', pass)
+    const invalidScene = !scene && !validateInputs('scene', scene)
+
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
     // const granulesAlreadyAdded: sampleGranuleData[] = []
@@ -109,14 +134,22 @@ const GranuleTable = (props: GranuleTableProps) => {
       }
     })
     
-    // check if any granules could not be found or they were already added
-    if (granuleNotFound && granuleAlreadyAdded) {
-      setSaveGranulesAlert('alreadyAddedAndNotFound')
-    } else if (granuleNotFound) {
-      setSaveGranulesAlert('notFound')
-    } else if  (granuleAlreadyAdded) {
-      setSaveGranulesAlert('alreadyAdded')
+    // check if any granules could not be found or they were already added    
+    if (invalidCycle || invalidPass || invalidScene) {
+      if (invalidCycle) setSaveGranulesAlert('invalidCycle')
+      if (invalidPass) setSaveGranulesAlert('invalidPass')
+      if (invalidScene) setSaveGranulesAlert('invalidScene')
     } else {
+      if (granuleNotFound && granuleAlreadyAdded) {
+        setSaveGranulesAlert('alreadyAddedAndNotFound')
+      } else if (granuleNotFound && !(invalidCycle || invalidPass || invalidScene)) {
+        setSaveGranulesAlert('notFound')
+      } else if  (granuleAlreadyAdded) {
+        setSaveGranulesAlert('alreadyAdded')
+      }
+    }
+
+    if (!granuleNotFound && !granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene) {
       setSaveGranulesAlert('success')
       dispatch(addProduct(granulesToAdd))
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
@@ -137,6 +170,9 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   const handleGranuleSelected = (granuleBeingSelected: string) => {
     dispatch(setGranuleFocus(granuleBeingSelected))
+  }
+
+  const handleSelectRemoveGranuleCheckbox = (granuleBeingSelected: string) => {
     if (tableType === 'granuleSelection') {
       if (selectedGranules.includes(granuleBeingSelected)) {
         // remove granuleId from selected list
@@ -233,7 +269,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
-        <Col><h4 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h4></Col>
+        <Col><h5 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h5></Col>
       </Row>
       <div style={{padding: '10px 20px 20px 20px'}}>
       <div className={`table-responsive-${tableType}`}>
@@ -250,6 +286,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                     className='remove-checkbox'
                     style={{cursor: 'pointer'}}
                     onChange={() => handleAllChecked()}
+                    // checked={!(allChecked && !addedProducts.length)}
                   />
                 </th>
               ): (
@@ -264,7 +301,7 @@ const GranuleTable = (props: GranuleTableProps) => {
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => handleGranuleSelected(granuleId)}>
+              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
                 {tableType === 'granuleSelection'  ? (
                   <td>
                     <Form.Check
@@ -272,7 +309,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                       name="group1"
                       id={`inline-select-${granuleId}`}
                       className='remove-checkbox'
-                      onChange={() => handleGranuleSelected(granuleId)}
+                      onChange={() => handleSelectRemoveGranuleCheckbox(granuleId)}
                       checked={selectedGranules.includes(granuleId)}
                     />
                   </td>
@@ -284,6 +321,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           </tbody>
           <tfoot>
             {tableType === 'granuleSelection' ? (
+              <>
                 <tr className='add-granules'>
                   <td colSpan={1}>
                     <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
@@ -295,12 +333,21 @@ const GranuleTable = (props: GranuleTableProps) => {
                   <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
                   <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
                 </tr>
-                ) : 
-                null
-              }
+                <tr className='add-granules'>
+                  <td>Valid Values:</td>
+                  <td></td>
+                  <td>{`${inputBounds.cycle.min} - ${inputBounds.cycle.max}`}</td>
+                  <td>{`${inputBounds.pass.min} - ${inputBounds.pass.max}`}</td>
+                  <td>{`${inputBounds.scene.min} - ${inputBounds.scene.max}`}</td>
+                </tr>
+              </>
+              ) : 
+              null
+            }
           </tfoot>
         </Table>
       </div>
+      {tableType === 'granuleSelection' ? <Row style={{marginTop: '5px', marginBottom: '5px'}}><Col>To enter a range of values, enter two numbers separated by a hyphen (e.g. 1-10)</Col></Row> : null}
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>
