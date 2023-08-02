@@ -7,8 +7,8 @@ const GranuleTableAlerts = () => {
 
   return (
     <div style={{padding: '0px 20px 0px 20px'}}>
-      {granuleTableAlerts.map(alertObject => (
-        <Row style={{paddingTop: '5px', paddingBottom: '10px'}}>
+      {granuleTableAlerts.map((alertObject, index) => (
+        <Row key={`${alertObject.variant}-${index}`} style={{paddingTop: '5px', paddingBottom: '10px'}}>
           <Col md={{ span: 8, offset: 2 }}>
             <Alert variant={`${alertObject.variant}`}>{alertObject.message}</Alert>
           </Col>

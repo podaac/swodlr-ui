@@ -25,13 +25,13 @@ const About = () => {
                     <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}}>Using lat/lon coordinates is easier to stitch data tiles together than using the UTM coordinate system.</ListGroup.Item>
                 </ListGroup>
             </Row>
-            <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>FAQ</h5></Row>
+            {/* <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>FAQ</h5></Row> */}
             <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>Definitions</h5></Row>
             <Row style={{paddingBottom: '20px'}}>
                 <ListGroup>
                     {Object.entries(parameterHelp).map((entry, index) => {
                         return (
-                            <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}}>
+                            <ListGroup.Item className='howToListItem' style={{marginRight: '20%', marginLeft: '20%'}} key={`definition-${index}`}>
                                 <Row><h6><b>{parameterOptions[entry[0] ]}</b></h6></Row>
                                 <Row>{entry[1]}</Row>
                             </ListGroup.Item>
