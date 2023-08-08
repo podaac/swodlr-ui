@@ -142,7 +142,7 @@ const GranuleTable = (props: GranuleTableProps) => {
       // check if granule exists with that scene, cycle, and pass
       const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
       const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, scene)
-      const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', scene)
+      const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
       if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
