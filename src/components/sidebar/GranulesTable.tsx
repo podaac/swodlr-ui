@@ -136,7 +136,6 @@ const GranuleTable = (props: GranuleTableProps) => {
 
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
-    // const granulesAlreadyAdded: sampleGranuleData[] = []
     let granuleNotFound = false
     getScenesArray(scene).forEach(sceneId => {
       // check if granule exists with that scene, cycle, and pass
