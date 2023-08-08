@@ -10,6 +10,7 @@ import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
+import { v4 as uuidv4 } from 'uuid';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -94,12 +95,44 @@ const GranuleTable = (props: GranuleTableProps) => {
     }
     return validInput
   }
+  
+  const alreadyAddedCyclePassScene = (cycle: string, pass: string, scene: string): boolean => {
+    let existingValue = false
+    addedProducts.forEach(product => {
+      if (product.cycle === cycle && product.pass === pass && product.scene === scene) {
+        existingValue = true
+      }
+    })
+    return existingValue
+  }
 
   const handleSave = () => {
     // check if cycle pass and scene are all within a valid range
     const invalidCycle = !cycle && !validateInputs('cycle', cycle)
     const invalidPass = !pass && !validateInputs('pass', pass)
     const invalidScene = !scene && !validateInputs('scene', scene)
+    const footprint: LatLngExpression[] = [
+      [
+        33.62959926136482,
+        -119.59722240610449
+      ],
+      [
+        33.93357164098772,
+        -119.01030070905898
+      ],
+      [
+        33.445222247065175,
+        -118.6445806486702
+      ],
+      [
+        33.137055033294544,
+        -119.23445170097719
+      ],
+      [
+        33.629599562267856,
+        -119.59722227107866
+      ]
+    ] 
 
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
@@ -108,12 +141,13 @@ const GranuleTable = (props: GranuleTableProps) => {
     getScenesArray(scene).forEach(sceneId => {
       // check if granule exists with that scene, cycle, and pass
       const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
-      // const granulesAlreadyAdded: string[] = addedProducts.map(granuleObj => granuleObj.granuleId)
-      if (granuleFoundResult && !allAddedGranules.includes(granuleFoundResult.granuleId)) {
+      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, scene)
+      const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', scene)
+      if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
         const parameters: allProductParameters = {
-          granuleId: granuleFoundResult.granuleId,
+          granuleId: uuidv4(),
           name: '',
           cycle,
           pass,
@@ -123,13 +157,13 @@ const GranuleTable = (props: GranuleTableProps) => {
           rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
           utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
           mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-          footprint: granuleFoundResult.footprint as LatLngExpression[]
+          footprint
         }
 
         granulesToAdd.push(parameters)
       } else if (!granuleFoundResult){
         granuleNotFound = true
-      } else if (allAddedGranules.includes(granuleFoundResult.granuleId)) {
+      } else if (comboAlreadyAdded) {
         granuleAlreadyAdded = true
       }
     })
@@ -225,7 +259,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   }
 
   const getValuesForRow = (tableType: TableTypes, basicGranuleValues: GranuleForTable) => {
-    const formattedGranulesForTable = Object.entries(basicGranuleValues).map(entry => <td>{entry[1]}</td> )
+    const formattedGranulesForTable = Object.entries(basicGranuleValues).map((entry, index) => <td key={`${entry[0]}-${index}`}>{entry[1]}</td> )
     if (tableType === 'productCustomization' && showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) {
       //put two more entries in there
       formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
@@ -262,7 +296,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const renderColTitle = (labelEntry: string[]) => {
     let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
     return (
-      <th>{labelEntry[1]} {infoIcon}</th>
+      <th key={`info-icon-${labelEntry[1]}`}>{labelEntry[1]} {infoIcon}</th>
     )
   }
 
@@ -277,7 +311,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           <thead>
             <tr>
               {tableType === 'granuleSelection' ? (
-                <th>          
+                <th key={'remove-granule-checkbox'}>          
                   <Form.Check
                     inline
                     name="group1"
@@ -301,9 +335,9 @@ const GranuleTable = (props: GranuleTableProps) => {
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
+              <tr className={`${colorModeClass}-table hoverable-row`} key={`${granuleId}-${index}`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
                 {tableType === 'granuleSelection'  ? (
-                  <td>
+                  <td key={'remove-checkbox'}>
                     <Form.Check
                       inline
                       name="group1"
