@@ -1,6 +1,6 @@
 import { TestAuthenticationResponse } from "../types/authenticationTypes";
 
-const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
+const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
 const redirectUri = process.env.REACT_APP_DEV_REDIRECT_URI
 
 export const checkUserAuthentication = async () => {
