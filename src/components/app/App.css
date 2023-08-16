@@ -238,7 +238,9 @@ CUSTOMIZE PRODUCT CONTAINER
 
 .Customize-products-container-sidebar-all {
   height: 100%;
-  width: 65%;
+  /* TODO: uncomment when granule footprints are being retreived to display on map */
+  /* width: 65%; */
+  width: 100%;
   position: absolute;
   top: 0;
   left: 0;

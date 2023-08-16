@@ -6,7 +6,7 @@ variable "region" {
   default = "us-west-2"
 }
 variable "app_name" {
-  default = "hitide"
+  default = "swodlr"
 }
 variable "default_tags" {
   type    = map(string)

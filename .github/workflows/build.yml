@@ -24,7 +24,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  PROJECT_ NAME: podaac/hitide-ui
+  PROJECT_ NAME: podaac/swodlr-ui
   REACT_APP_SWODLR_API_BASE_URI: "https://d15gds5czd9p7k.cloudfront.net"
   REACT_APP_DEV_REDIRECT_URI: "?redirect=http://localhost:3000/"
 
@@ -47,73 +47,73 @@ jobs:
       #     filename: 'package.json'
       #     prefix: project
 
-      # ## Set environment variables
-      # - name: Configure Initial environment variables
-      #   run: |
-      #     echo "THE_VERSION=${{ env.project_version }}" >> $GITHUB_ENV;
-      #     echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV;
-      #     GITHUB_REF_READABLE="${GITHUB_REF//\//-}"
-      #     echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
-      #     echo "REACT_APP_SWODLR_API_BASE_URI=${{ env.REACT_APP_DEV_REDIRECT_URI }}" >> $GITHUB_ENV;
-      #     echo "REACT_APP_DEV_REDIRECT_URI=${{ env.REACT_APP_DEV_REDIRECT_URI }}" >> $GITHUB_ENV;
+      ## Set environment variables
+      - name: Configure Initial environment variables
+        run: |
+          echo "THE_VERSION=${{ env.project_version }}" >> $GITHUB_ENV;
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV;
+          GITHUB_REF_READABLE="${GITHUB_REF//\//-}"
+          echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
+          echo "REACT_APP_SWODLR_API_BASE_URI=${{ env.REACT_APP_SWODLR_API_BASE_URI }}" >> $GITHUB_ENV;
+          echo "REACT_APP_DEV_REDIRECT_URI=${{ env.REACT_APP_DEV_REDIRECT_URI }}" >> $GITHUB_ENV;
 
-      # ## NPM Tagging
-      # - name: Pre Alpha
-      #   if: |
-      #     startsWith(github.ref, 'refs/heads/issue') ||
-      #     startsWith(github.ref, 'refs/heads/dependabot/') ||
-      #     startsWith(github.ref, 'refs/heads/feature/')
-      #   run: |
-      #       echo "THE_ENV=sit" >> $GITHUB_ENV
-      #       echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
-      #       echo "THE_VERSION=$(npm --no-git-tag-version --allow-same-version version ${{ env.THE_VERSION }}-${GITHUB_SHA})" >> $GITHUB_ENV
+      ## NPM Tagging
+      - name: Pre Alpha
+        if: |
+          startsWith(github.ref, 'refs/heads/issue') ||
+          startsWith(github.ref, 'refs/heads/dependabot/') ||
+          startsWith(github.ref, 'refs/heads/feature/')
+        run: |
+            echo "THE_ENV=sit" >> $GITHUB_ENV
+            echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
+            echo "THE_VERSION=$(npm --no-git-tag-version --allow-same-version version ${{ env.THE_VERSION }}-${GITHUB_SHA})" >> $GITHUB_ENV
 
-      # ## Set Alpha variables
-      # - name: Alpha
-      #   if: github.ref == 'refs/heads/develop'
-      #   run: |
-      #       echo "THE_ENV=sit" >> $GITHUB_ENV
-      #       echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
-      #       echo "THE_VERSION=$(npm --no-git-tag-version version prerelease)" >> $GITHUB_ENV
+      ## Set Alpha variables
+      - name: Alpha
+        if: github.ref == 'refs/heads/develop'
+        run: |
+            echo "THE_ENV=sit" >> $GITHUB_ENV
+            echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
+            echo "THE_VERSION=$(npm --no-git-tag-version version prerelease)" >> $GITHUB_ENV
 
-      # ## Bump RC Version
-      # - name: Bump rc version
-      #   # If triggered by push to a release branch
-      #   if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
-      #   env:
-      #     # True if the version already has a 'rc' pre-release identifier
-      #     BUMP_RC: ${{ contains(env.project_version, 'rc') }}
-      #     RELEASE_VERSION: ${THE_BRANCH//*\/}
-      #   run: |
-      #     if [ "$BUMP_RC" == true ]; then
-      #       echo "THE_VERSION=$(npm --no-git-tag-version version prerelease --preid rc)" >> $GITHUB_ENV
-      #     else
-      #       echo "THE_VERSION=$(npm --no-git-tag-version version ${GITHUB_REF#refs/heads/release/}-rc.1)" >> $GITHUB_ENV
-      #     fi
+      ## Bump RC Version
+      - name: Bump rc version
+        # If triggered by push to a release branch
+        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        env:
+          # True if the version already has a 'rc' pre-release identifier
+          BUMP_RC: ${{ contains(env.project_version, 'rc') }}
+          RELEASE_VERSION: ${THE_BRANCH//*\/}
+        run: |
+          if [ "$BUMP_RC" == true ]; then
+            echo "THE_VERSION=$(npm --no-git-tag-version version prerelease --preid rc)" >> $GITHUB_ENV
+          else
+            echo "THE_VERSION=$(npm --no-git-tag-version version ${GITHUB_REF#refs/heads/release/}-rc.1)" >> $GITHUB_ENV
+          fi
 
-      #     echo "THE_ENV=uat" >> $GITHUB_ENV
-      #     echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
+          echo "THE_ENV=uat" >> $GITHUB_ENV
+          echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
 
-      # ## Set Release variables
-      # - name: Release
-      #   if: ${{ (startsWith(github.ref, 'refs/heads/main')) && (github.event.inputs.allow_same_version != 'true') }}
-      #   run: |
-      #       echo "THE_ENV=ops" >> $GITHUB_ENV
-      #       echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-      #       echo "Modifying version number ${{ env.project_version}}"
-      #       THE_VERSION=${{ env.project_version }}
-      #       echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
-      #       npm --no-git-tag-version version ${THE_VERSION//-*}
+      ## Set Release variables
+      - name: Release
+        if: ${{ (startsWith(github.ref, 'refs/heads/main')) && (github.event.inputs.allow_same_version != 'true') }}
+        run: |
+            echo "THE_ENV=ops" >> $GITHUB_ENV
+            echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
+            echo "Modifying version number ${{ env.project_version}}"
+            THE_VERSION=${{ env.project_version }}
+            echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
+            npm --no-git-tag-version version ${THE_VERSION//-*}
 
-      # - name: Release - Allow same version
-      #   if: ${{ (startsWith(github.ref, 'refs/heads/main')) && (github.event.inputs.allow_same_version == 'true') }}
-      #   run: |
-      #       echo "THE_ENV=ops" >> $GITHUB_ENV
-      #       echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-      #       echo "Modifying version number ${{ env.project_version}}"
-      #       THE_VERSION=${{ env.project_version }}
-      #       echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
-      #       npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
+      - name: Release - Allow same version
+        if: ${{ (startsWith(github.ref, 'refs/heads/main')) && (github.event.inputs.allow_same_version == 'true') }}
+        run: |
+            echo "THE_ENV=ops" >> $GITHUB_ENV
+            echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
+            echo "Modifying version number ${{ env.project_version}}"
+            THE_VERSION=${{ env.project_version }}
+            echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
+            npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
 
       - name: Run Snyk as a blocking step
         uses: snyk/actions/node@master
@@ -146,8 +146,8 @@ jobs:
                  (github.ref == 'refs/heads/develop' ||
                   github.ref == 'refs/heads/main'    ||
                   startsWith(github.ref, 'refs/heads/release')) }}; then
-            git config --global user.name 'hitide-ui bot'
-            git config --global user.email 'hitide-ui@noreply.github.com'
+            git config --global user.name 'swodlr-ui bot'
+            git config --global user.email 'swodlr-ui@noreply.github.com'
             git commit -am "/version ${{ env.THE_VERSION }}"
             git push
           fi
@@ -169,7 +169,7 @@ jobs:
       #     github.ref == 'refs/heads/main' ||
       #     startsWith(github.ref, 'refs/heads/release')
       #   with:
-      #     umm-json: cmr/${{ env.THE_ENV }}_hitide_cmr_umm_t.json
+      #     umm-json: cmr/${{ env.THE_ENV }}_swodlr_cmr_umm_t.json
       #     provider: 'POCLOUD'
       #     env: ${{ env.THE_ENV }}
       #     version: ${{ env.THE_VERSION }}

@@ -55,7 +55,7 @@ else
 fi
 
 # s3 bucket already created so import the bucket into terraform state
-terraform import -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}" aws_s3_bucket.hitide-site-bucket podaac-services-${tf_venue}-swodlr || true
+terraform import -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}" aws_s3_bucket.swodlr-site-bucket podaac-services-${tf_venue}-swodlr || true
 
 terraform plan -input=false -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}" -out="tfplan"
 
