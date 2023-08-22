@@ -6,7 +6,7 @@ variable "region" {
   default = "us-west-2"
 }
 variable "app_name" {
-  default = "swodlr"
+  default = "swodlr-ui"
 }
 variable "default_tags" {
   type    = map(string)

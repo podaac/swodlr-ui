@@ -43,7 +43,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 TF_IN_AUTOMATION=true
 
 # Terraform initialization
-terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform" -backend-config="profile=ngap-service-${tf_venue}"
+terraform init -reconfigure -input=false -backend-config="bucket=podaac-swodlr-ui-${tf_venue}" -backend-config="profile=ngap-service-${tf_venue}"
 
 if [[ "${ticket}" ]]; then
   set +e
@@ -53,6 +53,8 @@ if [[ "${ticket}" ]]; then
 else
   terraform workspace select default
 fi
+
+terraform output swodlr-bucket-name
 
 # s3 bucket already created so import the bucket into terraform state
 terraform import -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}" aws_s3_bucket.swodlr-site-bucket podaac-services-${tf_venue}-swodlr || true
