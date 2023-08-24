@@ -240,7 +240,7 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
         run: |          
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ env.THE_ENV }}
-          echo "SWODLR_UI_BUCKET=$(terraform output swodlr-bucket-name)" >> $GITHUB_ENV
+          echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
 
       - name: Sync S3
         if: |
