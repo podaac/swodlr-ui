@@ -1,6 +1,6 @@
 {
   "name": "swodlr-ui",
-  "version": "0.1.1-36",
+  "version": "0.1.1-37",
   "private": true,
   "engines": {
     "node": ">=18.0.0"
