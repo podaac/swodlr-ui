@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
-import L, { LatLngExpression } from 'leaflet'
+import L from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
@@ -10,7 +10,7 @@ interface GranuleState {
     sampleGranuleDataArray: number[],
     addedProducts: allProductParameters[],
     selectedGranules: string[],
-    granuleFocus: LatLngExpression,
+    granuleFocus: number[],
     generatedProducts: GeneratedProduct[],
     generateProductParameters: GenerateProductParameters,
     granuleTableAlerts: AlertMessageObject[],
@@ -27,7 +27,7 @@ const initialState: GranuleState = {
     addedProducts: [],
     sampleGranuleDataArray: [],
     selectedGranules: [],
-    granuleFocus: [33.854457, -118.709093] as LatLngExpression,
+    granuleFocus: [33.854457, -118.709093],
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
@@ -62,7 +62,7 @@ export const productSlice = createSlice({
       const granuleIdToFocus = action.payload
       const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
-      state.granuleFocus = centerOfFootprint as LatLngExpression
+      state.granuleFocus = [centerOfFootprint.lat, centerOfFootprint.lng]
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]

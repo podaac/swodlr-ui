@@ -225,7 +225,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   }
 
   const getValuesForRow = (tableType: TableTypes, basicGranuleValues: GranuleForTable) => {
-    const formattedGranulesForTable = Object.entries(basicGranuleValues).map(entry => <td>{entry[1]}</td> )
+    const formattedGranulesForTable = Object.entries(basicGranuleValues).map((entry, index) => <td key={`${entry[0]}-${index}`}>{entry[1]}</td> )
     if (tableType === 'productCustomization' && showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) {
       //put two more entries in there
       formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
@@ -262,7 +262,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const renderColTitle = (labelEntry: string[]) => {
     let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
     return (
-      <th>{labelEntry[1]} {infoIcon}</th>
+      <th key={`info-icon-${labelEntry[1]}`}>{labelEntry[1]} {infoIcon}</th>
     )
   }
 
@@ -277,7 +277,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           <thead>
             <tr>
               {tableType === 'granuleSelection' ? (
-                <th>          
+                <th key={'remove-granule-checkbox'}>          
                   <Form.Check
                     inline
                     name="group1"
@@ -301,9 +301,9 @@ const GranuleTable = (props: GranuleTableProps) => {
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
+              <tr className={`${colorModeClass}-table hoverable-row`} key={`${granuleId}-${index}`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
                 {tableType === 'granuleSelection'  ? (
-                  <td>
+                  <td key={'remove-checkbox'}>
                     <Form.Check
                       inline
                       name="group1"

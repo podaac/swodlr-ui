@@ -51,9 +51,9 @@ const Welcome = () => {
               <Col md={{ span: 8, offset: 2 }}>
                 <Card className='loginButtonCard' style={{width: '90%'}}>
                   <Card.Body>
-                    <Card.Text style={{marginTop: '0%', marginBottom: '10%'}}><h4 className='welcome-page-text'>Login to Continue:</h4></Card.Text>
+                    <h4 style={{marginTop: '0%', marginBottom: '10%'}} className='welcome-page-text'>Login to Continue:</h4>
                     <Button variant='success' size='lg' onClick={() => handleLogin()}>Earthdata Login</Button>
-                    <Card.Text style={{marginTop: '10%', marginBottom: '0%'}}><p className='welcome-page-text'>To use this application, you need to sign in via Earthdata Login. The login button above will redirect you to the Earthdata Login site, then you will be redirected back to SWODLR.</p></Card.Text>
+                    <Card.Text className='welcome-page-text' style={{marginTop: '10%', marginBottom: '0%'}}>To use this application, you need to sign in via Earthdata Login. The login button above will redirect you to the Earthdata Login site, then you will be redirected back to SWODLR.</Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
