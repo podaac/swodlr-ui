@@ -34,16 +34,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout
-      - name: Checkout project to build and deploy
-        uses: actions/checkout@v2
-
       - uses: getsentry/action-github-app-token@v2
         name: my-app-install token
         id: podaac-cicd
         with:
           app_id: ${{ secrets.CICD_APP_ID }}
           private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+
+      # Checkout
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
 
       - name: Setup git user
         run: |
