@@ -216,6 +216,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v2.0.3
         with:
           terraform_version: 1.3.7
+          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -241,6 +242,7 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
         run: |          
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ env.THE_ENV }}
+          echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
 
       - name: Sync S3
         if: |
@@ -250,4 +252,4 @@ jobs:
           github.event.head_commit.message == '/deploy sit' ||
           github.event.head_commit.message == '/deploy uat'
         run:
-          aws s3 sync ./build s3://${{ steps.terraform-deploy.outputs.swodlr-bucket-name }} --delete
+          aws s3 sync ./build s3://${{ env.SWODLR_UI_BUCKET }} --delete
