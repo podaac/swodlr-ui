@@ -40,7 +40,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 # https://www.terraform.io/docs/commands/environment-variables.html#tf_in_automation
 TF_IN_AUTOMATION=true
 
-# Verify that you are in test workspace
+# Verify that you are in test workspace.
 current_workspace=$(terraform workspace show)
 
 if [ $current_workspace == ${ticket} ]; then
