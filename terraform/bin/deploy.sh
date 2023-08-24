@@ -43,7 +43,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 TF_IN_AUTOMATION=true
 
 # Terraform initialization
-source ../environments/${tf_venue}.env
+source ./environments/${tf_venue}.env
 terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform" -backend-config="profile=ngap-service-${tf_venue}" -backend-config="region=$REGION"
 
 if [[ "${ticket}" ]]; then
