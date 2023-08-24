@@ -38,6 +38,18 @@ jobs:
       - name: Checkout project to build and deploy
         uses: actions/checkout@v2
 
+      - uses: getsentry/action-github-app-token@v2
+        name: my-app-install token
+        id: podaac-cicd
+        with:
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+
+      - name: Setup git user
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
       ## Set environment variables
       - name: Configure Initial environment variables
         run: |
@@ -135,8 +147,6 @@ jobs:
                  (github.ref == 'refs/heads/develop' ||
                   github.ref == 'refs/heads/main'    ||
                   startsWith(github.ref, 'refs/heads/release')) }}; then
-            git config --global user.name 'swodlr-ui bot'
-            git config --global user.email 'swodlr-ui@noreply.github.com'
             git commit -am "/version ${{ env.THE_VERSION }}"
             git push
           fi
