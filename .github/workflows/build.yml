@@ -59,6 +59,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
+      ## Read the json file into the environment variables
+      - name: JSON to variables
+        uses: rgarcia-phi/json-to-variables@v1
+        with:
+          filename: 'package.json'
+          prefix: project
+
       ## Set environment variables
       - name: Configure Initial environment variables
         run: |
