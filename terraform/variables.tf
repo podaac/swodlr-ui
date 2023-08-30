@@ -5,6 +5,7 @@ variable "app_version" {}
 variable "cloudfront_distribution_id" {
   type = string
   description = "ID of the Cloudfront distribution routing public traffic to this app"
+  sensitive   = true
 }
 variable "cloudfront_allow_vpcs" {
   type = list(string)
