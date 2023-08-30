@@ -40,6 +40,21 @@ const About = () => {
                 </ListGroup>
             </Row>
             <Row><h5 style={{marginTop: '10px', marginBottom: '20px'}}>Citations</h5></Row>
+            <Row style={{marginRight: '20%', marginLeft: '20%'}}>
+                <div className='howToListItem'>
+                    <p>
+                        <b>When using data products from SWODLR, please cite both the SWODLR tool and the original source data product.</b>
+                    </p>
+                    <h6>Tool Citation</h6>
+                    <p>
+                        PO.DAAC. (YYYY). SWOT On-Demand Level 2 Raster Generation (SWODLR). NASA EOSDIS Physical Oceanography Distributed Active Archive Center (PO.DAAC), Pasadena, California, USA. Accessed Month dd, yyyy. INSERT SWODLR URL
+                    </p>
+                    <h6>Product Citation</h6>
+                    <p>
+                        Get from the dataset landing page when data is published like the citation tab on the <a href="https://podaac.jpl.nasa.gov/dataset/SWOT_SIMULATED_NA_CONTINENT_L2_HR_RASTER_V1" target="_">simulated raster data landing page</a>.
+                    </p>
+                </div>
+            </Row>
         </Col>
     );
 }
