@@ -43,6 +43,8 @@ locals {
   # Account ID used for getting the ECR host
   account_id = data.aws_caller_identity.current.account_id
 
+  vpc_list = split(",", var.cloudfront_allow_vpcs)
+
   default_tags = length(var.default_tags) == 0 ? {
     team : "TVA",
     application : local.ec2_resources_name,

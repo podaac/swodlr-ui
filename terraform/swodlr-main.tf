@@ -24,9 +24,9 @@ data "aws_iam_policy_document" "allow_cloudfront" {
   }
 
   dynamic "statement" {
-    for_each = { for idx, vpc_id in split(",", var.cloudfront_allow_vpcs): vpc_id => idx}
+    for_each = { for idx, vpc_id in local.vpc_list: idx => vpc_id}
     content {
-      sid    = "Internet-Services-VPC-Access-${format("%02d", statement.value + 1)}"
+      sid    = "Internet-Services-VPC-Access-${format("%02d", statement.key + 1)}"
       effect = "Allow"
 
       resources = [
@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "allow_cloudfront" {
       condition {
         test     = "StringEquals"
         variable = "aws:sourceVpc"
-        values   = [statement.key]
+        values   = [statement.value]
       }
 
       principals {
