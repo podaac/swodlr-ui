@@ -275,6 +275,11 @@ jobs:
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }}
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
 
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: build
+
       - name: Sync S3
         run:
-          aws s3 sync ./build s3://${{ env.SWODLR_UI_BUCKET }} --delete
+          aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete
