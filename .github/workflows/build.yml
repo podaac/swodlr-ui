@@ -272,7 +272,7 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
         run: |
           export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
-          export TF_VAR_cloudfront_allow_vpcs='${{ split(",", secrets.EDC_INTERNET_SERVICES_VPCS) }}'
+          export TF_VAR_cloudfront_allow_vpcs='${{ secrets.EDC_INTERNET_SERVICES_VPCS }}'
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }}
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
 
