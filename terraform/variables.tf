@@ -8,7 +8,7 @@ variable "cloudfront_distribution_id" {
   sensitive   = true
 }
 variable "cloudfront_allow_vpcs" {
-  type = list(string)
+  type = string
   description = "List of VPC ids which will be given read access to S3 bucket. Primarily for use if cloudfront traffic is coming from a different VPC."
   sensitive   = true
 }
