@@ -10,6 +10,7 @@ variable "cloudfront_distribution_id" {
 variable "cloudfront_allow_vpcs" {
   type = list(string)
   description = "List of VPC ids which will be given read access to S3 bucket. Primarily for use if cloudfront traffic is coming from a different VPC."
+  sensitive   = true
 }
 variable "region" {
   default = "us-west-2"
