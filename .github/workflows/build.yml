@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deploy_env: ${{ steps.npm-build.outputs.deploy_env }}
-      the_version: ${{ steps.version.outputs.the_version }}
+      version: ${{ steps.version.outputs.the_version }}
     steps:
       - uses: getsentry/action-github-app-token@v2
         name: my-app-install token
