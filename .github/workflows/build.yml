@@ -66,10 +66,14 @@ jobs:
           filename: 'package.json'
           prefix: project
 
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
       ## Set environment variables
       - name: Configure Initial environment variables
         run: |
-          echo "THE_VERSION=${{ env.project_version }}" >> $GITHUB_ENV;
+          echo "THE_VERSION=${{ steps.package-version.outputs.current-version}}" >> $GITHUB_ENV;
           echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV;
           GITHUB_REF_READABLE="${GITHUB_REF//\//-}"
           echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
@@ -101,7 +105,7 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
         env:
           # True if the version already has a 'rc' pre-release identifier
-          BUMP_RC: ${{ contains(env.project_version, 'rc') }}
+          BUMP_RC: ${{ contains(steps.package-version.outputs.current-version, 'rc') }}
           RELEASE_VERSION: ${THE_BRANCH//*\/}
         run: |
           if [ "$BUMP_RC" == true ]; then
@@ -119,8 +123,8 @@ jobs:
         run: |
             echo "THE_ENV=ops" >> $GITHUB_ENV
             echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-            echo "Modifying version number ${{ env.project_version}}"
-            THE_VERSION=${{ env.project_version }}
+            echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
+            THE_VERSION=${{ steps.package-version.outputs.current-version}}
             echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
             npm --no-git-tag-version version ${THE_VERSION//-*}
 
@@ -129,8 +133,8 @@ jobs:
         run: |
             echo "THE_ENV=ops" >> $GITHUB_ENV
             echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-            echo "Modifying version number ${{ env.project_version}}"
-            THE_VERSION=${{ env.project_version }}
+            echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
+            THE_VERSION=${{ steps.package-version.outputs.current-version}}
             echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
             npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
 
