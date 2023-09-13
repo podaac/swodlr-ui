@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css'
 import { useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { useState } from 'react';
 import { Row } from 'react-bootstrap';
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -15,14 +14,10 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const Map = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const granuleFocus = useAppSelector((state) => state.product.granuleFocus)
-  const [previousGranuleFocus, setPreviousGranuleFocus] = useState(granuleFocus)
 
   const ChangeView = () => {
     const map = useMap();
-    if (previousGranuleFocus !== granuleFocus) {
-      map.setView(granuleFocus, 8);
-      setPreviousGranuleFocus(granuleFocus)
-    }
+    map.setView(granuleFocus as LatLngExpression, 8);
     return null
   }
   
@@ -36,8 +31,8 @@ const Map = () => {
           />
           <ChangeView />
           <ZoomControl position='bottomright'/>
-          {addedProducts.map(productObject => (
-          <Polygon positions={productObject.footprint as LatLngExpression[]}>
+          {addedProducts.map((productObject, index) => (
+          <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]}>
             <Tooltip sticky>{productObject.granuleId}</Tooltip>
           </Polygon>
           ))}

@@ -60,7 +60,8 @@ const App = () => {
       case 'productCustomization':
         pageToShow = (
           <>
-            <Map />
+            {/* TODO: uncomment when granule footprints are being retreived to display on map */}
+            {/* <Map /> */}
             <CustomizeProductsSidebar />
           </>
         )

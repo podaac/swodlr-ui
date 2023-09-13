@@ -238,7 +238,9 @@ CUSTOMIZE PRODUCT CONTAINER
 
 .Customize-products-container-sidebar-all {
   height: 100%;
-  width: 65%;
+  /* TODO: uncomment when granule footprints are being retreived to display on map */
+  /* width: 65%; */
+  width: 100%;
   position: absolute;
   top: 0;
   left: 0;
@@ -407,8 +409,24 @@ ABOUT PAGE
 **************************************************/
 
 .about-page {
-  max-height: 85vh;
+  max-height: 82vh;
   overflow-y: auto;
+}
+
+.about-card {
+  background-color: #1A2535;
+  color: white;
+  margin-right: '10%'; 
+  margin-left: '10%';
+  margin-bottom: '40px'
+}
+
+.howToListItem {
+  background-color: #1A2535;
+  /* border: solid 1px #FAF9F6; */
+  color: white;
+  padding-left: '10%';
+  padding-right: '10%';
 }
 
 /**************************************************
@@ -439,14 +457,6 @@ WELCOME PAGE
 
 .loginButtonCard {
   background-color: #1A2535;
-}
-
-.howToListItem {
-  background-color: #2c415c;
-  border: solid 3px #1A2535;
-  
-  color: white;
-  /* border-bottom: white; */
 }
 
 /**************************************************

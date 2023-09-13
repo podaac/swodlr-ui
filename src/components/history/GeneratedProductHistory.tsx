@@ -43,10 +43,10 @@ const GeneratedProductHistory = () => {
         </OverlayTrigger>
     )
     
-      const renderColTitle = (labelEntry: string[]) => {
+      const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
         return (
-          <th>{labelEntry[1]} {infoIcon}</th>
+          <th key={`${labelEntry[0]}-${index}`}>{labelEntry[1]} {infoIcon}</th>
         )
       }
 
@@ -57,7 +57,7 @@ const GeneratedProductHistory = () => {
                     <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>
                     <tr>
-                        {Object.entries(generatedProductsLabels).map(labelEntry => renderColTitle(labelEntry))}
+                        {Object.entries(generatedProductsLabels).map((labelEntry, index) => renderColTitle(labelEntry, index))}
                     </tr>
                     </thead>
                     <tbody>
@@ -71,8 +71,8 @@ const GeneratedProductHistory = () => {
                             const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
                             const productRowValues = {productId, sampleGranuleId, status: statusToUse, cycle, pass, scene, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
                             return (
-                            <tr className={`${colorModeClass}-table hoverable-row`}>
-                            {Object.entries(productRowValues).map(entry => entry[0] === 'downloadUrl' && entry[1] !== 'N/A' ? <td><a href={entry[1] as string} target='_blank' rel="noreferrer">{entry[1]}</a></td> : <td>{entry[1]}</td> )}
+                            <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
+                            {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td> )}
                             </tr>
                         )})}
                     </tbody>
