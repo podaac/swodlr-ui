@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 const Welcome = () => {
   const dispatch = useAppDispatch()
-  const testMode: boolean = true
+  const testMode: boolean = false
 
   const [redirectUri, setRedirectUri] = useState("");
 
