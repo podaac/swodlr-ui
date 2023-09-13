@@ -34,10 +34,12 @@ env:
 jobs:
   # First job in the workflow installs and verifies the software
   build:
-    name: Build, Test, Deploy
+    name: Build, Test
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    outputs:
+      deploy_env: ${{ steps.npm-build.outputs.deploy_env }}
+      version: ${{ steps.version.outputs.the_version }}
     steps:
       - uses: getsentry/action-github-app-token@v2
         name: my-app-install token
@@ -57,10 +59,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
       ## Set environment variables
       - name: Configure Initial environment variables
         run: |
-          echo "THE_VERSION=${{ env.project_version }}" >> $GITHUB_ENV;
+          echo "THE_VERSION=${{ steps.package-version.outputs.current-version}}" >> $GITHUB_ENV;
           echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV;
           GITHUB_REF_READABLE="${GITHUB_REF//\//-}"
           echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
@@ -92,7 +98,7 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
         env:
           # True if the version already has a 'rc' pre-release identifier
-          BUMP_RC: ${{ contains(env.project_version, 'rc') }}
+          BUMP_RC: ${{ contains(steps.package-version.outputs.current-version, 'rc') }}
           RELEASE_VERSION: ${THE_BRANCH//*\/}
         run: |
           if [ "$BUMP_RC" == true ]; then
@@ -110,8 +116,8 @@ jobs:
         run: |
             echo "THE_ENV=ops" >> $GITHUB_ENV
             echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-            echo "Modifying version number ${{ env.project_version}}"
-            THE_VERSION=${{ env.project_version }}
+            echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
+            THE_VERSION=${{ steps.package-version.outputs.current-version}}
             echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
             npm --no-git-tag-version version ${THE_VERSION//-*}
 
@@ -120,8 +126,8 @@ jobs:
         run: |
             echo "THE_ENV=ops" >> $GITHUB_ENV
             echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-            echo "Modifying version number ${{ env.project_version}}"
-            THE_VERSION=${{ env.project_version }}
+            echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
+            THE_VERSION=${{ steps.package-version.outputs.current-version}}
             echo "THE_VERSION=${THE_VERSION//-*}" >> $GITHUB_ENV
             npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
 
@@ -148,6 +154,7 @@ jobs:
             --project-name=${{ github.repository }}
 
       - name: Commit Version Bump
+        id: version
         # If building develop, a release branch, or main then we commit the version bump back to the repo
         run: |
           if ${{ github.event.inputs.allow_same_version != 'true' &&
@@ -157,6 +164,7 @@ jobs:
             git commit -am "/version ${{ env.THE_VERSION }}"
             git push
           fi
+          echo "the_version=${{ env.THE_VERSION }}" >> $GITHUB_OUTPUT
 
       - name: Push Tag
         if: |
@@ -207,13 +215,41 @@ jobs:
           echo "TARGET_ENV_UPPERCASE=${override_env_upper}" >> $GITHUB_ENV
 
       - name: NPM install & NPM Lint
+        id: npm-build
         run: |
           source terraform/environments/${{ env.THE_ENV }}.env
           npm install
           npm run build
+          echo "deploy_env=${{ env.TARGET_ENV_UPPERCASE }}" >> $GITHUB_OUTPUT
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/*
 
       ## Deployment
-      - uses: hashicorp/setup-terraform@v2.0.3
+
+
+  deploy:
+    name: Deploy
+    needs: build
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.outputs.deploy_env }}
+    env:
+      TARGET_ENV_UPPERCASE: ${{ needs.build.outputs.deploy_env }}
+      THE_VERSION: ${{ needs.build.outputs.version }}
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/main'    ||
+      startsWith(github.ref, 'refs/heads/release') ||
+      github.event.head_commit.message == '/deploy sit' ||
+      github.event.head_commit.message == '/deploy uat'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+      - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.3.7
           terraform_wrapper: false
@@ -223,33 +259,29 @@ jobs:
         with:
           aws-region: us-west-2
           role-session-name: GitHubActions
-          aws-access-key-id: ${{ secrets[format('AWS_ACCESS_KEY_ID_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}
-          aws-secret-access-key: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}
+          aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
+          aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
 
       - name: Validate Terraform
         run: terraform validate -no-color
 
       - name: Deploy to venue
         id: terraform-deploy
-        if: |
-          github.ref == 'refs/heads/develop' ||
-          github.ref == 'refs/heads/main'    ||
-          startsWith(github.ref, 'refs/heads/release') ||
-          github.event.head_commit.message == '/deploy sit' ||
-          github.event.head_commit.message == '/deploy uat'
         working-directory: terraform/
         env:
           AWS_DEFAULT_REGION: us-west-2
-        run: |          
-          ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ env.THE_ENV }}
+        run: |
+          export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
+          export TF_VAR_cloudfront_allow_vpcs=${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
+          ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }}
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
 
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: build
+          path: build/
+
       - name: Sync S3
-        if: |
-          github.ref == 'refs/heads/develop' ||
-          github.ref == 'refs/heads/main'    ||
-          startsWith(github.ref, 'refs/heads/release') ||
-          github.event.head_commit.message == '/deploy sit' ||
-          github.event.head_commit.message == '/deploy uat'
         run:
-          aws s3 sync ./build s3://${{ env.SWODLR_UI_BUCKET }} --delete
+          aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete
