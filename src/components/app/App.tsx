@@ -22,17 +22,16 @@ const App = () => {
   const currentPage = useAppSelector((state) => state.app.currentPage)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
-  useEffect(() => {
-    if (userAuthenticated) {
-      const fetchData = async () => {
-        const userInfoResponse: CurrentUserData = await getUserData() as CurrentUserData;
-        dispatch(setCurrentUser(userInfoResponse))
-      }
-
-      fetchData()
-      .catch(console.error);
-    }
-  });
+  // useEffect(() => {
+  //   if (userAuthenticated) {
+  //     const fetchData = async () => {
+  //       const userInfoResponse: CurrentUserData = await getUserData() as CurrentUserData;
+  //       dispatch(setCurrentUser(userInfoResponse))
+  //     }
+  //     fetchData()
+  //     .catch(console.error);
+  //   }
+  // });
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
