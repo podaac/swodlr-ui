@@ -311,6 +311,11 @@ tfoot {
   bottom: 0;
 }
 
+.table {
+  --bs-table-color: none;
+  --bs-table-bg: none;
+}
+
 .table-responsive-granulesion {
   max-height: 40vh;
   overflow-y: auto;
