@@ -65,11 +65,11 @@ const GeneratedProductHistory = () => {
                             const {id: productId, status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
                             const statusToUse = status[0].state
                             const sampleGranuleId = granules.length === 0 ? 'N/A' : granules[0].id
-                            const sampleDownloadUrl = 'N/A'  
+                            const downloadUrl = granules && granules.length !== 0 ? granules[0].uri : 'N/A'
                             const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
                             const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
                             const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
-                            const productRowValues = {productId, sampleGranuleId, status: statusToUse, cycle, pass, scene, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, sampleDownloadUrl, dateGenerated}
+                            const productRowValues = {productId, sampleGranuleId, status: statusToUse, cycle, pass, scene, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
                             return (
                             <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
                             {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td> )}
