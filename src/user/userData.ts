@@ -11,6 +11,20 @@ const graphQLClient = new GraphQLClient(graphqlUri, {
     mode: `cors`,
   })
 
+export const getUserDataResponse = async () => {
+  try {
+    const userDataResponse = await graphQLClient.request(userIdQuery)
+    return userDataResponse
+  } catch (err) {
+    console.log (err)
+    if (err instanceof Error) {
+        return err
+      } else {
+        return 'something happened'
+      }
+  }
+}
+
 export const getUserData = async () => {
     try {
         const userInfoResponse = await graphQLClient.request(userIdQuery).then((result: unknown | UserResponse) => {

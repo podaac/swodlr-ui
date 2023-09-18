@@ -1,9 +1,10 @@
 import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap';
 import { useAppDispatch } from '../../redux/hooks'
-import { setCurrentPage, setUserAuthenticated } from '../app/appSlice';
+import { setCurrentPage, setCurrentUser, setUserAuthenticated } from '../app/appSlice';
 import { checkUserAuthentication } from '../../user/authentication';
 import { TestAuthenticationResponse } from '../../types/authenticationTypes';
 import { useEffect, useState } from 'react';
+import { CurrentUserData } from '../../types/graphqlTypes';
 
 const Welcome = () => {
   const dispatch = useAppDispatch()
@@ -21,7 +22,7 @@ const Welcome = () => {
   const testAuthentication = async () => {
     const response: TestAuthenticationResponse = await checkUserAuthentication()
     if (response.authenticated) {
-      // const userData = getUserData()
+      dispatch(setCurrentUser(response.data as CurrentUserData))
       dispatch(setCurrentPage('productCustomization'))
       dispatch(setUserAuthenticated())
     } else {
