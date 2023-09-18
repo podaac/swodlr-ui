@@ -70,11 +70,14 @@ const GeneratedProductHistory = () => {
                             const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
                             const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
                             const productRowValues = {productId, sampleGranuleId, status: statusToUse, cycle, pass, scene, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
-                            return (
-                            <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
-                            {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td> )}
-                            </tr>
-                        )})}
+                            if (statusToUse !== 'ERROR') {
+                                return (
+                                    <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
+                                        {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td> )}
+                                    </tr>
+                                )
+                            }
+                        })}
                     </tbody>
                 </Table>
             </div>
