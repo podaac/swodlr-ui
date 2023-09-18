@@ -311,7 +311,12 @@ tfoot {
   bottom: 0;
 }
 
-.table-responsive-granulesion {
+.table {
+  --bs-table-color: none;
+  --bs-table-bg: none;
+}
+
+.table-responsive-granuleSelection {
   max-height: 40vh;
   overflow-y: auto;
 }
