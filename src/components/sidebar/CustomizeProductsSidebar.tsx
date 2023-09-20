@@ -71,6 +71,7 @@ const CustomizeProductsSidebar = () => {
             {renderSidebarContents()}
             </div>
         </Col>
+        {/* TODO: uncomment when granule footprints are being retreived to display on map */}
         {/* <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
         </div> */}
