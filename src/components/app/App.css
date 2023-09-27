@@ -5,22 +5,6 @@ html, body, #root, .App {
   font-family: 'Source Sans 3', sans-serif;
 }
 
-body {
-  user-select: none; /* supported by Chrome and Opera */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-}
-
-.enable-text-selection {
-  user-select: text; /* supported by Chrome and Opera */
- -webkit-user-select: text; /* Safari */
- -khtml-user-select: text; /* Konqueror HTML */
- -moz-user-select: text; /* Firefox */
- -ms-user-select: text; /* Internet Explorer/Edge */
-}
-
 .user-authenticated {
   padding-top: 55px;
   width: 100%;
