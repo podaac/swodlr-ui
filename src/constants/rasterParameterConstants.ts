@@ -1,7 +1,7 @@
 import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
-    UTM: [100, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
+    UTM: [90, 100, 120, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
     GEO: [3, 4, 5, 6, 8, 15, 30, 60, 180, 300]
 }
 
