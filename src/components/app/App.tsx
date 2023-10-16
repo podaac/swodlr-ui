@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Map from '../map/Map'
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setResizeInactive, setResizeEndLocation, setResizeStartLocation } from '../sidebar/actions/sidebarSlice';
 import Welcome from '../welcome/Welcome'
@@ -10,28 +9,14 @@ import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
-import { getUserData } from '../../user/userData';
-import { setCurrentUser } from './appSlice';
-import { CurrentUserData } from '../../types/graphqlTypes';
-
+import { Route, Routes } from 'react-router-dom';
 const App = () => {
   const dispatch = useAppDispatch()
   const footerResizeActive = useAppSelector((state) => state.sidebar.footerResizeActive)
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
-  const currentPage = useAppSelector((state) => state.app.currentPage)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
 
-  // useEffect(() => {
-  //   if (userAuthenticated) {
-  //     const fetchData = async () => {
-  //       const userInfoResponse: CurrentUserData = await getUserData() as CurrentUserData;
-  //       dispatch(setCurrentUser(userInfoResponse))
-  //     }
-  //     fetchData()
-  //     .catch(console.error);
-  //   }
-  // });
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
@@ -47,36 +32,12 @@ const App = () => {
   // can use this for testing purposes
   // const userAuthenticated = true
   
-  const unauthenticatedApplicationView = (<>
-    <NavbarContainer showMainNavbar={false}/>
-    <Welcome />
-    <PodaacFooter />
-  </>)
 
-  const renderAuthenticatedApplicationView = () => {
-    let pageToShow
-    switch(currentPage) {
-      case 'productCustomization':
-        pageToShow = (
-          <>
-            {/* TODO: uncomment when granule footprints are being retreived to display on map */}
-            {/* <Map /> */}
-            <CustomizeProductsSidebar />
-          </>
-        )
-        break
-      case 'generatedProductsHistory':
-        pageToShow = <GeneratedProductHistory />
-        break
-      case 'about':
-        pageToShow = <About />
-        break
-      default:
-    }
+  const getPageWithFormatting = (component: JSX.Element, showMainNavbar: boolean) => {
     return (
       <>
-        <NavbarContainer showMainNavbar={true}/>
-        {pageToShow}
+        <NavbarContainer showMainNavbar={showMainNavbar}/>
+        {component}
         <PodaacFooter />
       </>
     )
@@ -84,7 +45,13 @@ const App = () => {
 
   return (
     <div className={`App ${userAuthenticated ? 'user-authenticated' : ''} ${colorModeClass}-background`} style={{cursor: footerResizeActive ? 'grabbing' : ''}} onMouseUp={(event) => handleFooterResize(event)} onMouseMove={(event) => handleFooterResize(event)}>
-      {userAuthenticated ? renderAuthenticatedApplicationView() : unauthenticatedApplicationView}
+      <Routes>
+        <Route path="/" element={ getPageWithFormatting(<Welcome />, false) } />
+        <Route path="customizeProduct/selectScenes" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="selectScenes"/>, true) } />
+        <Route path="customizeProduct/configureOptions" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="configureOptions"/>, true) } />
+        <Route path="generatedProductHistory" element={ getPageWithFormatting(<GeneratedProductHistory/>, true) } />
+        <Route path="about" element={ getPageWithFormatting(<About />, true) } />
+      </Routes>
     </div>
   );
 }
