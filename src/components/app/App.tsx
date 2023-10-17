@@ -10,6 +10,7 @@ import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 import { Route, Routes } from 'react-router-dom';
+import ErrorPage from '../error/ErrorPage';
 const App = () => {
   const dispatch = useAppDispatch()
   const footerResizeActive = useAppSelector((state) => state.sidebar.footerResizeActive)
@@ -51,6 +52,7 @@ const App = () => {
         <Route path="customizeProduct/configureOptions" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="configureOptions"/>, true) } />
         <Route path="generatedProductHistory" element={ getPageWithFormatting(<GeneratedProductHistory/>, true) } />
         <Route path="about" element={ getPageWithFormatting(<About />, true) } />
+        <Route path="error" element={ getPageWithFormatting(<ErrorPage errorCode='404' />, true) } />
       </Routes>
     </div>
   );
