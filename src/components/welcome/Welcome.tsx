@@ -29,7 +29,6 @@ const Welcome = () => {
       dispatch(setCurrentUser(response.data as CurrentUserData))
       navigate(`customizeProduct/selectScenes${search}`)
       dispatch(setUserAuthenticated())
-
     } else {
       if (response.redirectUri) {
         setRedirectUri(response.redirectUri)

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
@@ -10,14 +10,15 @@ import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 import { Route, Routes } from 'react-router-dom';
-import ErrorPage from '../error/ErrorPage';
+import NotFound from '../error/NotFound';
+
 const App = () => {
   const dispatch = useAppDispatch()
   const footerResizeActive = useAppSelector((state) => state.sidebar.footerResizeActive)
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-
+  
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
@@ -52,7 +53,7 @@ const App = () => {
         <Route path="customizeProduct/configureOptions" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="configureOptions"/>, true) } />
         <Route path="generatedProductHistory" element={ getPageWithFormatting(<GeneratedProductHistory/>, true) } />
         <Route path="about" element={ getPageWithFormatting(<About />, true) } />
-        <Route path="error" element={ getPageWithFormatting(<ErrorPage errorCode='404' />, true) } />
+        <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>
       </Routes>
     </div>
   );
