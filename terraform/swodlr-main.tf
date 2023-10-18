@@ -77,6 +77,16 @@ resource "aws_s3_bucket_ownership_controls" "private_acl_ownership" {
   }
 }
 
+resource "aws_s3_bucket_website_configuration" "swodlr-site-bucket" {
+    bucket = aws_s3_bucket.swodlr-site-bucket.id
+    index_document {
+      suffix = "index.html"
+    }
+    error_document {
+        key = "index.html"
+    }
+}
+
 
 output "swodlr-bucket-name" {
   value = aws_s3_bucket.swodlr-site-bucket.id
