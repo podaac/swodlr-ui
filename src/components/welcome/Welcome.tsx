@@ -40,7 +40,7 @@ const Welcome = () => {
 
   const handleLogin = () => {
     if (testMode) {
-      dispatch(setCurrentPage('productCustomization'))
+      navigate(`customizeProduct/selectScenes${search}`)
       dispatch(setUserAuthenticated())
     } else {
       window.location.replace(redirectUri as string);
