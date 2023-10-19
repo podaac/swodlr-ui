@@ -49,7 +49,7 @@ export interface sampleGranuleData {
   scene: string
 }
 
-export interface granuleAlertMessageConstantType {
+export interface alertMessageConstantType {
   [key: string]: AlertMessageObjectConstant
 }
 
@@ -97,7 +97,8 @@ export interface AlertMessageObject {
   message: string,
   variant: "danger" | "success" | "warning",
   timeoutId: ReturnType<typeof setTimeout>,
-  tableType: TableTypes
+  tableType?: TableTypes,
+  location: AlertLocation
 }
 
 export type CustomizeProductSidebarTypes = 'selectScenes' | 'configureOptions'
@@ -124,4 +125,9 @@ export interface inputValuesDictionary {
 
 export interface newUrlParamsObject {
   [key: string]: string | number | boolean
+}
+
+export type AlertLocation = 'granuleTable' | 'generate'
+export interface AlertProps {
+  location: AlertLocation
 }

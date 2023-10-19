@@ -1,13 +1,13 @@
 import { ReactElement, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, alertShowTime } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
-import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
+import { addProduct, setSelectedGranules, setGranuleFocus, addAlerts, removeAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
-  const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
+  const alerts = useAppSelector((state) => state.product.alerts)
   const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
 
@@ -50,27 +50,27 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   const setSaveGranulesAlert = (alert: string) => {
     const {message, variant} = granuleAlertMessageConstant[alert]
-    const alertThatExists = granuleTableAlerts.find(alertObj => alertObj.type === alert)
+    const alertThatExists = alerts.find(alertObj => alertObj.type === alert && alertObj.location === 'granuleTable')
     if (alertThatExists) {
       // if alert already in queue
       // delete alert
-      dispatch(removeGranuleTableAlerts(alert))
+      dispatch(removeAlerts(alert))
       // stop timeout
       clearTimeout(alertThatExists.timeoutId)
       // add alert again with timeout
       let newTimeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
+        dispatch(removeAlerts(alert))
+      }, alertShowTime)
 
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection' }))
+      dispatch(addAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection', location: 'granuleTable'}))
     } else {
       // if alert not in queue
       // add alert with timeout
       let timeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
+        dispatch(removeAlerts(alert))
+      }, alertShowTime)
 
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection' }))
+      dispatch(addAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection', location: 'granuleTable'}))
     }
   }
 

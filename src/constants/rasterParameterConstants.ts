@@ -1,4 +1,4 @@
-import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
+import { AlertLocation, ParameterHelp, ParameterOptions, alertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
 
 export const rasterResolutionOptions = {
     UTM: [90, 100, 120, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -132,7 +132,7 @@ export interface InputBounds {
     }
   }
 
-export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
+export const granuleAlertMessageConstant: alertMessageConstantType = {
     success: {
         message: 'Successfully added granules!',
         variant: 'success',
@@ -171,6 +171,13 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     }
   }
 
+  export const generateAlertMessageConstant: alertMessageConstantType = {
+    success: {
+        message: 'Successfully started to generate products! Click here to see the their status.',
+        variant: 'success',
+    }
+  }
+
   export const parameterOptionHelp = {
     outputGranuleExtentFlag: 'test',
     outputSamplingGridType: 'test',
@@ -178,3 +185,7 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     utmZoneAdjust: 'test',
     mgrsBandAdjust: 'test',
   }
+
+  export const alertStylesWithPointer: AlertLocation[] = ['generate']
+
+  export const alertShowTime = 4000

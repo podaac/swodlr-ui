@@ -14,7 +14,7 @@ const MainNavbar = () => {
   const navigate = useNavigate()
 
   const { email, firstName, lastName } = userData
-  const { search } = useLocation();
+  const { search } = useLocation()
 
   const renderUserDropdownTitle = () => (
       <span>

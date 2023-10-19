@@ -2,7 +2,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { ArrowReturnRight} from 'react-bootstrap-icons';
 import GranuleTable from './GranulesTable';
 import { useAppSelector } from '../../redux/hooks'
-import GranuleTableAlerts from './GranuleTableAlerts';
+import Alerts from './Alerts';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const GranuleSelectionView = () => {
@@ -13,7 +13,7 @@ const GranuleSelectionView = () => {
   return (
     <>
         <GranuleTable tableType='granuleSelection'/>
-        <GranuleTableAlerts />
+        <Alerts location='granuleTable'/>
         <hr></hr>
         <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
             <Col>

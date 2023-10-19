@@ -2,18 +2,49 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setShowGenerateProductModalFalse } from './actions/modalSlice'
-import { addGeneratedProducts } from './actions/productSlice'
+import { addGeneratedProducts, addAlerts, removeAlerts } from './actions/productSlice'
 import { Row } from 'react-bootstrap';
+import { alertShowTime, generateAlertMessageConstant } from '../../constants/rasterParameterConstants';
 
 const GenerateProductsModal = () => {
     const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const addedGranules = useAppSelector((state) => state.product.addedProducts)
     const dispatch = useAppDispatch()
 
+    const alerts = useAppSelector((state) => state.product.alerts)
+  
+    const setGenerateProductAlert = (alertType: string) => {
+      const {message, variant} = generateAlertMessageConstant[alertType]
+      const alertThatExists = alerts.find(alertObj => alertObj.type === alertType && alertObj.location === 'generate')
+      if (alertThatExists) {
+        // if alert already in queue
+        // delete alert
+        dispatch(removeAlerts(alertType))
+        // stop timeout
+        clearTimeout(alertThatExists.timeoutId)
+        // add alert again with timeout
+        let newTimeoutId = setTimeout(() => {
+          dispatch(removeAlerts(alertType))
+        }, alertShowTime)
+  
+        dispatch(addAlerts({type: alertType, message, variant, timeoutId: newTimeoutId, location: 'generate'}))
+      } else {
+        // if alert not in queue
+        // add alert with timeout
+        let timeoutId = setTimeout(() => {
+          dispatch(removeAlerts(alertType))
+        }, alertShowTime)
+  
+        dispatch(addAlerts({type: alertType, message, variant, timeoutId, location: 'generate'}))
+      }
+    }
+
     const handleGenerate = () => {
         // unselect select-all box
         dispatch(addGeneratedProducts(addedGranules.map(granuleObj => granuleObj.granuleId)))
         dispatch(setShowGenerateProductModalFalse())
+        // set alert
+        setGenerateProductAlert('success')
     }
 
   return (

@@ -1,6 +1,7 @@
 import GranuleTable from './GranulesTable';
 import ProductCustomization from './ProductCustomization';
 import GenerateProducts from './GenerateProducts';
+import Alerts from './Alerts';
 
 const GranuleSelectionView = () => {
   return (
@@ -9,6 +10,7 @@ const GranuleSelectionView = () => {
       <GranuleTable tableType='productCustomization'/>
       <hr></hr>
       <GenerateProducts />
+      <Alerts location='generate' />
     </>
   );
 }

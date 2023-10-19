@@ -13,7 +13,7 @@ interface GranuleState {
     granuleFocus: number[],
     generatedProducts: GeneratedProduct[],
     generateProductParameters: GenerateProductParameters,
-    granuleTableAlerts: AlertMessageObject[],
+    alerts: AlertMessageObject[],
     productCustomizationTableAlerts: AlertMessageObject[],
     showUTMAdvancedOptions: boolean,
 }
@@ -30,7 +30,7 @@ const initialState: GranuleState = {
     granuleFocus: [33.854457, -118.709093],
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
-    granuleTableAlerts: [],
+    alerts: [],
     productCustomizationTableAlerts: [],
     showUTMAdvancedOptions: false
 }
@@ -99,18 +99,18 @@ export const productSlice = createSlice({
     setGenerateProductParameters: (state, action: PayloadAction<GenerateProductParameters>) => {
       state.generateProductParameters = action.payload
     },
-    addGranuleTableAlerts: (state, action: PayloadAction<AlertMessageObject>) => {
+    addAlerts: (state, action: PayloadAction<AlertMessageObject>) => {
       const newAlert = action.payload
-      if (state.granuleTableAlerts.map(alertObj => alertObj.message).includes(newAlert.message)) {
+      if (state.alerts.map(alertObj => alertObj.message).includes(newAlert.message)) {
         // alert already in there so just up the time for that alert
       } else {
         // alert not in there yet so add it and start with the default time
-        state.granuleTableAlerts = [...state.granuleTableAlerts, newAlert]
+        state.alerts = [...state.alerts, newAlert]
       }
     },
-    removeGranuleTableAlerts: (state, action: PayloadAction<string>) => {
-      const newAlerts = [...state.granuleTableAlerts].filter(alertObject => alertObject.type !== action.payload)
-      state.granuleTableAlerts = newAlerts
+    removeAlerts: (state, action: PayloadAction<string>) => {
+      const newAlerts = [...state.alerts].filter(alertObject => alertObject.type !== action.payload)
+      state.alerts = newAlerts
     },
     setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
       state.showUTMAdvancedOptions = action.payload
@@ -126,8 +126,8 @@ export const {
     setGranuleFocus,
     addGeneratedProducts,
     setGenerateProductParameters,
-    addGranuleTableAlerts,
-    removeGranuleTableAlerts,
+    addAlerts,
+    removeAlerts,
     setShowUTMAdvancedOptions
 } = productSlice.actions
 
