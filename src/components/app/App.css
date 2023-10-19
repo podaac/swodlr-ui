@@ -128,16 +128,12 @@ NAVBAR
   color: #C8C7C5 !important;
 }
 
-.dark-mode-navbar-link.active {
-  color: #FAF9F6 !important;
-}
-
 .dark-mode-navbar-link:hover {
   color: #FAF9F6
 }
 
-.dark-mode-navbar-link:active {
-  color: #C8C7C5;
+.dark-mode-navbar-link:focus {
+  color: #FAF9F6
 }
 
 .light-mode-background {
@@ -624,10 +620,10 @@ TABS
 
 .sidebar-breadcrumb-item a{
   color: '#1a2535' !important;
-  font-size: '24px' !important
+  font-size: '24px' !important;
 }
 
 .sidebar-breadcrumb-item:active {
   color: 'black' !important;
-  font-size: '24px' !important
+  font-size: '24px' !important;
 }

@@ -38,7 +38,8 @@ scene: string,
 export interface GenerateProductParameters {
 outputGranuleExtentFlag: number,
 outputSamplingGridType: string,
-rasterResolution: number
+rasterResolutionUTM: number,
+rasterResolutionGEO: number
 }
 
 export interface sampleGranuleData {
@@ -99,6 +100,11 @@ export interface AlertMessageObject {
   tableType: TableTypes
 }
 
+export type CustomizeProductSidebarTypes = 'selectScenes' | 'configureOptions'
+export interface CustomizeProductSidebarProps {
+  mode: CustomizeProductSidebarTypes
+}
+
 export type TableTypes = 'granuleSelection' | 'productCustomization'
 export interface GranuleTableProps {
   tableType: TableTypes
@@ -114,4 +120,8 @@ export type InputType = 'cycle' | 'pass' | 'scene'
 
 export interface inputValuesDictionary {
   [key: string]: {max: number, min: number}
+}
+
+export interface newUrlParamsObject {
+  [key: string]: string | number | boolean
 }

@@ -5,6 +5,7 @@ import { checkUserAuthentication } from '../../user/authentication';
 import { TestAuthenticationResponse } from '../../types/authenticationTypes';
 import { useEffect, useState } from 'react';
 import { CurrentUserData } from '../../types/graphqlTypes';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Welcome = () => {
   const dispatch = useAppDispatch()
@@ -19,11 +20,14 @@ const Welcome = () => {
     }
   }, [])
 
+  const navigate = useNavigate();
+  const { search } = useLocation();
+
   const testAuthentication = async () => {
     const response: TestAuthenticationResponse = await checkUserAuthentication()
     if (response.authenticated) {
       dispatch(setCurrentUser(response.data as CurrentUserData))
-      dispatch(setCurrentPage('productCustomization'))
+      navigate(`customizeProduct/selectScenes${search}`)
       dispatch(setUserAuthenticated())
     } else {
       if (response.redirectUri) {
@@ -36,7 +40,7 @@ const Welcome = () => {
 
   const handleLogin = () => {
     if (testMode) {
-      dispatch(setCurrentPage('productCustomization'))
+      navigate(`customizeProduct/selectScenes${search}`)
       dispatch(setUserAuthenticated())
     } else {
       window.location.replace(redirectUri as string);

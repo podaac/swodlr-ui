@@ -1,19 +1,19 @@
-import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { Breadcrumb } from 'react-bootstrap';
-import { setActiveTab } from './actions/sidebarSlice';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const SidebarBreadcrumbs = () => {
-  const activeTab = useAppSelector((state) => state.sidebar.activeTab)
-  const dispatch = useAppDispatch()
+  const navigate = useNavigate();
+  let location = useLocation();
+  const { search } = useLocation();
 
   return (
     <div style={{marginTop: '10px'}}>
       {/* <hr className={`${colorModeClass}-text`} style={{marginTop: '0px', backgroundColor: 'black', borderWidth: '0px', opacity: 1}} /> */}
-      <Breadcrumb style={{color: 'black', backgroundColor: '#1A2535', paddingLeft: '20px', paddingBottom: '1px', paddingTop: '8px'}}>
-        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" style={{fontSize: '22px'}} onClick={() => dispatch(setActiveTab('granuleSelection'))}>
+      <Breadcrumb style={{backgroundColor: '#1A2535', paddingLeft: '20px', paddingBottom: '1px', paddingTop: '8px'}}>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' active={location.pathname.includes("/customizeProduct/selectScenes")} style={{fontSize: '22px', color: 'white'}} onClick={() => navigate(`/customizeProduct/selectScenes${search}`)}>
           Select Scenes
         </Breadcrumb.Item>
-        <Breadcrumb.Item className='sidebar-breadcrumb-item' href="#" active={activeTab === 'productCustomization'} style={{fontSize: '22px', color: 'white'}} onClick={() => dispatch(setActiveTab('productCustomization'))}>
+        <Breadcrumb.Item className='sidebar-breadcrumb-item' active={location.pathname.includes("/customizeProduct/configureOptions")} style={{fontSize: '22px', color: 'white'}} onClick={() => navigate(`/customizeProduct/configureOptions${search}`)}>
           Configure Options
         </Breadcrumb.Item>
       </Breadcrumb>

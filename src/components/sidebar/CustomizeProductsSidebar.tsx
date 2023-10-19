@@ -1,21 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button, Col, Row } from 'react-bootstrap';
-import { ArrowReturnRight, ArrowsExpand} from 'react-bootstrap-icons';
-import GranuleTable from './GranulesTable';
+import { Col } from 'react-bootstrap';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeActive, setResizeStartLocation, setResizeEndLocation, setActiveTab } from './actions/sidebarSlice';
+import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './actions/sidebarSlice';
 import { mouseLocation } from '../../types/sidebarTypes';
-import GenerateProducts from './GenerateProducts';
-import ProductCustomization from './ProductCustomization';
-import GranuleTableAlerts from './GranuleTableAlerts';
 import SidebarBreadcrumbs from './SidebarBreadcrumbs';
+import CustomizeProductView from './CustomizeProductView';
+import GranuleSelectionView from './GranuleSelectionView';
+import { CustomizeProductSidebarProps } from '../../types/constantTypes';
 
-const CustomizeProductsSidebar = () => {
+const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
+    const { mode } = props
     const resizeStartLocation = useAppSelector((state) => state.sidebar.resizeStartLocation)
     const resizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-    const activeTab = useAppSelector((state) => state.sidebar.activeTab)
-    const addedProducts = useAppSelector((state) => state.product.addedProducts)
     const footerRef = useRef<HTMLHeadingElement>(null);
     const [sidebarWidth, setSidebarWidth] = useState('')
 
@@ -28,27 +25,13 @@ const CustomizeProductsSidebar = () => {
     }
 
     const renderSidebarContents = () => {
-        if (activeTab === 'granuleSelection') {
+        if (mode as string === 'selectScenes') {
             return (
-                <>
-                    <GranuleTable tableType='granuleSelection'/>
-                    <GranuleTableAlerts />
-                    <hr></hr>
-                    <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
-                        <Col>
-                            <Button variant='success' disabled={addedProducts.length === 0} onClick={() => dispatch(setActiveTab('productCustomization'))}>Configure Products <ArrowReturnRight /></Button>
-                        </Col>
-                    </Row>
-                </>
+                <GranuleSelectionView />
             )
-        } else if (activeTab === 'productCustomization') {
+        } else if (mode as string === 'configureOptions') {
             return (
-                <>
-                    <ProductCustomization />
-                    <GranuleTable tableType='productCustomization'/>
-                    <hr></hr>
-                    <GenerateProducts />
-                </>
+                <CustomizeProductView />
             )
         }
     }
@@ -71,6 +54,7 @@ const CustomizeProductsSidebar = () => {
             {renderSidebarContents()}
             </div>
         </Col>
+
         {/* TODO: uncomment when granule footprints are being retreived to display on map */}
         {/* <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>

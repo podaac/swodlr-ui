@@ -93,7 +93,8 @@ export const parameterOptionDefaults = {
     scene: '',
     outputGranuleExtentFlag: 0,
     outputSamplingGridType: 'utm',
-    rasterResolution: 100,
+    rasterResolutionUTM: 100,
+    rasterResolutionGEO: 3,
     utmZoneAdjust: '0',
     mgrsBandAdjust: '0',
 }

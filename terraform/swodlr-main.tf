@@ -77,7 +77,6 @@ resource "aws_s3_bucket_ownership_controls" "private_acl_ownership" {
   }
 }
 
-
 output "swodlr-bucket-name" {
   value = aws_s3_bucket.swodlr-site-bucket.id
 }

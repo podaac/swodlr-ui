@@ -70,7 +70,8 @@ export const productSlice = createSlice({
       const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => {
         const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
         const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
-        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolution} = state.generateProductParameters
+        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolutionUTM, rasterResolutionGEO} = state.generateProductParameters
+        const rasterResolution = outputSamplingGridType === "utm" ? rasterResolutionUTM : rasterResolutionGEO
         const fetchData = async () => {
           await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
         }

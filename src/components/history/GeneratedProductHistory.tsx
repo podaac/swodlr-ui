@@ -1,16 +1,17 @@
 import { Alert, Col, OverlayTrigger, Row, Table, Tooltip } from "react-bootstrap";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
 import { InfoCircle } from "react-bootstrap-icons";
-import { setCurrentPage } from "../app/appSlice";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp } from "../../constants/rasterParameterConstants";
 import { getUserProducts } from "../../user/userData";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const GeneratedProductHistory = () => {
     // const generatedProducts = useAppSelector((state) => state.product.generatedProducts)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-    const dispatch = useAppDispatch()
+    const { search } = useLocation();
+    const navigate = useNavigate()
     const [userProducts, setUserProducts] = useState<Product[]>([])
     
     useEffect(() => {
@@ -85,7 +86,7 @@ const GeneratedProductHistory = () => {
 
     const productHistoryAlert = () => {
         const alertMessage = 'No products have been generated. Go to the Product Customization page to generate products.'
-        return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => dispatch(setCurrentPage('productCustomization'))} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
+        return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/generatedProductHistory${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
     const renderProductHistoryViews = () => {

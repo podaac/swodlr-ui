@@ -1,9 +1,6 @@
-import { resolve } from "path";
 import { userQuery } from "../constants/graphqlQueries";
 import { TestAuthenticationResponse } from "../types/authenticationTypes";
-import { getUserDataResponse } from "./userData";
 import { CurrentUser, UserResponse } from "../types/graphqlTypes";
-import { useAppSelector, useAppDispatch } from '../redux/hooks'
 
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
 const redirectUri = process.env.REACT_APP_DEV_REDIRECT_URI
