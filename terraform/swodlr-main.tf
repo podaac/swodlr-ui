@@ -77,25 +77,6 @@ resource "aws_s3_bucket_ownership_controls" "private_acl_ownership" {
   }
 }
 
-# resource "aws_s3_bucket_website_configuration" "swodlr-site-bucket" {
-#     bucket = aws_s3_bucket.swodlr-site-bucket.id
-#     index_document {
-#       suffix = "index.html"
-#     }
-#     error_document {
-#         key = "index.html"
-#     }
-# }
-
-resource "aws_cloudfront_function" "rewrite_url_to_root" {
-  name    = "rewrite_url_to_root"
-  runtime = "cloudfront-js-1.0"
-  comment = "rewrite url to point to root"
-  publish = true
-  code    = file("./cloudFrontFunctions.ts")
-}
-
-
 output "swodlr-bucket-name" {
   value = aws_s3_bucket.swodlr-site-bucket.id
 }
