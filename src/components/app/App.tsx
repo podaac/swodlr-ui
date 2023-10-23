@@ -9,6 +9,7 @@ import GeneratedProductHistory from '../history/GeneratedProductHistory';
 import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
+import NotFound from '../error/NotFound';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
 const App = () => {
@@ -54,6 +55,7 @@ const App = () => {
         <Route path="customizeProduct/configureOptions" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="configureOptions"/>, true) } />
         <Route path="generatedProductHistory" element={ getPageWithFormatting(<GeneratedProductHistory/>, true) } />
         <Route path="about" element={ getPageWithFormatting(<About />, true) } />
+        <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>
       </Routes>
     </div>
   );
