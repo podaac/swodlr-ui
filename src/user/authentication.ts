@@ -45,3 +45,26 @@ export const checkUserAuthentication = async () => {
           }
     }
 }
+
+export const logoutUser = async () => {
+  try {
+      let logoutResposne = await ((await fetch(`${baseUri}/logout`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // redirect: "manual",
+        credentials: "include",
+        mode: "cors"
+      })));
+
+      return logoutResposne
+  } catch (err) {
+      console.log (err)
+      if (err instanceof Error) {
+          return {authenticated: false, error: err.message as string} as TestAuthenticationResponse
+        } else {
+          return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
+        }
+  }
+}

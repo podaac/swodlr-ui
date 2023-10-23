@@ -80,7 +80,6 @@ export const generateL2RasterProduct = async (
     //   variablesToUse.mgrsBandAdjust = parseInt(mgrsBandAdjust)
     //   variablesToUse.outputSamplingGridType = outputSamplingGridType.toUpperCase()
     // }
-    console.log(rasterResolution)
 
     const utmVariables = {
       cycle: parseInt(cycle),
