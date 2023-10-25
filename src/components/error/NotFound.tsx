@@ -10,12 +10,9 @@ import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 const NotFound = (props: {errorCode: string}) => {
     const dispatch = useAppDispatch()
     const userData = useAppSelector((state) => state.app.currentUser)
-    console.log(userData)
     useEffect(() => {
-        console.log('test')
         const testAuthentication = async () => {
           const response: TestAuthenticationResponse = await checkUserAuthentication()
-          console.log(response)
           if (response.authenticated) {
             dispatch(setCurrentUser(response.data as CurrentUserData))
           }

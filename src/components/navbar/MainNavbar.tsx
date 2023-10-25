@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { PersonSquare } from 'react-bootstrap-icons';
 import { setUserNotAuthenticated } from '../app/appSlice';
 import { useLocation, useNavigate } from "react-router-dom";
+import { logoutUser } from '../../user/authentication';
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
@@ -21,6 +22,12 @@ const MainNavbar = () => {
         <PersonSquare /> {`${firstName} ${lastName}`}
       </span>
   )
+
+  const handleLogout = async () => {
+    dispatch(setUserNotAuthenticated())
+    await logoutUser()
+    navigate('/')
+  }
 
   return (
     <Navbar className={`${colorModeClass}-navbar-background Main-navbar`} expand="lg">
@@ -44,7 +51,7 @@ const MainNavbar = () => {
             </Row>
             <Row>
               <Col>
-                <NavDropdown.Item onClick={() => dispatch(setUserNotAuthenticated())}>Logout</NavDropdown.Item>
+                <NavDropdown.Item onClick={() => handleLogout()}>Logout</NavDropdown.Item>
               </Col>
             </Row>
         </NavDropdown>
