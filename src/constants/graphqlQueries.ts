@@ -55,3 +55,11 @@ export const userProductsQuery = `
         }
     }
 `
+
+export const availableSceneQuery = `
+    {
+        cycle
+        pass
+        scene
+    }
+`

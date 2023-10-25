@@ -11,6 +11,7 @@ import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
+import { availableSceneQuery } from "../../constants/graphqlQueries";
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -32,6 +33,40 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [pass, setPass] = useState('');
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
+
+
+const validateSceneAvailability = async () => {
+    try {
+      console.log('validating scene')
+        const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
+        let res = ((await fetch(`${baseUri}/graphql`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          redirect: "manual",
+          credentials: "include",
+          mode: "cors",
+          body: JSON.stringify({
+            query: availableSceneQuery,
+            variables: {}
+          })
+        }).then(async (response) => {
+          console.log(response)
+          // } else {
+          //   return { authenticated: false, error: 'unknown error occured' } as TestAuthenticationResponse;
+          // }
+        })))
+        return res
+    } catch (err) {
+        console.log (err)
+        // if (err instanceof Error) {
+        //     return {authenticated: false, error: err.message as string} as TestAuthenticationResponse
+        //   } else {
+        //     return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
+        //   }
+    }
+}
 
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
@@ -298,7 +333,7 @@ const GranuleTable = (props: GranuleTableProps) => {
       <th key={`info-icon-${labelEntry[1]}`}>{labelEntry[1]} {infoIcon}</th>
     )
   }
-
+  
   return (
     <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
