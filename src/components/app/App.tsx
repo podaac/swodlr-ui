@@ -23,7 +23,9 @@ const App = () => {
     // check if user is authenticated
     useEffect(() => {
       // navigate to login page if user isn't authenticated
-      navigate('/')
+      // if (!userAuthenticated) {
+      //   navigate('/')
+      // }
     }, [])
 
   const handleFooterResize = (event: any) => {
