@@ -12,6 +12,7 @@ import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
 import { availableSceneQuery } from "../../constants/graphqlQueries";
+import { graphQLClient } from '../../user/userData';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -35,37 +36,42 @@ const GranuleTable = (props: GranuleTableProps) => {
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
 
 
-const validateSceneAvailability = async () => {
-    try {
-      console.log('validating scene')
-        const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
-        let res = ((await fetch(`${baseUri}/graphql`, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          redirect: "manual",
-          credentials: "include",
-          mode: "cors",
-          body: JSON.stringify({
-            query: availableSceneQuery,
-            variables: {}
-          })
-        }).then(async (response) => {
-          console.log(response)
-          // } else {
-          //   return { authenticated: false, error: 'unknown error occured' } as TestAuthenticationResponse;
-          // }
-        })))
-        return res
-    } catch (err) {
-        console.log (err)
-        // if (err instanceof Error) {
-        //     return {authenticated: false, error: err.message as string} as TestAuthenticationResponse
-        //   } else {
-        //     return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
-        //   }
-    }
+const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number): Promise<boolean> => {
+  try {
+    console.log('validating scene')
+    console.log('cycle', cycleToUse, 'pass', passToUse, 'scene', sceneToUse)
+    const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
+    // let res = ((await fetch(`${baseUri}/graphql`, {
+    //   method: "POST",
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   redirect: "manual",
+    //   credentials: "include",
+    //   mode: "cors",
+    //   body: JSON.stringify({
+    //     query: availableSceneQuery,
+    //     variables: {cycle: cycleToUse, pass: passToUse, scene: sceneToUse}
+    //   })
+    // }).then(async (response) => {
+    //   console.log(await response.json())
+    //   return false
+    //   // } else {
+    //   //   return { authenticated: false, error: 'unknown error occured' } as TestAuthenticationResponse;
+    //   // }
+    // })))
+    const res = await graphQLClient.request(availableSceneQuery, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse})
+    console.log(res)
+    return false
+  } catch (err) {
+      console.log (err)
+      return false
+      // if (err instanceof Error) {
+      //     return {authenticated: false, error: err.message as string} as TestAuthenticationResponse
+      //   } else {
+      //     return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
+      //   }
+  }
 }
 
   const getScenesArray = (sceneString: string): string[] => {
@@ -172,11 +178,14 @@ const validateSceneAvailability = async () => {
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
     let granuleNotFound = false
-    getScenesArray(scene).forEach(sceneId => {
+    let sceneAvailable = false
+    getScenesArray(scene).forEach(async sceneId => {
       // check if granule exists with that scene, cycle, and pass
       const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
-      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, scene)
+      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, sceneId)
       const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
+      sceneAvailable = await validateSceneAvailability(parseInt(cycle), parseInt(pass), parseInt(sceneId))
+      console.log(sceneAvailable)
       if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
@@ -217,7 +226,7 @@ const validateSceneAvailability = async () => {
       }
     }
 
-    if (!granuleNotFound && !granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene) {
+    if (!granuleNotFound && !granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && sceneAvailable) {
       setSaveGranulesAlert('success')
       dispatch(addProduct(granulesToAdd))
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))

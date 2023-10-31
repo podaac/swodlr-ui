@@ -6,7 +6,7 @@ const userIdQuery = gql`${userQuery}`
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
 const graphqlUri = baseUri + '/graphql'
 
-const graphQLClient = new GraphQLClient(graphqlUri, {
+export const graphQLClient = new GraphQLClient(graphqlUri, {
     credentials: `include`,
     mode: `cors`,
   })
