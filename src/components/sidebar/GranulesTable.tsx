@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
@@ -11,6 +11,7 @@ import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -24,8 +25,38 @@ const GranuleTable = (props: GranuleTableProps) => {
   const dispatch = useAppDispatch()
   
   const [allChecked, setAllChecked] = useState(false)
-
   const {outputSamplingGridType} = generateProductParameters
+
+  // search parameters
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { search } = useLocation();
+
+  // set the default url state parameters
+  useEffect(() => {
+    // if any cycle scene and pass parameters in url, add them to table
+    const cyclePassSceneParameters = searchParams.get('cyclePassScene')
+    if (cyclePassSceneParameters) {
+      const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
+      
+      sceneParamArray.forEach(sceneParams => {
+        const splitSceneParams = sceneParams.split('_')
+        handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
+      })
+    }
+  }, [addedProducts])
+
+  const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
+      const currentSearchParams = Object.fromEntries(searchParams.entries())
+      Object.entries(newPairsObject).forEach(pair => {
+          currentSearchParams[pair[0]] = pair[1].toString()
+      })
+      
+      // remove unused search param
+      if (remove) {
+          delete currentSearchParams[remove]
+      }
+      setSearchParams(currentSearchParams)
+  }
 
   // add granules
   const [cycle, setCycle] = useState('');
@@ -96,21 +127,32 @@ const GranuleTable = (props: GranuleTableProps) => {
     return validInput
   }
   
-  const alreadyAddedCyclePassScene = (cycle: string, pass: string, scene: string): boolean => {
+  const alreadyAddedCyclePassScene = (cycleValue: string, passValue: string, sceneValue: string): boolean => {
     let existingValue = false
+    const cyclePassSceneParameters = searchParams.get('cyclePassScene')
+    if (cyclePassSceneParameters) {
+      const sceneParamArray = cyclePassSceneParameters.split('-')
+      if (sceneParamArray.includes(`${cycleValue}_${passValue}_${sceneValue}`)) {
+        existingValue = true
+      }
+    }
     addedProducts.forEach(product => {
-      if (product.cycle === cycle && product.pass === pass && product.scene === scene) {
+      if (product.cycle === cycleValue && product.pass === passValue && product.scene === sceneValue) {
         existingValue = true
       }
     })
     return existingValue
   }
 
-  const handleSave = () => {
+  const handleSave = (cycleParam?: string, passParam?: string, sceneParam?: string) => {
+    const cycleToUse = cycleParam ?? cycle
+    const passToUse = passParam ?? pass
+    const sceneToUse = sceneParam ?? scene
     // check if cycle pass and scene are all within a valid range
-    const invalidCycle = !cycle && !validateInputs('cycle', cycle)
-    const invalidPass = !pass && !validateInputs('pass', pass)
-    const invalidScene = !scene && !validateInputs('scene', scene)
+    const invalidCycle = !cycleToUse && !validateInputs('cycle', cycleToUse)
+    const invalidPass = !passToUse && !validateInputs('pass', pass)
+    const invalidScene = !sceneToUse && !validateInputs('scene', scene)
+
     const footprint: LatLngExpression[] = [
       [
         33.62959926136482,
@@ -137,19 +179,21 @@ const GranuleTable = (props: GranuleTableProps) => {
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
     let granuleNotFound = false
-    getScenesArray(scene).forEach(sceneId => {
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    getScenesArray(sceneToUse).forEach(sceneId => {
       // check if granule exists with that scene, cycle, and pass
-      const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
-      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, scene)
-      const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
+      const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycleToUse && granuleObject.pass === passToUse && granuleObject.scene === sceneId)
+      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneToUse)
+      const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
+      
       if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
         const parameters: allProductParameters = {
           granuleId: uuidv4(),
           name: '',
-          cycle,
-          pass,
+          cycle: cycleToUse,
+          pass: passToUse,
           scene: sceneId,
           outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
           outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
@@ -158,6 +202,9 @@ const GranuleTable = (props: GranuleTableProps) => {
           mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
           footprint
         }
+        // add cycle/pass/scene to url parameters
+        cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneToUse}`
+        // addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
 
         granulesToAdd.push(parameters)
       } else if (!granuleFoundResult){
@@ -185,6 +232,7 @@ const GranuleTable = (props: GranuleTableProps) => {
     if (!granuleNotFound && !granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene) {
       setSaveGranulesAlert('success')
       dispatch(addProduct(granulesToAdd))
+      addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
     }
 }
