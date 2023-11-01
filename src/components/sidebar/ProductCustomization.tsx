@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import Form from 'react-bootstrap/Form';
 import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
 import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actions/productSlice";
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { GenerateProductParameters, newUrlParamsObject } from '../../types/constantTypes';
+import { useSearchParams } from 'react-router-dom';
+import { GenerateProductParameters } from '../../types/constantTypes';
 
 const ProductCustomization = () => {
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
@@ -14,7 +14,6 @@ const ProductCustomization = () => {
     const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
     
     const dispatch = useAppDispatch()
-    const { search } = useLocation();
 
     const {outputSamplingGridType, rasterResolutionUTM, rasterResolutionGEO} = generateProductParameters
 
@@ -24,20 +23,17 @@ const ProductCustomization = () => {
             switch(paramEntry[0]) {
                 case 'outputGranuleExtentFlag':
                     // set outputGranuleExtentFlag
-                    console.log(parseInt(currentSearchParamObject['outputGranuleExtentFlag']))
                     objectToReturn['outputGranuleExtentFlag'] = parseInt(currentSearchParamObject['outputGranuleExtentFlag'])
                     break;
                 case 'rasterResolutionGEO':
                     // set raster resolution and output sampling grid type
                     objectToReturn['rasterResolutionGEO'] = parseInt(currentSearchParamObject['rasterResolutionGEO'])
                     objectToReturn['outputSamplingGridType'] = 'lat/lon'
-                    // objectToReturn['rasterResolutionGEO'] = parseInt(currentSearchParamObject['rasterResolutionGEO'])
                     break;
                 case 'rasterResolutionUTM':
                     // set raster resolution and output sampling grid type
                     objectToReturn['rasterResolutionUTM'] = parseInt(currentSearchParamObject['rasterResolutionUTM'])
                     objectToReturn['outputSamplingGridType'] = 'utm'
-                    // objectToReturn['rasterResolutionGEO'] = parseInt(currentSearchParamObject['rasterResolutionGEO'])
                     break;
                 case 'showUTMAdvancedOptions':
                     if ((objectToReturn['rasterResolutionGEO'] === 'true') !== showUTMAdvancedOptions)
@@ -53,38 +49,12 @@ const ProductCustomization = () => {
 
     // set the default url state parameters
     useEffect(() => {
-        // check if anything specified in url, if not load defaults
-        // set redux state variables to parameters
-        // const newParamsObject: newUrlParamsObject = {}
-        // if (!search.includes('outputGranuleExtentFlag')) {
-        //     console.log('outputGranuleExtentFlag')
-        //     newParamsObject['outputGranuleExtentFlag'] = parameterOptionValues.outputGranuleExtentFlag.default
-        // }
-        // if (!(search.includes('rasterResolutionUTM') || search.includes('rasterResolutionGEO'))) {
-        //     if (search.includes('rasterResolutionGEO')) {
-        //         newParamsObject['rasterResolutionGEO'] = parameterOptionValues.rasterResolutionGEO.default
-        //     } else {
-        //         newParamsObject['rasterResolutionUTM'] = parameterOptionValues.rasterResolutionUTM.default
-        //     }
-        // }
-        // if (!search.includes('showUTMAdvancedOptions')) {
-        //     newParamsObject['showUTMAdvancedOptions'] = false
-        // }
-        // addSearchParamToCurrentUrlState(newParamsObject)
-        // console.log('generateProductParameters', generateProductParameters)
-        // console.log('newParamsObject', newParamsObject)
-        // console.log('currentSearchParamObject', Object.fromEntries(searchParams.entries()))
-        // go through object of search params and if it is different then default parameters update it
-        // Object.entries(Object.fromEntries(searchParams.entries())).forEach(paramEntry => {
-        //     let key = paramEntry[0]
-        //     let value = paramEntry[1]
-        //     if (key === )
-        // })
         const currentSearchParamObject = Object.fromEntries(searchParams.entries())
-        const currentSearchParamObjectCleaned = cleanUpCurrentParametersObject(currentSearchParamObject)
-        const parametersFromUrl = {...generateProductParameters, ...currentSearchParamObjectCleaned}
-        console.log(parametersFromUrl)
-        dispatch(setGenerateProductParameters(parametersFromUrl))
+        const currentSearchParamObjectCleaned = {...generateProductParameters, ...cleanUpCurrentParametersObject(currentSearchParamObject)}
+        dispatch(setGenerateProductParameters(currentSearchParamObjectCleaned))
+        if (currentSearchParamObjectCleaned.outputSamplingGridType === 'utm' && currentSearchParamObject.showUTMAdvancedOptions) {
+            dispatch(setShowUTMAdvancedOptions(true))
+        }
     }, [])
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -117,7 +87,7 @@ const ProductCustomization = () => {
             searchParamToRemove = "rasterResolutionGEO"
         }
         addSearchParamToCurrentUrlState({[gridType]: rasterResolution}, searchParamToRemove)
-        dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType, [gridType] :rasterResolution}))
+        dispatch(setGenerateProductParameters({...generateProductParameters, outputSamplingGridType, [gridType]: rasterResolution}))
     }
     const setRasterResolutionUTM = (rasterResolutionUTM: number) => {
         addSearchParamToCurrentUrlState({"rasterResolutionUTM": rasterResolutionUTM}, "rasterResolutionGEO")
@@ -128,28 +98,27 @@ const ProductCustomization = () => {
         dispatch(setGenerateProductParameters({...generateProductParameters, rasterResolutionGEO}))
     }
 
-    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-    const handleShowAdvancedOptions = (bool: boolean) => {
-        addSearchParamToCurrentUrlState({"outputGranuleExtentFlag": bool ? "0" : "1"})
-        setShowAdvancedOptions(!showAdvancedOptions)
+    const setOutputGranuleExtentFlag = (value: string | number) => {
+        addSearchParamToCurrentUrlState({"outputGranuleExtentFlag": value ? "1" : "0"})
+        dispatch(setGenerateProductParameters({...generateProductParameters, outputGranuleExtentFlag: parseInt(value as string)}))
     }
 
     const handleShowUTMAdvancedOptions = () => {
         const newShowOptionsValue: boolean = !showUTMAdvancedOptions
-        addSearchParamToCurrentUrlState({"showUTMAdvancedOptions": newShowOptionsValue} )
+        newShowOptionsValue ? addSearchParamToCurrentUrlState({"showUTMAdvancedOptions": newShowOptionsValue}) : addSearchParamToCurrentUrlState({"showUTMAdvancedOptions": newShowOptionsValue}, "showUTMAdvancedOptions")
         dispatch(setShowUTMAdvancedOptions(newShowOptionsValue))
     }
 
     const renderRasterResolutionOptions = (outputSamplingGridType: string) => {
         if (outputSamplingGridType === 'utm') {
             return (
-                <Form.Select id='rasterResolutionUTMId' aria-label='rasterResolutionUTM' defaultValue={parameterOptionValues.rasterResolutionUTM.default} value={rasterResolutionUTM} onChange={event => setRasterResolutionUTM(parseInt(event.target.value))}>
+                <Form.Select id='rasterResolutionUTMId' aria-label='rasterResolutionUTM' value={rasterResolutionUTM} onChange={event => setRasterResolutionUTM(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionUTM.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
         } else if (outputSamplingGridType === 'lat/lon') {
             return (
-                <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' defaultValue={parameterOptionValues.rasterResolutionGEO.default} value={rasterResolutionGEO} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
+                <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' value={rasterResolutionGEO} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
                     {parameterOptionValues.rasterResolutionGEO.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
                 </Form.Select>
             )
@@ -183,11 +152,10 @@ const ProductCustomization = () => {
 
     const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
         const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => {
-            // const resolutionToUse: number = value === 'utm' ? parseInt(parameterOptionValues.rasterResolutionUTM.default as string) : parseInt(parameterOptionValues.rasterResolutionGEO.default as string)
             const resolutionToUse: number = value === 'utm' ? rasterResolutionUTM : rasterResolutionGEO
             return (
                 <Form.Check 
-                    defaultChecked={value === parameterOptionValues.outputSamplingGridType.default} 
+                    checked={value === generateProductParameters.outputSamplingGridType}
                     inline 
                     label={String(value).toUpperCase()} 
                     name="outputSamplingGridTypeGroup" 
@@ -231,13 +199,13 @@ const ProductCustomization = () => {
                     {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
                         return (
                             <Form.Check 
-                                defaultChecked={value === parameterOptionValues.outputGranuleExtentFlag.default} 
+                                checked={value === generateProductParameters.outputGranuleExtentFlag}
                                 inline 
                                 label={value ? '256 x 128 km' : '128 x 128 km'} 
                                 name="outputGranuleExtentFlagTypeGroup" 
                                 type={'radio'} 
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
-                                onChange={() => handleShowAdvancedOptions(showAdvancedOptions)}
+                                onChange={() => setOutputGranuleExtentFlag(value)}
                             />
                         )
                     })}

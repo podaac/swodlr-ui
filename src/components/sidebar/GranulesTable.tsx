@@ -4,14 +4,14 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
 import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -29,7 +29,6 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   // search parameters
   const [searchParams, setSearchParams] = useSearchParams();
-  const { search } = useLocation();
 
   // set the default url state parameters
   useEffect(() => {
@@ -37,9 +36,18 @@ const GranuleTable = (props: GranuleTableProps) => {
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     if (cyclePassSceneParameters) {
       const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
-      
       sceneParamArray.forEach(sceneParams => {
         const splitSceneParams = sceneParams.split('_')
+        if (splitSceneParams.length > 3) {
+          // update zone and band adjust values
+          const zoneAdjustValue = adjustParamDecoder('value', splitSceneParams[3])
+          const bandAdjustValue = adjustParamDecoder('value', splitSceneParams[4])
+          const productToEdit = addedProducts.find(granuleObj => granuleObj.cycle === splitSceneParams[0] && granuleObj.pass === splitSceneParams[1] && granuleObj.scene === splitSceneParams[2])
+          if (productToEdit?.utmZoneAdjust !== zoneAdjustValue || productToEdit.mgrsBandAdjust !== bandAdjustValue) {
+            const editedProduct = {...productToEdit, utmZoneAdjust: zoneAdjustValue, mgrsBandAdjust: bandAdjustValue}
+            dispatch(editProduct(editedProduct as allProductParameters))
+          }
+        }
         handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
@@ -126,19 +134,33 @@ const GranuleTable = (props: GranuleTableProps) => {
     }
     return validInput
   }
+
+  const searchParamSceneComboAlreadyInUrl = (cyclePassSceneSearchParams: string, cycleValue: string, passValue: string, sceneValue: string): boolean => {
+    let searchParamSceneComboAlreadyInUrlResult: boolean = false
+    if (cyclePassSceneSearchParams) {
+      const sceneParamArray = cyclePassSceneSearchParams.split('-')
+      const relevantParam = sceneParamArray.find(param => param.includes(`${cycleValue}_${passValue}_${sceneValue}`))
+      if (relevantParam) {
+        searchParamSceneComboAlreadyInUrlResult = true
+      }
+    }
+    return searchParamSceneComboAlreadyInUrlResult
+  }
   
   const alreadyAddedCyclePassScene = (cycleValue: string, passValue: string, sceneValue: string): boolean => {
     let existingValue = false
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
-    if (cyclePassSceneParameters) {
-      const sceneParamArray = cyclePassSceneParameters.split('-')
-      if (sceneParamArray.includes(`${cycleValue}_${passValue}_${sceneValue}`)) {
-        existingValue = true
-      }
-    }
     addedProducts.forEach(product => {
-      if (product.cycle === cycleValue && product.pass === passValue && product.scene === sceneValue) {
+      if (product.cycle === cycleValue && product.pass === passValue && product.scene === sceneValue) {   
         existingValue = true
+      } else {
+        if (cyclePassSceneParameters) {
+          const sceneParamArray = cyclePassSceneParameters.split('-')
+          const relevantParam = sceneParamArray.find(param => param.includes(`${cycleValue}_${passValue}_${sceneValue}`))
+          if (relevantParam) {
+            existingValue = true
+          }
+        }
       }
     })
     return existingValue
@@ -203,9 +225,9 @@ const GranuleTable = (props: GranuleTableProps) => {
           footprint
         }
         // add cycle/pass/scene to url parameters
-        cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneToUse}`
-        // addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-
+        if (!searchParamSceneComboAlreadyInUrl(cyclePassSceneSearchParams, cycleToUse, passToUse, sceneToUse)) {
+          cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneToUse}`
+        }
         granulesToAdd.push(parameters)
       } else if (!granuleFoundResult){
         granuleNotFound = true
@@ -266,13 +288,16 @@ const GranuleTable = (props: GranuleTableProps) => {
   }
 
   const getAdjustRadioGroup = (adjustType: AdjustType, granuleId: string) => {
+    const productToUse = addedProducts.find(product => product.granuleId === granuleId)
+    const utmZoneAdjustToUse = productToUse?.utmZoneAdjust
+    const mgrsBandAdjustToUse = productToUse?.mgrsBandAdjust
     if (adjustType === 'zone') {
       return (                    
         <td>  
           <Form>              
               {parameterOptionValues.utmZoneAdjust.values.map((value, index) => 
                 <Form.Check
-                    defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
+                    checked = {value === utmZoneAdjustToUse}
                     inline
                     label={value}
                     name="utmZoneAdjustGroup"
@@ -290,7 +315,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           <Form>              
             {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => 
               <Form.Check
-                  defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
+                  checked = {value === mgrsBandAdjustToUse}
                   inline
                   label={value}
                   name="mgrsBandAdjustGroup"
@@ -316,14 +341,78 @@ const GranuleTable = (props: GranuleTableProps) => {
     return formattedGranulesForTable
   }
 
+  const adjustParamDecoder = (targetLocation: 'url' | 'value', adjustValueToConvert: string): string => {
+    const adjustParamObject: AdjustValueDecoder = {
+      '00': '0',
+      '01': '-1',
+      '10': '+1'
+    }
+    if (targetLocation === 'url') {
+      return Object.keys(adjustParamObject).find(key => adjustParamObject[key] === adjustValueToConvert) as string
+    } else {
+      return adjustParamObject[adjustValueToConvert]
+    }
+  }
+
+  const handleModifyingSceneSearchParams = (action: 'add' | 'remove', adjustType: AdjustType, adjustValue: string, cycleToUse: string, passToUse: string, sceneToUse: string ) => {
+    const adjustParamValue: string = adjustParamDecoder('url',adjustValue)
+
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    if (cyclePassSceneSearchParams.length > 0) {
+      const sceneComboParamOriginal = cyclePassSceneSearchParams.split('-').find(sceneCombo => sceneCombo.includes(`${cycleToUse}_${passToUse}_${sceneToUse}`)) as string
+      const sceneComboParamToModify = sceneComboParamOriginal?.split('_') as string[]
+      if (action === 'add') {
+        if (sceneComboParamToModify.length === 3) {
+          // add the adjust params
+          if (adjustType === 'zone') {
+            sceneComboParamToModify.push(adjustParamValue, '00')
+          } else {
+            sceneComboParamToModify.push('00', adjustParamValue)
+          }
+        } else {
+          // replace the adjust params
+          if (adjustType === 'zone') {
+            sceneComboParamToModify[3] = adjustParamValue
+          } else {
+            sceneComboParamToModify[4] = adjustParamValue
+          }
+        }
+      } else if (action === 'remove') {
+        if (sceneComboParamToModify.length > 3) {
+          // remove the adjust params
+          sceneComboParamToModify.splice(sceneComboParamToModify.length - 2, 2);
+        }
+      }
+      const recombinedSceneParams = cyclePassSceneSearchParams.replace(sceneComboParamOriginal, sceneComboParamToModify.join('_'))
+      addSearchParamToCurrentUrlState({'cyclePassScene': recombinedSceneParams})
+    }
+  }
+
   const handleAdjustSelection = (adjustType: AdjustType, granuleId: string, adjustValue: string) => {
     const productToEdit = addedProducts.find(granuleObj => granuleId === granuleObj.granuleId)
+    const cycleToUse = productToEdit?.cycle as string
+    const passToUse = productToEdit?.pass as string
+    const sceneToUse = productToEdit?.scene as string
     const editedProduct = {...productToEdit}
+    
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    let action: 'add' | 'remove' = 'add'
     if (adjustType === 'zone') {
       editedProduct!.utmZoneAdjust = adjustValue
+      if (productToEdit?.utmZoneAdjust !== '0' && productToEdit?.mgrsBandAdjust === '0' && adjustValue === '0' && cyclePassSceneSearchParams.length > 0) { // remove zone adjust params
+        action = 'remove'
+      } else { // set zone adjust param
+        action = 'add'
+      }
     } else if (adjustType === 'band') {
       editedProduct!.mgrsBandAdjust = adjustValue
+      if (productToEdit?.utmZoneAdjust === '0' && productToEdit?.mgrsBandAdjust !== '0' && adjustValue === '0' && cyclePassSceneSearchParams.length > 0) { // remove band adjust params
+        action = 'remove'
+      } else { // set zone adjust param
+        action = 'add'
+      }
     }
+    handleModifyingSceneSearchParams(action, adjustType, adjustValue, cycleToUse, passToUse, sceneToUse)
     dispatch(editProduct(editedProduct as allProductParameters))
   }
 
@@ -367,7 +456,6 @@ const GranuleTable = (props: GranuleTableProps) => {
                     className='remove-checkbox'
                     style={{cursor: 'pointer'}}
                     onChange={() => handleAllChecked()}
-                    // checked={!(allChecked && !addedProducts.length)}
                   />
                 </th>
               ): (

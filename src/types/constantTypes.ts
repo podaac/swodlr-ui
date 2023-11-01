@@ -75,6 +75,10 @@ export interface ParameterOptions {
   [key: string]: string
 }
 
+export interface AdjustValueDecoder {
+  [key: string]: string
+}
+
 export type StatusTypes = 'In Progress' | 'Complete'
 
 export type TabTypes = 'granuleSelection' | 'productCustomization'
