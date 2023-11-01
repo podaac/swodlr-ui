@@ -1,11 +1,10 @@
 import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
-import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
@@ -174,29 +173,6 @@ const GranuleTable = (props: GranuleTableProps) => {
     const invalidPass = !passToUse && !validateInputs('pass', pass)
     const invalidScene = !sceneToUse && !validateInputs('scene', scene)
 
-    const footprint: LatLngExpression[] = [
-      [
-        33.62959926136482,
-        -119.59722240610449
-      ],
-      [
-        33.93357164098772,
-        -119.01030070905898
-      ],
-      [
-        33.445222247065175,
-        -118.6445806486702
-      ],
-      [
-        33.137055033294544,
-        -119.23445170097719
-      ],
-      [
-        33.629599562267856,
-        -119.59722227107866
-      ]
-    ] 
-
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
     let granuleNotFound = false
@@ -220,7 +196,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
           utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
           mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-          footprint
+          footprint: sampleFootprint
         }
         // add cycle/pass/scene to url parameters
         if (!searchParamSceneComboAlreadyInUrl(cyclePassSceneSearchParams, cycleToUse, passToUse, sceneToUse)) {

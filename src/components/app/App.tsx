@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
@@ -10,7 +9,7 @@ import About from '../about/About';
 import NavbarContainer from '../navbar/NavbarContainer';
 import PodaacFooter from '../navbar/PodaacFooter';
 import NotFound from '../error/NotFound';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -18,15 +17,6 @@ const App = () => {
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-  const navigate = useNavigate();
-
-    // check if user is authenticated
-    useEffect(() => {
-      // navigate to login page if user isn't authenticated
-      // if (!userAuthenticated) {
-      //   navigate('/')
-      // }
-    }, [])
 
   const handleFooterResize = (event: any) => {
     if (footerResizeActive) {
