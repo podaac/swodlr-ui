@@ -5,7 +5,6 @@ import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizati
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
-import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
@@ -51,7 +50,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
-  }, [addedProducts])
+  }, [])
 
   const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
       const currentSearchParams = Object.fromEntries(searchParams.entries())
@@ -204,7 +203,6 @@ const GranuleTable = (props: GranuleTableProps) => {
     let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
     getScenesArray(sceneToUse).forEach(sceneId => {
       // check if granule exists with that scene, cycle, and pass
-      const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycleToUse && granuleObject.pass === passToUse && granuleObject.scene === sceneId)
       const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneToUse)
       const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
       
@@ -229,15 +227,13 @@ const GranuleTable = (props: GranuleTableProps) => {
           cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneToUse}`
         }
         granulesToAdd.push(parameters)
-      } else if (!granuleFoundResult){
-        granuleNotFound = true
       } else if (comboAlreadyAdded) {
         granuleAlreadyAdded = true
       }
     })
     
     // check if any granules could not be found or they were already added    
-    if (invalidCycle || invalidPass || invalidScene) {
+    if ((invalidCycle || invalidPass || invalidScene)) {
       if (invalidCycle) setSaveGranulesAlert('invalidCycle')
       if (invalidPass) setSaveGranulesAlert('invalidPass')
       if (invalidScene) setSaveGranulesAlert('invalidScene')
