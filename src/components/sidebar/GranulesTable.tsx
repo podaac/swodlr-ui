@@ -41,7 +41,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           const zoneAdjustValue = adjustParamDecoder('value', splitSceneParams[3])
           const bandAdjustValue = adjustParamDecoder('value', splitSceneParams[4])
           const productToEdit = addedProducts.find(granuleObj => granuleObj.cycle === splitSceneParams[0] && granuleObj.pass === splitSceneParams[1] && granuleObj.scene === splitSceneParams[2])
-          if (productToEdit?.utmZoneAdjust !== zoneAdjustValue || productToEdit.mgrsBandAdjust !== bandAdjustValue) {
+          if (productToEdit?.utmZoneAdjust !== zoneAdjustValue || productToEdit?.mgrsBandAdjust !== bandAdjustValue) {
             const editedProduct = {...productToEdit, utmZoneAdjust: zoneAdjustValue, mgrsBandAdjust: bandAdjustValue}
             dispatch(editProduct(editedProduct as allProductParameters))
           }
@@ -49,7 +49,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
-  }, [])
+  }, [tableType === 'granuleSelection' ? null : addedProducts])
 
   const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
       const currentSearchParams = Object.fromEntries(searchParams.entries())
