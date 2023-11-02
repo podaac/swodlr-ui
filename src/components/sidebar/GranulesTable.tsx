@@ -60,9 +60,9 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     //   //   return { authenticated: false, error: 'unknown error occured' } as TestAuthenticationResponse;
     //   // }
     // })))
-    const res = await graphQLClient.request(availableSceneQuery, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse})
+    const res: {availableScene: boolean} = await graphQLClient.request(availableSceneQuery, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse})
     console.log(res)
-    return false
+    return res.availableScene
   } catch (err) {
       console.log (err)
       return false
