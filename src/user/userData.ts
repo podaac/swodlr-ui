@@ -1,15 +1,37 @@
-import { gql, GraphQLClient } from 'graphql-request'
+import { gql, GraphQLClient, RequestMiddleware } from 'graphql-request'
 import { generateL2RasterProductQuery, userProductsQuery, userQuery } from '../constants/graphqlQueries';
 import { CurrentUser, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
+import { Session } from '../authentication/session';
 
 const userIdQuery = gql`${userQuery}`
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
 const graphqlUri = baseUri + '/graphql'
 
+const requestMiddleware: RequestMiddleware = async (request) => {
+  const session = await Session.getCurrent();
+  if (session === null) {
+    throw new Error('No current session');
+  }
+
+  const authToken = await session.getAccessToken();
+  if (authToken === null) {
+    throw new Error('Failed to get authentication token');
+  }
+
+  return {
+    ...request,
+    headers: {
+      ...request.headers,
+      Authorization: `Bearer ${authToken}`
+    }
+  }
+}
+
 const graphQLClient = new GraphQLClient(graphqlUri, {
     credentials: `include`,
     mode: `cors`,
-  })
+    requestMiddleware
+})
 
 export const getUserDataResponse = async () => {
   try {
@@ -26,20 +48,11 @@ export const getUserDataResponse = async () => {
 }
 
 export const getUserData = async () => {
-    try {
-        const userInfoResponse = await graphQLClient.request(userIdQuery).then((result: unknown | UserResponse) => {
-          const userResult: CurrentUser = (result as UserResponse).currentUser
-          return userResult
-        })
-        return userInfoResponse
-    } catch (err) {
-        console.log (err)
-        if (err instanceof Error) {
-            return err
-          } else {
-            return 'something happened'
-          }
-    }
+  const userInfoResponse = await graphQLClient.request(userIdQuery).then((result: unknown | UserResponse) => {
+    const userResult: CurrentUser = (result as UserResponse).currentUser
+    return userResult;
+  })
+  return userInfoResponse;
 }
 
 export interface ProductGenerationVariables {
