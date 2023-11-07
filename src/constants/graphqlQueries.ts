@@ -55,9 +55,3 @@ export const userProductsQuery = `
         }
     }
 `
-
-export const availableSceneQuery = `
-    query AvailableScene ($cycle: Int!, $pass: Int!, $scene: Int!) { 
-        availableScene(cycle: $cycle, pass: $pass, scene: $scene)
-    }
-`

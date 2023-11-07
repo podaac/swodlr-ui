@@ -2,16 +2,14 @@ import { ReactElement, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
-import { Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters } from '../../types/constantTypes';
-import sampleAvailableGranules from '../../constants/sampleAvailableGranules.json'
+import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters, validScene } from '../../types/constantTypes';
 import { LatLngExpression } from 'leaflet';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { v4 as uuidv4 } from 'uuid';
-import { availableSceneQuery } from "../../constants/graphqlQueries";
 import { graphQLClient } from '../../user/userData';
 
 const GranuleTable = (props: GranuleTableProps) => {
@@ -34,43 +32,25 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [pass, setPass] = useState('');
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
+  const [waitingForScenesToBeAdded, setWaitingForScenesToBeAdded] = useState(false)
 
-
-const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number): Promise<boolean> => {
+const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[]): Promise<validScene> => {
   try {
-    console.log('validating scene')
-    console.log('cycle', cycleToUse, 'pass', passToUse, 'scene', sceneToUse)
-    const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI
-    // let res = ((await fetch(`${baseUri}/graphql`, {
-    //   method: "POST",
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   redirect: "manual",
-    //   credentials: "include",
-    //   mode: "cors",
-    //   body: JSON.stringify({
-    //     query: availableSceneQuery,
-    //     variables: {cycle: cycleToUse, pass: passToUse, scene: sceneToUse}
-    //   })
-    // }).then(async (response) => {
-    //   console.log(await response.json())
-    //   return false
-    //   // } else {
-    //   //   return { authenticated: false, error: 'unknown error occured' } as TestAuthenticationResponse;
-    //   // }
-    // })))
-    const res: {availableScene: boolean} = await graphQLClient.request(availableSceneQuery, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse})
-    console.log(res)
-    return res.availableScene
+    // build grapql availableScene query with all cycle/pass/scene combos requested
+    let queryAliasString = ``
+    for(const specificScene of sceneToUse) {
+      const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
+      queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycleToUse}, pass: ${passToUse}, scene: ${specificScene}) `
+    }
+    const queryAliasObject = `{${queryAliasString}}`
+    const res: {availableScene: boolean} = await graphQLClient.request(queryAliasObject, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse[0]}).then(response => {
+      const responseToReturn = Object.fromEntries(Object.entries(response as {availableScene: boolean}).map(responseObj => [responseObj[0].replace('s_', ''), responseObj[1]]))
+      return responseToReturn as {availableScene: boolean}
+    })
+    return res
   } catch (err) {
       console.log (err)
-      return false
-      // if (err instanceof Error) {
-      //     return {authenticated: false, error: err.message as string} as TestAuthenticationResponse
-      //   } else {
-      //     return {authenticated: false, error: 'unknown error occured'} as TestAuthenticationResponse
-      //   }
+      return {}
   }
 }
 
@@ -147,7 +127,8 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return existingValue
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setWaitingForScenesToBeAdded(true)
     // check if cycle pass and scene are all within a valid range
     const invalidCycle = !cycle && !validateInputs('cycle', cycle)
     const invalidPass = !pass && !validateInputs('pass', pass)
@@ -177,15 +158,20 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
 
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
-    let granuleNotFound = false
-    let sceneAvailable = false
-    getScenesArray(scene).forEach(async sceneId => {
+    
+    const sceneArray = getScenesArray(scene)
+    // check scenes availability
+    await validateSceneAvailability(parseInt(cycle), parseInt(pass), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
+      // return response
+    setWaitingForScenesToBeAdded(false)
+    const scenesValidity = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
+      return sceneObjectValidityEntry[1]
+    })
+    // TODO: filter scene array so that it adds valid scenes and doesn't just skip adding all if one is not available
+    sceneArray.forEach(async sceneId => {
       // check if granule exists with that scene, cycle, and pass
-      const granuleFoundResult = sampleAvailableGranules.find(granuleObject => granuleObject.cycle === cycle && granuleObject.pass === pass && granuleObject.scene === sceneId)
       const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, sceneId)
       const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
-      sceneAvailable = await validateSceneAvailability(parseInt(cycle), parseInt(pass), parseInt(sceneId))
-      console.log(sceneAvailable)
       if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
         // NOTE: this is using sample json array but will be hooked up to the get granule API result later
         // get the granuleId from it and pass it to the parameters
@@ -204,8 +190,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         }
 
         granulesToAdd.push(parameters)
-      } else if (!granuleFoundResult){
-        granuleNotFound = true
       } else if (comboAlreadyAdded) {
         granuleAlreadyAdded = true
       }
@@ -217,20 +201,20 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       if (invalidPass) setSaveGranulesAlert('invalidPass')
       if (invalidScene) setSaveGranulesAlert('invalidScene')
     } else {
-      if (granuleNotFound && granuleAlreadyAdded) {
+      if (granuleAlreadyAdded) {
         setSaveGranulesAlert('alreadyAddedAndNotFound')
-      } else if (granuleNotFound && !(invalidCycle || invalidPass || invalidScene)) {
-        setSaveGranulesAlert('notFound')
       } else if  (granuleAlreadyAdded) {
         setSaveGranulesAlert('alreadyAdded')
+      } else if (!scenesValidity) {
+        setSaveGranulesAlert('notFound')
       }
     }
-
-    if (!granuleNotFound && !granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && sceneAvailable) {
+    if (!granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && scenesValidity) {
       setSaveGranulesAlert('success')
       dispatch(addProduct(granulesToAdd))
       dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
     }
+  })
 }
 
   const handleAllChecked = () => {
@@ -428,9 +412,14 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>
-              <Button variant='primary' size='sm' onClick={() => handleSave()}>
-                <Plus size={28}/> Add Scenes
-              </Button>
+              {waitingForScenesToBeAdded ? 
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner> : 
+                <Button variant='primary' size='sm' onClick={() => handleSave()}>
+                  <Plus size={28}/> Add Scenes
+                </Button>
+              }
             </Col>
           </Row>
         ) : null

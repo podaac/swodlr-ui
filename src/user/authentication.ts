@@ -28,7 +28,6 @@ export const checkUserAuthentication = async () => {
           } else if (response.status === 200) {
             // RETURN authenticated response
             const userData = await (response.json())
-            console.log(userData)
             const userResult: CurrentUser = (userData.data as UserResponse).currentUser;
             const testAuthenticationObj: TestAuthenticationResponse = { authenticated: true, data: userResult };
             return testAuthenticationObj;

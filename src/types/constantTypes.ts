@@ -125,3 +125,7 @@ export interface inputValuesDictionary {
 export interface newUrlParamsObject {
   [key: string]: string | number | boolean
 }
+
+export interface validScene {
+  [key: string]: boolean
+}
