@@ -163,59 +163,67 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     // check scenes availability
     await validateSceneAvailability(parseInt(cycle), parseInt(pass), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
       // return response
-    setWaitingForScenesToBeAdded(false)
-    const scenesValidity = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
-      return sceneObjectValidityEntry[1]
-    })
-    // TODO: filter scene array so that it adds valid scenes and doesn't just skip adding all if one is not available
-    sceneArray.forEach(async sceneId => {
-      // check if granule exists with that scene, cycle, and pass
-      const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, sceneId)
-      const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
-      if ( cyclePassSceneInBounds && !comboAlreadyAdded) {
-        // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-        // get the granuleId from it and pass it to the parameters
-        const parameters: allProductParameters = {
-          granuleId: uuidv4(),
-          name: '',
-          cycle,
-          pass,
-          scene: sceneId,
-          outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
-          outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
-          rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
-          utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
-          mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-          footprint
-        }
+      setWaitingForScenesToBeAdded(false)
+      const someScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
+        return sceneObjectValidityEntry[1]
+      })
 
-        granulesToAdd.push(parameters)
-      } else if (comboAlreadyAdded) {
-        granuleAlreadyAdded = true
+      const allScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
+        return !sceneObjectValidityEntry[1]
+      })
+      console.log(allScenesNotValid, scenesAvailable)
+      // TODO: filter scene array so that it adds valid scenes and doesn't just skip adding all if one is not available
+      console.log(sceneArray, scenesAvailable)
+      sceneArray.filter(sceneNumber => scenesAvailable[`${cycle}_${pass}_${sceneNumber}`]).forEach(async sceneId => {
+        // check if granule exists with that scene, cycle, and pass
+        const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, sceneId)
+        const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
+        if (cyclePassSceneInBounds && !comboAlreadyAdded) {
+          // NOTE: this is using sample json array but will be hooked up to the get granule API result later
+          // get the granuleId from it and pass it to the parameters
+          const parameters: allProductParameters = {
+            granuleId: uuidv4(),
+            name: '',
+            cycle,
+            pass,
+            scene: sceneId,
+            outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
+            outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
+            rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
+            utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
+            mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
+            footprint
+          }
+
+          granulesToAdd.push(parameters)
+        } else if (comboAlreadyAdded) {
+          granuleAlreadyAdded = true
+        }
+      })
+    
+      // check if any granules could not be found or they were already added    
+      if (invalidCycle || invalidPass || invalidScene) {
+        if (invalidCycle) setSaveGranulesAlert('invalidCycle')
+        if (invalidPass) setSaveGranulesAlert('invalidPass')
+        if (invalidScene) setSaveGranulesAlert('invalidScene')
+      } else {
+        if (granuleAlreadyAdded) {
+          setSaveGranulesAlert('alreadyAddedAndNotFound')
+        } else if (granuleAlreadyAdded) {
+          setSaveGranulesAlert('alreadyAdded')
+        } else if (allScenesNotValid) {
+          setSaveGranulesAlert('notFound')
+        } else if (someScenesNotValid) {
+          // set granule alert to show which scenes are missing but also say that you were successful
+        }
+      }
+      if (!granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && !allScenesNotValid) {
+        setSaveGranulesAlert('success')
+        dispatch(addProduct(granulesToAdd))
+        dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
       }
     })
-    
-    // check if any granules could not be found or they were already added    
-    if (invalidCycle || invalidPass || invalidScene) {
-      if (invalidCycle) setSaveGranulesAlert('invalidCycle')
-      if (invalidPass) setSaveGranulesAlert('invalidPass')
-      if (invalidScene) setSaveGranulesAlert('invalidScene')
-    } else {
-      if (granuleAlreadyAdded) {
-        setSaveGranulesAlert('alreadyAddedAndNotFound')
-      } else if  (granuleAlreadyAdded) {
-        setSaveGranulesAlert('alreadyAdded')
-      } else if (!scenesValidity) {
-        setSaveGranulesAlert('notFound')
-      }
-    }
-    if (!granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && scenesValidity) {
-      setSaveGranulesAlert('success')
-      dispatch(addProduct(granulesToAdd))
-      dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
-    }
-  })
-}
+  }
 
   const handleAllChecked = () => {
     if (!allChecked) {
