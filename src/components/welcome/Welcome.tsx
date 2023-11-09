@@ -1,49 +1,29 @@
 import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap';
-import { useAppDispatch } from '../../redux/hooks'
-import { setCurrentPage, setCurrentUser, setUserAuthenticated } from '../app/appSlice';
-import { checkUserAuthentication } from '../../user/authentication';
-import { TestAuthenticationResponse } from '../../types/authenticationTypes';
-import { useEffect, useState } from 'react';
-import { CurrentUserData } from '../../types/graphqlTypes';
+import { useAppSelector } from '../../redux/hooks'
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { generateEdlAuthorizeLink } from '../../authentication/edl';
 
 const Welcome = () => {
-  const dispatch = useAppDispatch()
-  const testMode: boolean = false
-
-  const [redirectUri, setRedirectUri] = useState("");
-
-  // check if user is authenticated
-  useEffect(() => {
-    if (!testMode) {
-      testAuthentication()
-    }
-  }, [])
-
   const navigate = useNavigate();
   const { search } = useLocation();
 
-  const testAuthentication = async () => {
-    const response: TestAuthenticationResponse = await checkUserAuthentication()
-    if (response.authenticated) {
-      dispatch(setCurrentUser(response.data as CurrentUserData))
-      navigate(`customizeProduct/selectScenes${search}`)
-      dispatch(setUserAuthenticated())
-    } else {
-      if (response.redirectUri) {
-        setRedirectUri(response.redirectUri)
-      } else if (response.error) {
-        console.log('error: ' + response.error)
-      }
+  const testMode = false;
+  const currentUser = useAppSelector((state) => state.app.currentUser);
+
+  useEffect(() => {
+    if (currentUser !== null) {
+      navigate('/customizeProduct/selectScenes');
     }
-  }
+  }, [navigate, currentUser]);
 
   const handleLogin = () => {
     if (testMode) {
       navigate(`customizeProduct/selectScenes${search}`)
-      dispatch(setUserAuthenticated())
     } else {
-      window.location.replace(redirectUri as string);
+      generateEdlAuthorizeLink().then((url) => {
+        window.location.replace(url as string)
+      })
     } 
   }
 

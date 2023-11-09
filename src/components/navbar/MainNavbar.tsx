@@ -4,9 +4,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { PersonSquare } from 'react-bootstrap-icons';
-import { setUserNotAuthenticated } from '../app/appSlice';
+import { logoutCurrentUser } from '../app/appSlice';
 import { useLocation, useNavigate } from "react-router-dom";
-import { logoutUser } from '../../user/authentication';
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
@@ -14,7 +13,7 @@ const MainNavbar = () => {
   const userData = useAppSelector((state) => state.app.currentUser)
   const navigate = useNavigate()
 
-  const { email, firstName, lastName } = userData
+  var { email, firstName, lastName } = userData || {};
   const { search } = useLocation();
 
   const renderUserDropdownTitle = () => (
@@ -24,8 +23,7 @@ const MainNavbar = () => {
   )
 
   const handleLogout = async () => {
-    dispatch(setUserNotAuthenticated())
-    await logoutUser()
+    dispatch(logoutCurrentUser());
     navigate('/')
   }
 
