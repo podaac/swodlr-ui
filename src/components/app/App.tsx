@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
@@ -14,6 +13,7 @@ import NotFound from '../error/NotFound';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { getCurrentUser } from './appSlice';
+import { useEffect } from 'react';
 
 const App = () => {
   const dispatch = useAppDispatch()
