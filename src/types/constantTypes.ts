@@ -1,5 +1,4 @@
 import { LatLngExpression } from "leaflet"
-import { Product } from "./graphqlTypes"
 
 export interface parameterValuesObject {
    values: string[] | number[],
@@ -133,3 +132,5 @@ export interface newUrlParamsObject {
 export interface validScene {
   [key: string]: boolean
 }
+
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable'

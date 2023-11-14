@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters, validScene } from '../../types/constantTypes';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
@@ -106,7 +106,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return scenesArray
   }
 
-  const setSaveGranulesAlert = (alert: string) => {
+  const setSaveGranulesAlert = (alert: alertMessageInput) => {
     const {message, variant} = granuleAlertMessageConstant[alert]
     const alertThatExists = granuleTableAlerts.find(alertObj => alertObj.type === alert)
     if (alertThatExists) {
@@ -133,23 +133,25 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const checkInBounds = (inputType: string, inputValue: string): boolean => {
-    return parseInt(inputValue) >= inputBounds[inputType].min && parseInt(inputValue) <= inputBounds[inputType].max
+    return parseInt(inputValue) >= inputBounds[inputType].min && parseInt(inputValue) <= inputBounds[inputType].max && !isNaN(+(inputValue.trim()))
   }
 
-  const validateInputs = (inputType: InputType, inputValue: string): boolean => {
+  const inputIsValid = (inputType: InputType, inputValue: string): boolean => {
     let validInput = false
     // TODO: error checking if not in the 1-10 format
     // check for more than one -
     // check for characters other than integers and one -
     if (inputValue.includes('-')) {
       const inputBoundsValue = inputValue.split('-')
+      // const allInputsValidNumbers = inputBoundsValue.every(inputString => !isNaN(+inputString))
       const min: string = inputBoundsValue[0].trim()
       const max: string = inputBoundsValue[1].trim()
       const minIsValid = checkInBounds(inputType, min)
       const maxIsValid = checkInBounds(inputType, max)
       validInput = minIsValid && maxIsValid
     } else {
-      validInput = checkInBounds(inputType, inputValue.trim())
+      const validInBounds = checkInBounds(inputType, inputValue.trim())
+      validInput = validInBounds
     }
     return validInput
   }
@@ -191,79 +193,82 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     const passToUse = passParam ?? pass
     const sceneToUse = sceneParam ?? scene
     // check if cycle pass and scene are all within a valid range
-    const invalidCycle = !cycleToUse && !validateInputs('cycle', cycleToUse)
-    const invalidPass = !passToUse && !validateInputs('pass', passToUse)
-    const invalidScene = !sceneToUse && !validateInputs('scene', sceneToUse)
+    const validCycle = inputIsValid('cycle', cycleToUse)
+    const validPass = inputIsValid('pass', passToUse)
+    const validScene = inputIsValid('scene', sceneToUse)
 
-    const granulesToAdd: allProductParameters[] = []
-    let granuleAlreadyAdded = false
-    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
-    const sceneArray = getScenesArray(sceneToUse)
-    // check scenes availability
-    await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
-      // return response
+    if (!validCycle || !validPass || !validScene) {
       setWaitingForScenesToBeAdded(false)
-      const someScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
-        return sceneObjectValidityEntry[1]
-      })
+      if (!validCycle) setSaveGranulesAlert('invalidCycle')
+      if (!validPass) setSaveGranulesAlert('invalidPass')
+      if (!validScene) setSaveGranulesAlert('invalidScene')
+    } else {
+      const granulesToAdd: allProductParameters[] = []
+      let someGranulesAlreadyAdded = false
+      let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+      const sceneArray = getScenesArray(sceneToUse)
+      // check scenes availability
+      await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
+        // return response
+        setWaitingForScenesToBeAdded(false)
+        const someScenesNotAvailable = Object.entries(scenesAvailable).some(sceneObjectValidityEntry => {
+          return !sceneObjectValidityEntry[1]
+        })
 
-      const allScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
-        return !sceneObjectValidityEntry[1]
-      })
-      // TODO: make alert more verbose if some granules are added and others are not when adding more than one with scene hyphen
-      sceneArray.filter(sceneNumber => scenesAvailable[`${cycleToUse}_${passToUse}_${sceneNumber}`]).forEach(async sceneId => {
-        // check if granule exists with that scene, cycle, and pass
-        const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneId)
-        const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
-        if (cyclePassSceneInBounds && !comboAlreadyAdded) {
-          // NOTE: this is using sample json array but will be hooked up to the get granule API result later
-          // get the granuleId from it and pass it to the parameters
-          const parameters: allProductParameters = {
-            granuleId: `${cycleToUse}_${passToUse}_${sceneId}`,
-            name: '',
-            cycle: cycleToUse,
-            pass: passToUse,
-            scene: sceneId,
-            outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
-            outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
-            rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
-            utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
-            mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-            footprint: sampleFootprint
+        const allScenesNotAvailable = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
+          return !sceneObjectValidityEntry[1]
+        })
+
+        // TODO: make alert more verbose if some granules are added and others are not when adding more than one with scene hyphen
+        sceneArray.filter(sceneNumber => scenesAvailable[`${cycleToUse}_${passToUse}_${sceneNumber}`]).forEach(async sceneId => {
+          // check if granule exists with that scene, cycle, and pass
+          const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneId)
+          const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
+          if (cyclePassSceneInBounds && !comboAlreadyAdded) {
+            // NOTE: this is using sample json array but will be hooked up to the get granule API result later
+            // get the granuleId from it and pass it to the parameters
+            const parameters: allProductParameters = {
+              granuleId: `${cycleToUse}_${passToUse}_${sceneId}`,
+              name: '',
+              cycle: cycleToUse,
+              pass: passToUse,
+              scene: sceneId,
+              outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
+              outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
+              rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
+              utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
+              mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
+              footprint: sampleFootprint
+            }
+            // add cycle/pass/scene to url parameters
+            if (!searchParamSceneComboAlreadyInUrl(cyclePassSceneSearchParams, cycleToUse, passToUse, sceneId)) {
+              cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneId}`
+            }
+            granulesToAdd.push(parameters)
+          } else if (comboAlreadyAdded) {
+            someGranulesAlreadyAdded = true
           }
-          // add cycle/pass/scene to url parameters
-          if (!searchParamSceneComboAlreadyInUrl(cyclePassSceneSearchParams, cycleToUse, passToUse, sceneId)) {
-            cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneId}`
-          }
-          granulesToAdd.push(parameters)
-        } else if (comboAlreadyAdded) {
-          granuleAlreadyAdded = true
-        }
-      })
-    
-      // check if any granules could not be found or they were already added    
-      if (invalidCycle || invalidPass || invalidScene) {
-        if (invalidCycle) setSaveGranulesAlert('invalidCycle')
-        if (invalidPass) setSaveGranulesAlert('invalidPass')
-        if (invalidScene) setSaveGranulesAlert('invalidScene')
-      } else {
-        if (granuleAlreadyAdded) {
-          setSaveGranulesAlert('alreadyAddedAndNotFound')
-        } else if (granuleAlreadyAdded) {
+        })
+
+        // check if any granules could not be found or they were already added    
+        if (someGranulesAlreadyAdded) {
           setSaveGranulesAlert('alreadyAdded')
-        } else if (allScenesNotValid) {
-          setSaveGranulesAlert('notFound')
-        } else if (someScenesNotValid) {
-          // set granule alert to show which scenes are missing but also say that you were successful
+        } 
+        if (allScenesNotAvailable) {
+          setSaveGranulesAlert('allScenesNotAvailable')
         }
-      }
-      if (!granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && !allScenesNotValid) {
-        setSaveGranulesAlert('success')
-        dispatch(addProduct(granulesToAdd))
-        addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-        dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
-      }
-    })
+        if (someScenesNotAvailable) {
+          setSaveGranulesAlert('someScenesNotAvailable')
+          // set granule alert to show which scenes are missing but also say that you were successful
+        } 
+        if (granulesToAdd.length > 0) {
+          setSaveGranulesAlert('success')
+          dispatch(addProduct(granulesToAdd))
+          addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
+          dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
+        }
+      })
+    }
   }
 
   const handleAllChecked = () => {

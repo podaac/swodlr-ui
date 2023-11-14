@@ -131,39 +131,43 @@ export interface InputBounds {
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: {
-        message: 'Successfully added granules!',
+        message: 'Successfully added scenes!',
         variant: 'success',
     },
     alreadyAdded: {
-        message: 'Some granules have already been added.',
+        message: 'Some scenes have already been added.',
         variant: 'danger',
     },
-    notFound:{
-        message: 'Some granules were not found.',
+    allScenesNotAvailable:{
+        message: 'The scenes entered are not available.',
         variant: "danger",
     },
-    alreadyAddedAndNotFound: {
-        message: 'Some granules have already been added or not found',
+    someScenesNotAvailable: {
+        message: `Some scenes entered are not available.`,
         variant: 'danger',
     },
-    noGranulesAdded: {
-        message: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
+    alreadyAddedAndNotFound: {
+        message: 'Some scenes have already been added or not found.',
+        variant: 'danger',
+    },
+    noScenesAdded: {
+        message: 'No scenes have been added yet. You must have scenes added before switching to Generate mode.',
         variant: 'danger',
     },
     readyForGeneration: {
-        message: 'Remember: customize your product parameters before starting Generation',
+        message: 'Remember: customize your product parameters before starting Generation.',
         variant: 'warning',
     },
     invalidCycle: {
-        message: `Cycle is either not in range [${inputBounds.cycle.min} - ${inputBounds.cycle.max}] or contains invalid characters`,
+        message: `Cycle is either not in range [${inputBounds.cycle.min} - ${inputBounds.cycle.max}] or contains invalid characters.`,
         variant: 'danger',
     },
     invalidPass: {
-        message: `Pass is either not in range [${inputBounds.pass.min} - ${inputBounds.pass.max}] or contains invalid characters`,
+        message: `Pass is either not in range [${inputBounds.pass.min} - ${inputBounds.pass.max}] or contains invalid characters.`,
         variant: 'danger',
     },
     invalidScene: {
-        message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters`,
+        message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters.`,
         variant: 'danger',
     }
   }
