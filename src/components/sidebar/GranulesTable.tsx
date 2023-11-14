@@ -1,16 +1,15 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters, validScene } from '../../types/constantTypes';
-import { LatLngExpression } from 'leaflet';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, allProductParameters, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
-import { v4 as uuidv4 } from 'uuid';
 import { graphQLClient } from '../../user/userData';
+import { useSearchParams } from 'react-router-dom';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -24,8 +23,46 @@ const GranuleTable = (props: GranuleTableProps) => {
   const dispatch = useAppDispatch()
   
   const [allChecked, setAllChecked] = useState(false)
-
   const {outputSamplingGridType} = generateProductParameters
+
+  // search parameters
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // set the default url state parameters
+  useEffect(() => {
+    // if any cycle scene and pass parameters in url, add them to table
+    const cyclePassSceneParameters = searchParams.get('cyclePassScene')
+    if (cyclePassSceneParameters) {
+      const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
+      sceneParamArray.forEach(sceneParams => {
+        const splitSceneParams = sceneParams.split('_')
+        if (splitSceneParams.length > 3) {
+          // update zone and band adjust values
+          const zoneAdjustValue = adjustParamDecoder('value', splitSceneParams[3])
+          const bandAdjustValue = adjustParamDecoder('value', splitSceneParams[4])
+          const productToEdit = addedProducts.find(granuleObj => granuleObj.cycle === splitSceneParams[0] && granuleObj.pass === splitSceneParams[1] && granuleObj.scene === splitSceneParams[2])
+          if (productToEdit?.utmZoneAdjust !== zoneAdjustValue || productToEdit?.mgrsBandAdjust !== bandAdjustValue) {
+            const editedProduct = {...productToEdit, utmZoneAdjust: zoneAdjustValue, mgrsBandAdjust: bandAdjustValue}
+            dispatch(editProduct(editedProduct as allProductParameters))
+          }
+        }
+        handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
+      })
+    }
+  }, [tableType === 'granuleSelection' ? null : addedProducts])
+
+  const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
+      const currentSearchParams = Object.fromEntries(searchParams.entries())
+      Object.entries(newPairsObject).forEach(pair => {
+          currentSearchParams[pair[0]] = pair[1].toString()
+      })
+      
+      // remove unused search param
+      if (remove) {
+          delete currentSearchParams[remove]
+      }
+      setSearchParams(currentSearchParams)
+  }
 
   // add granules
   const [cycle, setCycle] = useState('');
@@ -116,52 +153,54 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     }
     return validInput
   }
+
+  const searchParamSceneComboAlreadyInUrl = (cyclePassSceneSearchParams: string, cycleValue: string, passValue: string, sceneValue: string): boolean => {
+    let searchParamSceneComboAlreadyInUrlResult: boolean = false
+    if (cyclePassSceneSearchParams) {
+      const sceneParamArray = cyclePassSceneSearchParams.split('-')
+      const relevantParam = sceneParamArray.find(param => param.includes(`${cycleValue}_${passValue}_${sceneValue}`))
+      if (relevantParam) {
+        searchParamSceneComboAlreadyInUrlResult = true
+      }
+    }
+    return searchParamSceneComboAlreadyInUrlResult
+  }
   
-  const alreadyAddedCyclePassScene = (cycle: string, pass: string, scene: string): boolean => {
+  const alreadyAddedCyclePassScene = (cycleValue: string, passValue: string, sceneValue: string): boolean => {
     let existingValue = false
+    const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     addedProducts.forEach(product => {
-      if (product.cycle === cycle && product.pass === pass && product.scene === scene) {
+      if (product.cycle === cycleValue && product.pass === passValue && product.scene === sceneValue) {   
         existingValue = true
+      } else {
+        if (cyclePassSceneParameters) {
+          const sceneParamArray = cyclePassSceneParameters.split('-')
+          const relevantParam = sceneParamArray.find(param => param.includes(`${cycleValue}_${passValue}_${sceneValue}`))
+          if (relevantParam) {
+            existingValue = true
+          }
+        }
       }
     })
     return existingValue
   }
 
-  const handleSave = async () => {
+  const handleSave = async (cycleParam?: string, passParam?: string, sceneParam?: string) => {
     setWaitingForScenesToBeAdded(true)
+    const cycleToUse = cycleParam ?? cycle
+    const passToUse = passParam ?? pass
+    const sceneToUse = sceneParam ?? scene
     // check if cycle pass and scene are all within a valid range
-    const invalidCycle = !cycle && !validateInputs('cycle', cycle)
-    const invalidPass = !pass && !validateInputs('pass', pass)
-    const invalidScene = !scene && !validateInputs('scene', scene)
-    const footprint: LatLngExpression[] = [
-      [
-        33.62959926136482,
-        -119.59722240610449
-      ],
-      [
-        33.93357164098772,
-        -119.01030070905898
-      ],
-      [
-        33.445222247065175,
-        -118.6445806486702
-      ],
-      [
-        33.137055033294544,
-        -119.23445170097719
-      ],
-      [
-        33.629599562267856,
-        -119.59722227107866
-      ]
-    ] 
+    const invalidCycle = !cycleToUse && !validateInputs('cycle', cycleToUse)
+    const invalidPass = !passToUse && !validateInputs('pass', passToUse)
+    const invalidScene = !sceneToUse && !validateInputs('scene', sceneToUse)
 
     const granulesToAdd: allProductParameters[] = []
     let granuleAlreadyAdded = false
-    
-    const sceneArray = getScenesArray(scene)
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    const sceneArray = getScenesArray(sceneToUse)
     // check scenes availability
-    await validateSceneAvailability(parseInt(cycle), parseInt(pass), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
+    await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
       // return response
       setWaitingForScenesToBeAdded(false)
       const someScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
@@ -171,30 +210,31 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       const allScenesNotValid = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
         return !sceneObjectValidityEntry[1]
       })
-      console.log(allScenesNotValid, scenesAvailable)
-      // TODO: filter scene array so that it adds valid scenes and doesn't just skip adding all if one is not available
-      console.log(sceneArray, scenesAvailable)
-      sceneArray.filter(sceneNumber => scenesAvailable[`${cycle}_${pass}_${sceneNumber}`]).forEach(async sceneId => {
+      // TODO: make alert more verbose if some granules are added and others are not when adding more than one with scene hyphen
+      sceneArray.filter(sceneNumber => scenesAvailable[`${cycleToUse}_${passToUse}_${sceneNumber}`]).forEach(async sceneId => {
         // check if granule exists with that scene, cycle, and pass
-        const comboAlreadyAdded = alreadyAddedCyclePassScene(cycle, pass, sceneId)
-        const cyclePassSceneInBounds = checkInBounds('cycle', cycle) && checkInBounds('pass', pass) && checkInBounds('scene', sceneId)
+        const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneId)
+        const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
         if (cyclePassSceneInBounds && !comboAlreadyAdded) {
           // NOTE: this is using sample json array but will be hooked up to the get granule API result later
           // get the granuleId from it and pass it to the parameters
           const parameters: allProductParameters = {
-            granuleId: uuidv4(),
+            granuleId: `${cycleToUse}_${passToUse}_${sceneId}`,
             name: '',
-            cycle,
-            pass,
+            cycle: cycleToUse,
+            pass: passToUse,
             scene: sceneId,
             outputGranuleExtentFlag: parameterOptionValues.outputGranuleExtentFlag.default as number,
             outputSamplingGridType: parameterOptionValues.outputSamplingGridType.default as string,
             rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
             utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
             mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-            footprint
+            footprint: sampleFootprint
           }
-
+          // add cycle/pass/scene to url parameters
+          if (!searchParamSceneComboAlreadyInUrl(cyclePassSceneSearchParams, cycleToUse, passToUse, sceneId)) {
+            cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneId}`
+          }
           granulesToAdd.push(parameters)
         } else if (comboAlreadyAdded) {
           granuleAlreadyAdded = true
@@ -220,6 +260,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       if (!granuleAlreadyAdded && !invalidCycle && !invalidPass && !invalidScene && !allScenesNotValid) {
         setSaveGranulesAlert('success')
         dispatch(addProduct(granulesToAdd))
+        addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
         dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
       }
     })
@@ -254,13 +295,16 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const getAdjustRadioGroup = (adjustType: AdjustType, granuleId: string) => {
+    const productToUse = addedProducts.find(product => product.granuleId === granuleId)
+    const utmZoneAdjustToUse = productToUse?.utmZoneAdjust
+    const mgrsBandAdjustToUse = productToUse?.mgrsBandAdjust
     if (adjustType === 'zone') {
       return (                    
         <td>  
           <Form>              
               {parameterOptionValues.utmZoneAdjust.values.map((value, index) => 
                 <Form.Check
-                    defaultChecked={value === parameterOptionValues.utmZoneAdjust.default}
+                    checked = {value === utmZoneAdjustToUse}
                     inline
                     label={value}
                     name="utmZoneAdjustGroup"
@@ -278,7 +322,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           <Form>              
             {parameterOptionValues.mgrsBandAdjust.values.map((value, index) => 
               <Form.Check
-                  defaultChecked={value === parameterOptionValues.mgrsBandAdjust.default}
+                  checked = {value === mgrsBandAdjustToUse}
                   inline
                   label={value}
                   name="mgrsBandAdjustGroup"
@@ -294,24 +338,89 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const getValuesForRow = (tableType: TableTypes, basicGranuleValues: GranuleForTable) => {
-    const formattedGranulesForTable = Object.entries(basicGranuleValues).map((entry, index) => <td key={`${entry[0]}-${index}`}>{entry[1]}</td> )
+    const {granuleId, ...restOfGranule} = basicGranuleValues
+    const formattedGranulesForTable = Object.entries(restOfGranule).map((entry, index) => <td key={`${entry[0]}-${index}`}>{entry[1]}</td> )
     if (tableType === 'productCustomization' && showUTMAdvancedOptions && (outputSamplingGridType === 'utm')) {
       //put two more entries in there
-      formattedGranulesForTable.push(getAdjustRadioGroup('zone', basicGranuleValues.granuleId) as ReactElement)
-      formattedGranulesForTable.push(getAdjustRadioGroup('band', basicGranuleValues.granuleId) as ReactElement)
+      formattedGranulesForTable.push(getAdjustRadioGroup('zone', granuleId) as ReactElement)
+      formattedGranulesForTable.push(getAdjustRadioGroup('band', granuleId) as ReactElement)
     }
 
     return formattedGranulesForTable
   }
 
+  const adjustParamDecoder = (targetLocation: 'url' | 'value', adjustValueToConvert: string): string => {
+    const adjustParamObject: AdjustValueDecoder = {
+      '00': '0',
+      '01': '-1',
+      '10': '+1'
+    }
+    if (targetLocation === 'url') {
+      return Object.keys(adjustParamObject).find(key => adjustParamObject[key] === adjustValueToConvert) as string
+    } else {
+      return adjustParamObject[adjustValueToConvert]
+    }
+  }
+
+  const handleModifyingSceneSearchParams = (action: 'add' | 'remove', adjustType: AdjustType, adjustValue: string, cycleToUse: string, passToUse: string, sceneToUse: string ) => {
+    const adjustParamValue: string = adjustParamDecoder('url',adjustValue)
+
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    if (cyclePassSceneSearchParams.length > 0) {
+      const sceneComboParamOriginal = cyclePassSceneSearchParams.split('-').find(sceneCombo => sceneCombo.includes(`${cycleToUse}_${passToUse}_${sceneToUse}`)) as string
+      const sceneComboParamToModify = sceneComboParamOriginal?.split('_') as string[]
+      if (action === 'add') {
+        if (sceneComboParamToModify.length === 3) {
+          // add the adjust params
+          if (adjustType === 'zone') {
+            sceneComboParamToModify.push(adjustParamValue, '00')
+          } else {
+            sceneComboParamToModify.push('00', adjustParamValue)
+          }
+        } else {
+          // replace the adjust params
+          if (adjustType === 'zone') {
+            sceneComboParamToModify[3] = adjustParamValue
+          } else {
+            sceneComboParamToModify[4] = adjustParamValue
+          }
+        }
+      } else if (action === 'remove') {
+        if (sceneComboParamToModify.length > 3) {
+          // remove the adjust params
+          sceneComboParamToModify.splice(sceneComboParamToModify.length - 2, 2);
+        }
+      }
+      const recombinedSceneParams = cyclePassSceneSearchParams.replace(sceneComboParamOriginal, sceneComboParamToModify.join('_'))
+      addSearchParamToCurrentUrlState({'cyclePassScene': recombinedSceneParams})
+    }
+  }
+
   const handleAdjustSelection = (adjustType: AdjustType, granuleId: string, adjustValue: string) => {
     const productToEdit = addedProducts.find(granuleObj => granuleId === granuleObj.granuleId)
+    const cycleToUse = productToEdit?.cycle as string
+    const passToUse = productToEdit?.pass as string
+    const sceneToUse = productToEdit?.scene as string
     const editedProduct = {...productToEdit}
+    
+    let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
+    let action: 'add' | 'remove' = 'add'
     if (adjustType === 'zone') {
       editedProduct!.utmZoneAdjust = adjustValue
+      if (productToEdit?.utmZoneAdjust !== '0' && productToEdit?.mgrsBandAdjust === '0' && adjustValue === '0' && cyclePassSceneSearchParams.length > 0) { // remove zone adjust params
+        action = 'remove'
+      } else { // set zone adjust param
+        action = 'add'
+      }
     } else if (adjustType === 'band') {
       editedProduct!.mgrsBandAdjust = adjustValue
+      if (productToEdit?.utmZoneAdjust === '0' && productToEdit?.mgrsBandAdjust !== '0' && adjustValue === '0' && cyclePassSceneSearchParams.length > 0) { // remove band adjust params
+        action = 'remove'
+      } else { // set zone adjust param
+        action = 'add'
+      }
     }
+    handleModifyingSceneSearchParams(action, adjustType, adjustValue, cycleToUse, passToUse, sceneToUse)
     dispatch(editProduct(editedProduct as allProductParameters))
   }
 
@@ -355,7 +464,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
                     className='remove-checkbox'
                     style={{cursor: 'pointer'}}
                     onChange={() => handleAllChecked()}
-                    // checked={!(allChecked && !addedProducts.length)}
                   />
                 </th>
               ): (
@@ -397,14 +505,12 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
                         <Trash color="white" size={18}/>
                     </Button>
                   </td>
-                  <td></td>
                   <td><Form.Control value={cycle} required id="add-product-cycle" placeholder="cycle_id" onChange={event => setCycle(event.target.value)}/></td>
                   <td><Form.Control value={pass} required id="add-product-pass" placeholder="pass_id" onChange={event => setPass(event.target.value)}/></td>
                   <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
                 </tr>
                 <tr className='add-granules'>
                   <td>Valid Values:</td>
-                  <td></td>
                   <td>{`${inputBounds.cycle.min} - ${inputBounds.cycle.max}`}</td>
                   <td>{`${inputBounds.pass.min} - ${inputBounds.pass.max}`}</td>
                   <td>{`${inputBounds.scene.min} - ${inputBounds.scene.max}`}</td>
@@ -416,7 +522,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           </tfoot>
         </Table>
       </div>
-      {tableType === 'granuleSelection' ? <Row style={{marginTop: '5px', marginBottom: '5px'}}><Col>To enter a range of values, enter two numbers separated by a hyphen (e.g. 1-10)</Col></Row> : null}
+      {tableType === 'granuleSelection' ? <Row style={{marginTop: '5px', marginBottom: '5px'}}><Col>To add multiple scenes at once, enter two numbers into the scene input field separated by a hyphen (e.g. 1-10)</Col></Row> : null}
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>

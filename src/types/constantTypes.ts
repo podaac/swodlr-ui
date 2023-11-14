@@ -29,17 +29,17 @@ export interface allProductParameters {
 }
 
 export interface GranuleForTable {
-granuleId: string,
-cycle: string,
-pass: string,
-scene: string,
+  granuleId: string,
+  cycle: string,
+  pass: string,
+  scene: string,
 }
 
 export interface GenerateProductParameters {
-outputGranuleExtentFlag: number,
-outputSamplingGridType: string,
-rasterResolutionUTM: number,
-rasterResolutionGEO: number
+  outputGranuleExtentFlag: number,
+  outputSamplingGridType: string,
+  rasterResolutionUTM: number,
+  rasterResolutionGEO: number
 }
 
 export interface sampleGranuleData {
@@ -72,6 +72,10 @@ export interface GeneratedProduct {
 }
 
 export interface ParameterOptions {
+  [key: string]: string
+}
+
+export interface AdjustValueDecoder {
   [key: string]: string
 }
 
