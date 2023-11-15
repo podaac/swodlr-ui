@@ -14,6 +14,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { getCurrentUser } from './appSlice';
 import { useEffect } from 'react';
+import GranuleSelectionAndConfigurationView from '../sidebar/GranuleSelectionAndConfigurationView';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -64,8 +65,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={ getPageWithFormatting(<Welcome />, false) } />
         <Route path="/edl/code" element={ getPageWithFormatting(<AuthorizationCodeHandler/>, false) } />
-        <Route path="/customizeProduct/selectScenes" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="selectScenes"/>, true) } />
-        <Route path="/customizeProduct/configureOptions" element={ getPageWithFormatting(<CustomizeProductsSidebar mode="configureOptions"/>, true) } />
+        <Route path="/customizeProduct/selectScenes" element={ getPageWithFormatting(<GranuleSelectionAndConfigurationView mode="selectScenes"/>, true) } />
+        <Route path="/customizeProduct/configureOptions" element={ getPageWithFormatting(<GranuleSelectionAndConfigurationView mode="configureOptions"/>, true) } />
         <Route path="/generatedProductHistory" element={ getPageWithFormatting(<GeneratedProductHistory/>, true) } />
         <Route path="/about" element={ getPageWithFormatting(<About />, true) } />
         <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>

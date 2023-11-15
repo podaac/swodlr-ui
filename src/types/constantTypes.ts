@@ -113,6 +113,10 @@ export interface GranuleTableProps {
   tableType: TableTypes
 }
 
+export interface GranuleSelectionAndConfigurationViewProps {
+  mode: CustomizeProductSidebarTypes
+}
+
 export type AdjustType = "zone" | "band"
 
 export interface UserData {

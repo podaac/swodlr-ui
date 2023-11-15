@@ -7,6 +7,7 @@ import SidebarBreadcrumbs from './SidebarBreadcrumbs';
 import CustomizeProductView from './CustomizeProductView';
 import GranuleSelectionView from './GranuleSelectionView';
 import { CustomizeProductSidebarProps } from '../../types/constantTypes';
+import { ArrowsExpand } from 'react-bootstrap-icons';
 
 const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
     const { mode } = props
@@ -55,10 +56,10 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
             </div>
         </Col>
 
-        {/* TODO: uncomment when granule footprints are being retreived to display on map */}
-        {/* <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
+        {/* TODO: uncomment when granule footprints are being retrieved to display on map */}
+        <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
-        </div> */}
+        </div>
     </div>
   );
 }
