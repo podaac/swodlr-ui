@@ -60,7 +60,7 @@ export async function generateEdlAuthorizeLink(): Promise<string> {
     return oauthParams.authorizeUri;
   }
 
-  const redirectUri = new URL('#edl/code', BASE_REDIRECT_URI).toString();
+  const redirectUri = new URL('edl/code', BASE_REDIRECT_URI).toString();
 
   // Generate code challenge and verifier
   const { codeVerifier, codeChallenge } = await generatePKCEParameters();
