@@ -11,6 +11,8 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@turf/boolean-clockwise": "^6.5.0",
+    "@turf/helpers": "^6.5.0",
     "@types/jest": "^27.5.2",
     "@types/leaflet-draw": "^1.0.10",
     "@types/node": "^16.18.38",

@@ -202,3 +202,5 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
       -119.59722227107866
     ]
   ] 
+
+  export const swotConceptId = 'C2263383790-POCLOUD'
