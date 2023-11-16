@@ -47,10 +47,13 @@ const WorldMap = () => {
         const lineStringFeature = lineString(polygonCoordinates)
         console.log('lineStringFeature', lineStringFeature)
         console.log('clockwise',booleanClockwise(lineStringFeature))
-        if (!booleanClockwise(lineStringFeature)) {
-          console.log('counter clockwise')
+        const clockwise = booleanClockwise(lineStringFeature)
+        // close the polygon loop
+        polygonCoordinates.push(polygonCoordinates[0])
+        if (clockwise) {
+          console.log('fix coordinates')
           // polygonCoordinates.reverse()
-          polygonCoordinates = polygon.reverse().map(({lng, lat}) => [lng, lat])
+          polygonCoordinates = polygonCoordinates.reverse()
         }
 
         // create string with polygon array
@@ -58,13 +61,13 @@ const WorldMap = () => {
         polygonCoordinates.forEach((lngLatPair, index) => {
           polygonString += `${index === 0 ? '' : ',' }${lngLatPair[0]},${lngLatPair[1]}`
         })
-        // close the polygon loop
-        polygonString += `,${polygonCoordinates[0][0]},${polygonCoordinates[0][1]}`
+        
+        // polygonString += `,${polygonCoordinates[0][0]},${polygonCoordinates[0][1]}`
         return polygonString
       }).join()
-      console.log(polygonUrlString)
-      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${swotConceptId}${polygonUrlString}&page_size=2000`
-      console.log(spatialSearchUrl)
+      // console.log(polygonUrlString)
+      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${swotConceptId}${polygonUrlString}&page_size=1000`
+      // console.log(spatialSearchUrl)
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
         credentials: 'omit',
@@ -74,15 +77,17 @@ const WorldMap = () => {
       }).then(response => response.text()).then(data => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
-        console.log(xml)
+        // console.log(xml)
         const references = Array.from(xml.getElementsByTagName("name")).map(nameElement => {
           const granuleName = (nameElement.textContent)
-          console.log(granuleName)
-          const granuleCyclePassSceneIds = granuleName?.match('N_x_x_x_([0-9]+(_[0-9]+)+)F_')?.[1].split('_').map(foundId => parseInt(foundId))
-          return granuleCyclePassSceneIds
+          // console.log(granuleName)
+          const granuleCyclePassSceneIds = granuleName?.match('N_x_x_x_([0-9]+(_[0-9]+)+)F_')?.[1].split('_').map(foundId => parseInt(foundId).toString()) as string[]
+          console.log(granuleCyclePassSceneIds)
+          return {cycle: granuleCyclePassSceneIds[0], pass: granuleCyclePassSceneIds[1], scene: granuleCyclePassSceneIds[2]}
         })
-        console.log(references)
-        return xml
+        // console.log(references)
+        // TODO: remove duplicates
+        return new Set(references)
       })
       setWaitingForSpatialSearch(false)
       return spatialSearchResponse
@@ -101,6 +106,7 @@ const WorldMap = () => {
   const onCreate = async (createEvent: any) => {
       // dispatch to redux store
       const scenesResult = await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
+      // TODO: dispatch found scenes to its own array in redux which the granules table will check with use effect and save
       console.log(scenesResult)
   }
 
