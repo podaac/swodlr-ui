@@ -27,7 +27,7 @@ const requestMiddleware: RequestMiddleware = async (request) => {
   }
 }
 
-const graphQLClient = new GraphQLClient(graphqlUri, {
+export const graphQLClient = new GraphQLClient(graphqlUri, {
     credentials: `include`,
     mode: `cors`,
     requestMiddleware

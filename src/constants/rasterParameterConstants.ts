@@ -47,14 +47,12 @@ export const parameterOptions: ParameterOptions = {
 }
 
 export const granuleSelectionLabels = {
-    granuleId: 'Granule ID',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
 }
 
 export const productCustomizationLabelsUTM = {
-    granuleId: 'Granule ID',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
@@ -63,19 +61,16 @@ export const productCustomizationLabelsUTM = {
 }
 
 export const productCustomizationLabelsGEO = {
-    granuleId: 'Granule ID',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
 }
 
 export const generatedProductsLabels = {
-    productId: 'Product ID',
-    granuleId: 'Granule ID',
-    status: 'Status',
     cycle: 'Cycle',
     pass: 'Pass',
     scene: 'Scene',
+    status: 'Status',
     outputGranuleExtentFlag: 'Output Granule Extent Flag',
     outputSamplingGridType: 'Output Sampling Grid Type',
     rasterResolution: 'Raster Resolution',
@@ -85,7 +80,7 @@ export const generatedProductsLabels = {
     dateGenerated: 'Date Generated'
 }
 
-export const infoIconsToRender = ['outputGranuleExtentFlag', 'outputSamplingGridType', 'rasterResolution', 'utmZoneAdjust', 'mgrsBandAdjust', 'cycle', 'pass', 'scene']
+export const infoIconsToRender = ['outputGranuleExtentFlag', 'outputSamplingGridType', 'rasterResolution', 'utmZoneAdjust', 'mgrsBandAdjust', 'cycle', 'pass', 'scene', 'status']
 
 export const parameterOptionDefaults = {
     name: '',
@@ -108,7 +103,8 @@ export const parameterHelp: ParameterHelp = {
     mgrsBandAdjust: `The Military Grid Reference System (MGRS) defines alphabetic Latitude bands. By default, UTM raster processing uses the MGRS band at the scene center. If a common grid is desired for scenes near each other, the band per scene can be adjusted (+/- 1 band) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
     cycle: `The repeat orbit cycle number of the observation. SWOT’s orbit is 21 days and thus observations in the same 21-day orbit period would have the same cycle number.`,
     pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
-    scene: `Predefined 128 x 128 km squares of the SWOT observations.`
+    scene: `Predefined 128 x 128 km squares of the SWOT observations.`,
+    status: `The processing status of your custom product. The status types are as follows: NEW, UNAVAILABLE, GENERATING, ERROR, READY, AVAILABLE`
 }
 
 export interface InputBounds {
@@ -135,39 +131,43 @@ export interface InputBounds {
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: {
-        message: 'Successfully added granules!',
+        message: 'Successfully added scenes!',
         variant: 'success',
     },
     alreadyAdded: {
-        message: 'Some granules have already been added.',
+        message: 'Some scenes have already been added.',
         variant: 'danger',
     },
-    notFound:{
-        message: 'Some granules were not found.',
+    allScenesNotAvailable:{
+        message: 'The scenes entered are not available.',
         variant: "danger",
     },
-    alreadyAddedAndNotFound: {
-        message: 'Some granules have already been added or not found',
+    someScenesNotAvailable: {
+        message: `Some scenes entered are not available.`,
         variant: 'danger',
     },
-    noGranulesAdded: {
-        message: 'No granules have been added yet. You must have granules added before switching to Generate mode.',
+    alreadyAddedAndNotFound: {
+        message: 'Some scenes have already been added or not found.',
+        variant: 'danger',
+    },
+    noScenesAdded: {
+        message: 'No scenes have been added yet. You must have scenes added before switching to Generate mode.',
         variant: 'danger',
     },
     readyForGeneration: {
-        message: 'Remember: customize your product parameters before starting Generation',
+        message: 'Remember: customize your product parameters before starting Generation.',
         variant: 'warning',
     },
     invalidCycle: {
-        message: `Cycle is either not in range [${inputBounds.cycle.min} - ${inputBounds.cycle.max}] or contains invalid characters`,
+        message: `Cycle is either not in range [${inputBounds.cycle.min} - ${inputBounds.cycle.max}] or contains invalid characters.`,
         variant: 'danger',
     },
     invalidPass: {
-        message: `Pass is either not in range [${inputBounds.pass.min} - ${inputBounds.pass.max}] or contains invalid characters`,
+        message: `Pass is either not in range [${inputBounds.pass.min} - ${inputBounds.pass.max}] or contains invalid characters.`,
         variant: 'danger',
     },
     invalidScene: {
-        message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters`,
+        message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters.`,
         variant: 'danger',
     }
   }

@@ -1,11 +1,12 @@
 import Navbar from 'react-bootstrap/Navbar';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks'
-import { setCurrentPage } from '../app/appSlice';
+import { useAppSelector } from '../../redux/hooks'
 import { Col, Row } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PodaacFooter = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-  const dispatch = useAppDispatch()
+  const navigate = useNavigate();
+  const { search } = useLocation();
 
   return (
     <Navbar className={`${colorModeClass}-navbar-background Main-navbar fixed-bottom`} style={{paddingTop: '0px', paddingBottom: "0px", marginRight: '0px'}} expand="lg">
@@ -21,7 +22,7 @@ const PodaacFooter = () => {
             </Navbar.Text>
           </Col>
           <Col>
-            <Navbar.Text style={{marginLeft: '0px', color: 'white', cursor: 'pointer'}} onClick={() => dispatch(setCurrentPage('about'))}>
+            <Navbar.Text style={{marginLeft: '0px', color: 'white', cursor: 'pointer'}} onClick={() => navigate(`/about${search}`)}>
               <u>About SWODLR</u>
             </Navbar.Text>
           </Col>

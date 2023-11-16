@@ -1,7 +1,6 @@
 import { ReactElement, useEffect } from "react";
 import { useAppDispatch } from '../../redux/hooks'
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getCurrentUser, setCurrentPage } from "../app/appSlice";
 import { exchangeAuthenticationCode } from "../../authentication/edl";
 import { OAuthTokenExchangeFailed } from "../../authentication/exception";
 import { Session } from "../../authentication/session";
@@ -14,7 +13,6 @@ export default function AuthorizationCodeHandler(): ReactElement {
   useEffect(() => {
     function resetAuth() {
       Session.invalidateCurrentSession()
-      dispatch(setCurrentPage('welcome'));
     }
 
     const code = searchParams.get('code');

@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { Button, Col, Row } from 'react-bootstrap';
+import { Button, Row } from 'react-bootstrap';
 import { TabTypes } from '../../types/constantTypes';
 import { setActiveTab } from './actions/sidebarSlice';
 

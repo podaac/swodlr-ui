@@ -27,9 +27,6 @@ export const appSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    setCurrentPage: (state, action: PayloadAction<PageTypes>) => {
-      state.currentPage = action.payload
-    },
     logoutCurrentUser: (state) => {
       state.userAuthenticated = false;
       state.currentUser = null;
@@ -53,6 +50,6 @@ export const appSlice = createSlice({
   },
 });
 
-export const { setCurrentPage, logoutCurrentUser } = appSlice.actions
+export const { logoutCurrentUser } = appSlice.actions
 
 export default appSlice.reducer
