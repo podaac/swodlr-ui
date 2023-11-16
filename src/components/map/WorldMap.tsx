@@ -9,9 +9,11 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { afterCPS, beforeCPS, spatialSearchResultLimit, swotConceptId } from '../../constants/rasterParameterConstants';
+import { afterCPS, beforeCPS, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
+
+const SPATIAL_SEARCH_COLLECTION_CONCEPT_ID = process.env.REACT_APP_SPATIAL_SEARCH_COLLECTION_CONCEPT_ID;
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -22,7 +24,6 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const granuleFocus = useAppSelector((state) => state.product.granuleFocus)
-  // const [waitingForSpatialSearch, setWaitingForSpatialSearch] = useState(false)
   const dispatch = useAppDispatch()
 
   const ChangeView = () => {
@@ -47,13 +48,16 @@ const WorldMap = () => {
 
       const polygonUrlString = coordinatesToSearch.map((polygon) => {
         let polygonCoordinates = polygon.map(({lng, lat}) => [lng, lat])
+        // close the polygon
         polygonCoordinates.push(polygonCoordinates[0])
+
         // if coordinates to search in polygon are clockwise, switch them to counter clockwise
         const lineStringFeature = lineString(polygonCoordinates)
         const clockwise = booleanClockwise(lineStringFeature)
         if (clockwise) {
           polygonCoordinates = polygonCoordinates.reverse()
         }
+
         // create string with polygon array
         let polygonString = '&polygon[]='
         polygonCoordinates.forEach((lngLatPair, index) => {
@@ -61,9 +65,7 @@ const WorldMap = () => {
         })
         return polygonString
       }).join()
-      
-      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${swotConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
-      // console.log(spatialSearchUrl)
+      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${SPATIAL_SEARCH_COLLECTION_CONCEPT_ID}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
         credentials: 'omit',
@@ -73,7 +75,6 @@ const WorldMap = () => {
       }).then(response => response.text()).then(data => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
-        console.log(xml)
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)${afterCPS}`)?.[1]))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
           return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : cyclePassSceneStringArray?.[2]} as SpatialSearchResult
@@ -142,3 +143,5 @@ const WorldMap = () => {
 }
 
 export default WorldMap;
+
+// https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=C2296989359-POCLOUD&polygon[]=-116.90002441406251,35.016424131174766,-117.02087402343751,34.917380419972105,-116.87255859375001,34.89034772491291,-116.90002441406251,35.016424131174766&page_size=2000

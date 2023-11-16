@@ -55,8 +55,6 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   useEffect(() => {
     if (spatialSearchResults.length > 0) {
-      console.log(waitingForSpatialSearch)
-      console.log('trying to add spatial results')
       spatialSearchResults.forEach(spatialSearchResult => handleSave(spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
     }
   }, [spatialSearchResults])

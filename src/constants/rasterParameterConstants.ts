@@ -203,8 +203,8 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     ]
   ] 
 
-  export const swotConceptId = 'C2263383790-POCLOUD'
 // C2263383790-POCLOUD
+// _N_x_x_x_486_013_127F
 // C2296989369-POCLOUD
 // _N_x_x_x_486_013_127F_
 // C2762949418-POCLOUD
@@ -213,5 +213,5 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
 // _PIXCVec_406_009_226L_
 
 export const spatialSearchResultLimit = 2000
-export const beforeCPS = '_N_x_x_x_'
-export const afterCPS = 'F_'
+export const beforeCPS = '_PIXCVec_'
+export const afterCPS = 'L_'
