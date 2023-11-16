@@ -16,9 +16,11 @@ const GranuleTable = (props: GranuleTableProps) => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+  const spatialSearchResults = useAppSelector((state) => state.product.spatialSearchResults)
   const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
   const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
+  const waitingForSpatialSearch = useAppSelector((state) => state.product.waitingForSpatialSearch)
 
   const dispatch = useAppDispatch()
   
@@ -50,6 +52,14 @@ const GranuleTable = (props: GranuleTableProps) => {
       })
     }
   }, [tableType === 'granuleSelection' ? null : addedProducts])
+
+  useEffect(() => {
+    if (spatialSearchResults.length > 0) {
+      console.log(waitingForSpatialSearch)
+      console.log('trying to add spatial results')
+      spatialSearchResults.forEach(spatialSearchResult => handleSave(spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
+    }
+  }, [spatialSearchResults])
 
   const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
       const currentSearchParams = Object.fromEntries(searchParams.entries())
@@ -531,7 +541,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>
-              {waitingForScenesToBeAdded ? 
+              {waitingForScenesToBeAdded || waitingForSpatialSearch ? 
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner> : 

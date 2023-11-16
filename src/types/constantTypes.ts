@@ -138,3 +138,9 @@ export interface validScene {
 }
 
 export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable'
+
+export interface SpatialSearchResult {
+  cycle: string,
+  pass: string,
+  scene: string
+}

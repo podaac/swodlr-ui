@@ -1,7 +1,7 @@
 import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup } from 'react-leaflet'
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
-import { useAppSelector } from '../../redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Row } from 'react-bootstrap';
@@ -9,8 +9,9 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { useState } from 'react';
-import { swotConceptId } from '../../constants/rasterParameterConstants';
+import { afterCPS, beforeCPS, spatialSearchResultLimit, swotConceptId } from '../../constants/rasterParameterConstants';
+import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
+import { SpatialSearchResult } from '../../types/constantTypes';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -21,7 +22,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const granuleFocus = useAppSelector((state) => state.product.granuleFocus)
-  const [waitingForSpatialSearch, setWaitingForSpatialSearch] = useState(false)
+  // const [waitingForSpatialSearch, setWaitingForSpatialSearch] = useState(false)
+  const dispatch = useAppDispatch()
 
   const ChangeView = () => {
     const map = useMap();
@@ -31,42 +33,36 @@ const WorldMap = () => {
 
   const getScenesWithinCoordinates = async (coordinatesToSearch: {lat: number, lng: number}[][]) => {
     try {
+      // get session token to use in spatial search query
       const session = await Session.getCurrent();
       if (session === null) {
         throw new Error('No current session');
       }
-    
       const authToken = await session.getAccessToken();
       if (authToken === null) {
         throw new Error('Failed to get authentication token');
       }
-      setWaitingForSpatialSearch(true)
+
+      dispatch(setWaitingForSpatialSearch(true))
+
       const polygonUrlString = coordinatesToSearch.map((polygon) => {
         let polygonCoordinates = polygon.map(({lng, lat}) => [lng, lat])
+        polygonCoordinates.push(polygonCoordinates[0])
         // if coordinates to search in polygon are clockwise, switch them to counter clockwise
         const lineStringFeature = lineString(polygonCoordinates)
-        console.log('lineStringFeature', lineStringFeature)
-        console.log('clockwise',booleanClockwise(lineStringFeature))
         const clockwise = booleanClockwise(lineStringFeature)
-        // close the polygon loop
-        polygonCoordinates.push(polygonCoordinates[0])
         if (clockwise) {
-          console.log('fix coordinates')
-          // polygonCoordinates.reverse()
           polygonCoordinates = polygonCoordinates.reverse()
         }
-
         // create string with polygon array
         let polygonString = '&polygon[]='
         polygonCoordinates.forEach((lngLatPair, index) => {
           polygonString += `${index === 0 ? '' : ',' }${lngLatPair[0]},${lngLatPair[1]}`
         })
-        
-        // polygonString += `,${polygonCoordinates[0][0]},${polygonCoordinates[0][1]}`
         return polygonString
       }).join()
-      // console.log(polygonUrlString)
-      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${swotConceptId}${polygonUrlString}&page_size=1000`
+      
+      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${swotConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       // console.log(spatialSearchUrl)
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
@@ -77,22 +73,18 @@ const WorldMap = () => {
       }).then(response => response.text()).then(data => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
-        // console.log(xml)
-        const references = Array.from(xml.getElementsByTagName("name")).map(nameElement => {
-          const granuleName = (nameElement.textContent)
-          // console.log(granuleName)
-          const granuleCyclePassSceneIds = granuleName?.match('N_x_x_x_([0-9]+(_[0-9]+)+)F_')?.[1].split('_').map(foundId => parseInt(foundId).toString()) as string[]
-          console.log(granuleCyclePassSceneIds)
-          return {cycle: granuleCyclePassSceneIds[0], pass: granuleCyclePassSceneIds[1], scene: granuleCyclePassSceneIds[2]}
+        console.log(xml)
+        const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)${afterCPS}`)?.[1]))).map(foundIdString => {
+          const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
+          return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : cyclePassSceneStringArray?.[2]} as SpatialSearchResult
         })
-        // console.log(references)
-        // TODO: remove duplicates
-        return new Set(references)
+        return references
       })
-      setWaitingForSpatialSearch(false)
-      return spatialSearchResponse
+      console.log(spatialSearchResponse)
+      dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
+      dispatch(setWaitingForSpatialSearch(false))
     } catch (err) {
-      setWaitingForSpatialSearch(false)
+      dispatch(setWaitingForSpatialSearch(false))
       console.log (err)
       if (err instanceof Error) {
           return err
@@ -104,17 +96,12 @@ const WorldMap = () => {
 
 
   const onCreate = async (createEvent: any) => {
-      // dispatch to redux store
-      const scenesResult = await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
-      // TODO: dispatch found scenes to its own array in redux which the granules table will check with use effect and save
-      console.log(scenesResult)
+      await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
   }
 
   const onEdit = async (editEvent: any) => {
     const coordinatesToSearch = Object.entries(editEvent.layers._layers).map((newLayer: [string, any]) => newLayer[1].editing.latlngs[0][0])
-    // dispatch to redux store
-    const scenesResult = await getScenesWithinCoordinates(coordinatesToSearch)
-    console.log(scenesResult)
+    await getScenesWithinCoordinates(coordinatesToSearch)
   }
 
   return (

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, SpatialSearchResult } from '../../../types/constantTypes'
 import L from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +16,8 @@ interface GranuleState {
     granuleTableAlerts: AlertMessageObject[],
     productCustomizationTableAlerts: AlertMessageObject[],
     showUTMAdvancedOptions: boolean,
+    spatialSearchResults: SpatialSearchResult[],
+    waitingForSpatialSearch: boolean
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -32,7 +34,9 @@ const initialState: GranuleState = {
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
     productCustomizationTableAlerts: [],
-    showUTMAdvancedOptions: false
+    showUTMAdvancedOptions: false,
+    spatialSearchResults: [],
+    waitingForSpatialSearch: false
 }
 
 
@@ -115,6 +119,12 @@ export const productSlice = createSlice({
     setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
       state.showUTMAdvancedOptions = action.payload
     },
+    addSpatialSearchResults: (state, action: PayloadAction<SpatialSearchResult[]>) => {
+      state.spatialSearchResults = action.payload
+    },
+    setWaitingForSpatialSearch: (state, action: PayloadAction<boolean>) => {
+      state.waitingForSpatialSearch = action.payload
+    },
   },
 })
 
@@ -128,7 +138,9 @@ export const {
     setGenerateProductParameters,
     addGranuleTableAlerts,
     removeGranuleTableAlerts,
-    setShowUTMAdvancedOptions
+    setShowUTMAdvancedOptions,
+    addSpatialSearchResults,
+    setWaitingForSpatialSearch
 } = productSlice.actions
 
 export default productSlice.reducer
