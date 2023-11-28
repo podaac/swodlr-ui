@@ -65,6 +65,7 @@ const WorldMap = () => {
         })
         return polygonString
       }).join()
+
       const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${SPATIAL_SEARCH_COLLECTION_CONCEPT_ID}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
@@ -81,7 +82,6 @@ const WorldMap = () => {
         })
         return references
       })
-      console.log(spatialSearchResponse)
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
       dispatch(setWaitingForSpatialSearch(false))
     } catch (err) {
