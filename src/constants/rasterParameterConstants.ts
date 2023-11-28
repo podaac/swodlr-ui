@@ -211,7 +211,9 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
 // _PIXCVec_484_009_147R_
 // C2296989359-POCLOUD
 // _PIXCVec_406_009_226L_
+// C2799438266-POCLOUD
+// _PIXC_007_054_056L_
 
 export const spatialSearchResultLimit = 2000
-export const beforeCPS = '_N_x_x_x_'
-export const afterCPS = 'F_'
+export const beforeCPS = '_PIXC_'
+export const afterCPS = 'R_'
