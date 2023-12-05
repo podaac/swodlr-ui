@@ -112,22 +112,24 @@ export interface InputBounds {
         min: number,
         max: number
     }
-  }
+}
 
-  export const inputBounds: inputValuesDictionary = {
-    cycle: {
-        min: 1,
-        max: 154
-    },
-    pass: {
-        min: 1,
-        max: 584
-    },
-    scene: {
-        min: 0,
-        max: 399
-    }
-  }
+export const inputBounds: inputValuesDictionary = {
+cycle: {
+    min: 1,
+    max: 154
+},
+pass: {
+    min: 1,
+    max: 584
+},
+scene: {
+    min: 0,
+    max: 399
+}
+}
+
+export const granuleTableLimit = 10
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: {
@@ -169,6 +171,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     invalidScene: {
         message: `Scene is either not in range [${inputBounds.scene.min} - ${inputBounds.scene.max}] or contains invalid characters.`,
         variant: 'danger',
+    },
+    granuleLimit: {
+        message: `You can only process ${granuleTableLimit} scenes at a time.`,
+        variant: 'danger'
     }
   }
 
@@ -216,4 +222,5 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
 
 export const spatialSearchResultLimit = 2000
 export const beforeCPS = '_PIXC_'
-export const afterCPS = 'R_'
+export const afterCPSR = 'R_'
+export const afterCPSL = 'L_'

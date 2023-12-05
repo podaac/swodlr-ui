@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, SpatialSearchResult } from '../../../types/constantTypes'
-import L from 'leaflet'
+import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
@@ -17,7 +17,8 @@ interface GranuleState {
     productCustomizationTableAlerts: AlertMessageObject[],
     showUTMAdvancedOptions: boolean,
     spatialSearchResults: SpatialSearchResult[],
-    waitingForSpatialSearch: boolean
+    waitingForSpatialSearch: boolean,
+    waitingForFootprintSearch: boolean
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -36,7 +37,8 @@ const initialState: GranuleState = {
     productCustomizationTableAlerts: [],
     showUTMAdvancedOptions: false,
     spatialSearchResults: [],
-    waitingForSpatialSearch: false
+    waitingForSpatialSearch: false,
+    waitingForFootprintSearch: false
 }
 
 
@@ -47,6 +49,7 @@ export const productSlice = createSlice({
   reducers: {
     addProduct: (state, action: PayloadAction<allProductParameters[]>) => {
       action.payload.forEach(granuleObjectToAdd => state.addedProducts.push(Object.assign(granuleObjectToAdd)))
+      // console.log('added products askdjhasklhj')
       // add sample granule data
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
@@ -64,7 +67,7 @@ export const productSlice = createSlice({
     },
     setGranuleFocus: (state, action: PayloadAction<string>) => {
       const granuleIdToFocus = action.payload
-      const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint
+      const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint as LatLngExpression[]
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
       state.granuleFocus = [centerOfFootprint.lat, centerOfFootprint.lng]
     },
@@ -125,6 +128,9 @@ export const productSlice = createSlice({
     setWaitingForSpatialSearch: (state, action: PayloadAction<boolean>) => {
       state.waitingForSpatialSearch = action.payload
     },
+    setWaitingForFootprintSearch: (state, action: PayloadAction<boolean>) => {
+      state.waitingForFootprintSearch = action.payload
+    },
   },
 })
 
@@ -140,7 +146,8 @@ export const {
     removeGranuleTableAlerts,
     setShowUTMAdvancedOptions,
     addSpatialSearchResults,
-    setWaitingForSpatialSearch
+    setWaitingForSpatialSearch,
+    setWaitingForFootprintSearch
 } = productSlice.actions
 
 export default productSlice.reducer

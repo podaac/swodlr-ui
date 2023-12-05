@@ -9,7 +9,7 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { afterCPS, beforeCPS, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
+import { afterCPSL, afterCPSR, beforeCPS, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
 
@@ -76,10 +76,16 @@ const WorldMap = () => {
       }).then(response => response.text()).then(data => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
-        const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)${afterCPS}`)?.[1]))).map(foundIdString => {
+        const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
+          // console.log(nameElement.textContent)
+          return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
+        }))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
-          return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : cyclePassSceneStringArray?.[2]} as SpatialSearchResult
+          const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
+          const sceneToUse = String(Math.floor(tileValue / 2))
+          return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
         })
+        // console.log(references)
         return references
       })
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
