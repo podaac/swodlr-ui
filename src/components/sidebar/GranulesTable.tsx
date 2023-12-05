@@ -339,9 +339,9 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             return Promise.resolve(await getSceneFootprint(SPATIAL_SEARCH_COLLECTION_CONCEPT_ID as string, granuleIdForFootprint).then(retrievedFootprint => {
               return {...granule, footprint: retrievedFootprint} as allProductParameters
             }))
-          })).then(async footprintsToReturn => {
+          })).then(async productsWithFootprints => {
             setSaveGranulesAlert('success')
-            dispatch(addProduct(footprintsToReturn))
+            dispatch(addProduct(productsWithFootprints))
             addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
             dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
           })
@@ -559,7 +559,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             </tr>
           </thead>
           <tbody>
-            {addedProducts.map((productParameterObject, index) => {
+            {Array.from(new Set(addedProducts.map(obj => JSON.stringify(obj)))).map(obj => JSON.parse(obj)).map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}

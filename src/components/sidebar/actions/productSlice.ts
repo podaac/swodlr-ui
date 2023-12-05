@@ -49,8 +49,6 @@ export const productSlice = createSlice({
   reducers: {
     addProduct: (state, action: PayloadAction<allProductParameters[]>) => {
       action.payload.forEach(granuleObjectToAdd => state.addedProducts.push(Object.assign(granuleObjectToAdd)))
-      // console.log('added products askdjhasklhj')
-      // add sample granule data
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
       const editedParameters = Object.assign(action.payload)

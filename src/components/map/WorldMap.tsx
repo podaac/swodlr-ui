@@ -77,7 +77,6 @@ const WorldMap = () => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
-          // console.log(nameElement.textContent)
           return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
         }))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
@@ -85,7 +84,6 @@ const WorldMap = () => {
           const sceneToUse = String(Math.floor(tileValue / 2))
           return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
         })
-        // console.log(references)
         return references
       })
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
