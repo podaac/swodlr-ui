@@ -308,7 +308,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               rasterResolution: parameterOptionValues.rasterResolutionUTM.default as number,
               utmZoneAdjust: parameterOptionValues.utmZoneAdjust.default as string,
               mgrsBandAdjust: parameterOptionValues.mgrsBandAdjust.default as string,
-              // footprint: footprintToUse as LatLngExpression[]
               footprint: sampleFootprint
             }
             // add cycle/pass/scene to url parameters
