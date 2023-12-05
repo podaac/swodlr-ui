@@ -1,7 +1,7 @@
 import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit, spatialSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
@@ -12,8 +12,6 @@ import { graphQLClient } from '../../user/userData';
 import { useSearchParams } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { LatLngExpression } from 'leaflet';
-
-const SPATIAL_SEARCH_COLLECTION_CONCEPT_ID = process.env.REACT_APP_SPATIAL_SEARCH_COLLECTION_CONCEPT_ID;
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -335,7 +333,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         if (granulesToAdd.length > 0) {
           await Promise.all(granulesToAdd.map(async granule => {
             const granuleIdForFootprint = `SWOT_L2_HR_PIXC_${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
-            return Promise.resolve(await getSceneFootprint(SPATIAL_SEARCH_COLLECTION_CONCEPT_ID as string, granuleIdForFootprint).then(retrievedFootprint => {
+            return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
               return {...granule, footprint: retrievedFootprint} as allProductParameters
             }))
           })).then(async productsWithFootprints => {

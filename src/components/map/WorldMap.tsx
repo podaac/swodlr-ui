@@ -9,11 +9,9 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { afterCPSL, afterCPSR, beforeCPS, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
+import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
-
-const SPATIAL_SEARCH_COLLECTION_CONCEPT_ID = process.env.REACT_APP_SPATIAL_SEARCH_COLLECTION_CONCEPT_ID;
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -66,7 +64,7 @@ const WorldMap = () => {
         return polygonString
       }).join()
       
-      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${SPATIAL_SEARCH_COLLECTION_CONCEPT_ID}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
+      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${spatialSearchCollectionConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
         credentials: 'omit',
