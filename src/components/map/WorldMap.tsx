@@ -12,6 +12,7 @@ import booleanClockwise from '@turf/boolean-clockwise';
 import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
+import { useLocation } from 'react-router-dom';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -112,21 +113,24 @@ const WorldMap = () => {
       <MapContainer className='Map-container' 
       // center={[33.854457, -118.709093]} 
       zoom={7} scrollWheelZoom={true} zoomControl={false}>
-          <FeatureGroup>
-            <EditControl 
-              position="topright" 
-              onCreated={(createEvent) => onCreate(createEvent)} 
-              onEdited={(editEvent) => onEdit(editEvent)} 
-              // onDeleted={(deleteEvent) => onDelete(deleteEvent)} 
-              draw={{
-                rectangle: false,
-                polyline: false,
-                circle: false,
-                circlemarker: false,
-                marker: false
-              }} 
-            />
-          </FeatureGroup>
+          {useLocation().pathname.includes('selectScenes') ? (
+            <FeatureGroup>
+              <EditControl 
+                position="topright" 
+                onCreated={(createEvent) => onCreate(createEvent)} 
+                onEdited={(editEvent) => onEdit(editEvent)} 
+                // onDeleted={(deleteEvent) => onDelete(deleteEvent)} 
+                draw={{
+                  rectangle: false,
+                  polyline: false,
+                  circle: false,
+                  circlemarker: false,
+                  marker: false
+                }} 
+              />
+            </FeatureGroup>
+            ) : null
+          }
           <TileLayer
             url='https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'

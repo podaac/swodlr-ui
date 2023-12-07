@@ -54,7 +54,7 @@ const GeneratedProductHistory = () => {
     const renderHistoryTable = () => {
         return (
             <div style={{padding: '0px 20px 20px 20px'}}>
-                <div className={`table-responsive-generatedProducts`}>
+                <div className={`table-responsive-generatedProducts table-responsive`}>
                     <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>
                     <tr>
@@ -72,7 +72,7 @@ const GeneratedProductHistory = () => {
                             const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
                             return (
                             <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
-                            {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td> )}
+                            {Object.entries(productRowValues).map((entry, index2) => <td style={{}} key={`${index}-${index2}`}>{entry[1]}</td> )}
                             </tr>
                         )})}
                     </tbody>

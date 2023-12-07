@@ -24,6 +24,8 @@ const GranuleTable = (props: GranuleTableProps) => {
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
   const waitingForSpatialSearch = useAppSelector((state) => state.product.waitingForSpatialSearch)
   const waitingForFootprintSearch = useAppSelector((state) => state.product.waitingForFootprintSearch)
+  const spatialSearchStartDate = useAppSelector((state) => state.product.spatialSearchStartDate)
+  const spatialSearchEndDate = useAppSelector((state) => state.product.spatialSearchEndDate)
 
   const dispatch = useAppDispatch()
   
@@ -213,13 +215,18 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       }
       dispatch(setWaitingForFootprintSearch(true))
       const footprintSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=${collectionId}&producer_granule_id\[\]=${granuleId}&options[producer_granule_id][pattern]=true`
-      const footprintResult: LatLngExpression[] = await fetch(footprintSearchUrl, {
+      const footprintResult = await fetch(footprintSearchUrl, {
         method: 'GET',
         credentials: 'omit',
         headers: {
           Authorization: `Bearer ${authToken}`
         }
       }).then(response => response.json()).then(data => {
+        const timeStart = new Date(data.feed.entry[0].time_start)
+        const timeEnd = new Date(data.feed.entry[0].time_end)
+        const spatialSearchStartDateToUse = new Date(spatialSearchStartDate)
+        const spatialSearchEndDateToUse = new Date(spatialSearchEndDate)
+        const granuleInTimeRange: boolean = timeStart > spatialSearchStartDateToUse && timeStart < spatialSearchEndDateToUse && timeEnd > spatialSearchStartDateToUse && timeEnd < spatialSearchEndDateToUse
         const footprintCoordinatesSingleArray = (data.feed.entry[0].polygons[0][0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
         let footprintLatLongArray: LatLngExpression[] = []
         for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
@@ -228,7 +235,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1]])
           }
         }
-        return footprintLatLongArray
+        return [footprintLatLongArray,granuleInTimeRange]
       })
       dispatch(setWaitingForFootprintSearch(false))
       return footprintResult
@@ -334,16 +341,34 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           await Promise.all(granulesToAdd.map(async granule => {
             const granuleIdForFootprint = `SWOT_L2_HR_PIXC_${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
             return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
-              return {...granule, footprint: retrievedFootprint} as allProductParameters
+              const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
+              const footprintResult = validFootprintResultArray[0]
+              const isInTimeRange = validFootprintResultArray[1]
+              return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange} as allProductParameters
             }))
           })).then(async productsWithFootprints => {
-            setSaveGranulesAlert('success')
-            dispatch(addProduct(productsWithFootprints))
-            addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-            dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
+            const productsInTimeRange: allProductParameters[] = []
+            const productsNotInTimeRange:allProductParameters[] = []
+            productsWithFootprints.forEach(product => {
+              if (product.inTimeRange){
+                delete product.inTimeRange
+                productsInTimeRange.push(product)
+              } else if (!product.inTimeRange) {
+                delete product.inTimeRange
+                productsNotInTimeRange.push(product)
+              }
+            })
+            if (productsInTimeRange.length > 0) {
+              setSaveGranulesAlert('success')
+              dispatch(addProduct(productsInTimeRange))
+              addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
+              dispatch(setGranuleFocus(productsInTimeRange[productsInTimeRange.length-1].granuleId))
+            }
+            if (productsNotInTimeRange.length > 0) {
+              // set alerts for not in range
+              setSaveGranulesAlert('notInTimeRange')
+            }
           })
-          
-
         }
       })
     }

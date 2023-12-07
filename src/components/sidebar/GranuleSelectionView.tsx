@@ -4,6 +4,7 @@ import GranuleTable from './GranulesTable';
 import { useAppSelector } from '../../redux/hooks'
 import GranuleTableAlerts from './GranuleTableAlerts';
 import { useLocation, useNavigate } from 'react-router-dom';
+import SpatialSearchOptions from './SpatialSearchOptions';
 
 const GranuleSelectionView = () => {
     const addedProducts = useAppSelector((state) => state.product.addedProducts)
@@ -12,6 +13,7 @@ const GranuleSelectionView = () => {
 
   return (
     <>
+        <SpatialSearchOptions />
         <GranuleTable tableType='granuleSelection'/>
         <GranuleTableAlerts />
         <hr></hr>

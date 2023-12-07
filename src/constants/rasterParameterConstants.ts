@@ -175,6 +175,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     granuleLimit: {
         message: `You can only process ${granuleTableLimit} scenes at a time.`,
         variant: 'danger'
+    },
+    notInTimeRange: {
+        message: `Some scenes were not within the specified spatial search time range.`,
+        variant: 'danger'
     }
   }
 

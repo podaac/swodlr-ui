@@ -24,7 +24,8 @@ export interface allProductParameters {
   rasterResolution: number,
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
-  footprint: LatLngExpression[]
+  footprint: LatLngExpression[],
+  inTimeRange?: boolean
 }
 
 export interface GranuleForTable {
@@ -137,10 +138,11 @@ export interface validScene {
   [key: string]: boolean
 }
 
-export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit'
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange'
 
 export interface SpatialSearchResult {
   cycle: string,
   pass: string,
   scene: string
 }
+export type footprintResponse = LatLngExpression[] | boolean

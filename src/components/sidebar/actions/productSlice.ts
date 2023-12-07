@@ -18,7 +18,9 @@ interface GranuleState {
     showUTMAdvancedOptions: boolean,
     spatialSearchResults: SpatialSearchResult[],
     waitingForSpatialSearch: boolean,
-    waitingForFootprintSearch: boolean
+    waitingForFootprintSearch: boolean,
+    spatialSearchStartDate: string,
+    spatialSearchEndDate: string
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -38,7 +40,9 @@ const initialState: GranuleState = {
     showUTMAdvancedOptions: false,
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
-    waitingForFootprintSearch: false
+    waitingForFootprintSearch: false,
+    spatialSearchStartDate: (new Date()).toString(),
+    spatialSearchEndDate: (new Date()).toString()
 }
 
 
@@ -129,6 +133,12 @@ export const productSlice = createSlice({
     setWaitingForFootprintSearch: (state, action: PayloadAction<boolean>) => {
       state.waitingForFootprintSearch = action.payload
     },
+    setSpatialSearchStartDate: (state, action: PayloadAction<string>) => {
+      state.spatialSearchStartDate = action.payload
+    },
+    setSpatialSearchEndDate: (state, action: PayloadAction<string>) => {
+      state.spatialSearchEndDate = action.payload
+    },
   },
 })
 
@@ -145,7 +155,9 @@ export const {
     setShowUTMAdvancedOptions,
     addSpatialSearchResults,
     setWaitingForSpatialSearch,
-    setWaitingForFootprintSearch
+    setWaitingForFootprintSearch,
+    setSpatialSearchStartDate,
+    setSpatialSearchEndDate
 } = productSlice.actions
 
 export default productSlice.reducer
