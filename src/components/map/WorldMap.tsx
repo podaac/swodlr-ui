@@ -1,10 +1,10 @@
 import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup } from 'react-leaflet'
-import L, { LatLngExpression } from 'leaflet';
+import L, { LatLngExpression, map } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { Row } from 'react-bootstrap';
+import { Button, Row } from 'react-bootstrap';
 import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';

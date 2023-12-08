@@ -25,6 +25,8 @@ interface GranuleState {
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
 
+const date = new Date()
+
 // Define the initial state using that type
 const initialState: GranuleState = {
     // allProducts: this will be like a 'database' for the local state of all the products added
@@ -41,8 +43,8 @@ const initialState: GranuleState = {
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
     waitingForFootprintSearch: false,
-    spatialSearchStartDate: (new Date()).toString(),
-    spatialSearchEndDate: (new Date()).toString()
+    spatialSearchStartDate: (new Date(date.setMonth(date.getMonth() - 1))).toISOString(),
+    spatialSearchEndDate: (new Date()).toISOString()
 }
 
 

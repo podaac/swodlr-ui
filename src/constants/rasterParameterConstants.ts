@@ -96,7 +96,8 @@ export const parameterOptionDefaults = {
 }
 
 export const parameterHelp: ParameterHelp = {
-    outputGranuleExtentFlag: `There are two sizing options for raster granules: square (128 km x 128 km) or rectangular (256 km x 128 km). The square granule extent utilizes the data from only the specific square scene ID indicated, whereas the rectangular granule extent utilizes the specific square scene ID indicated and data from the two adjacent scene IDs along the SWOT swath. At the very edges of scenes, there is a risk that the pixels SWOT measures will not be aggregated as accurately into the raster product. The rectangular extent addresses this issue and could be most helpful with points of interest near the edges of scenes.`,
+    // outputGranuleExtentFlag: `There are two sizing options for raster granules: square (128 km x 128 km) or rectangular (256 km x 128 km). The square granule extent utilizes the data from only the specific square scene ID indicated, whereas the rectangular granule extent utilizes the specific square scene ID indicated and data from the two adjacent scene IDs along the SWOT swath. At the very edges of scenes, there is a risk that the pixels SWOT measures will not be aggregated as accurately into the raster product. The rectangular extent addresses this issue and could be most helpful with points of interest near the edges of scenes.`,
+    outputGranuleExtentFlag: `There are two sizing options for raster granules: nonoverlapping square (128 km x 128 km) or overlapping rectangular (256 km x 128 km). The rectangular granule extent is 64 km longer in along-track on both sides of the granule and can be useful for observing areas of interest near the along-track edges of the nonoverlapping granules without the need to stitch sequential granules together.`,
     outputSamplingGridType: `Specifies the type of the raster sampling grid. It can be either a Universal Transverse Mercator (UTM) grid or a geodetic latitude-longitude grid.`,
     rasterResolution: `Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids.`,
     utmZoneAdjust: `The Universal Transverse Mercator (UTM) projection is divided into 60 local zones 6° wide in Longitude. By default, UTM raster processing uses the UTM zone at the scene center. If a common grid is desired for scenes near each other, the zone per scene can be adjusted (+/- 1 zone) to allow nearby L2_HR_Raster outputs to be sampled on a common grid. This parameter has no effect if the output grid is not UTM.`,
@@ -116,16 +117,16 @@ export interface InputBounds {
 
 export const inputBounds: inputValuesDictionary = {
 cycle: {
-    min: 1,
-    max: 154
+    min: 0,
+    max: 399
 },
 pass: {
     min: 1,
     max: 584
 },
 scene: {
-    min: 0,
-    max: 399
+    min: 1,
+    max: 154
 }
 }
 
@@ -212,17 +213,6 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
       -119.59722227107866
     ]
   ] 
-
-// C2263383790-POCLOUD
-// _N_x_x_x_486_013_127F
-// C2296989369-POCLOUD
-// _N_x_x_x_486_013_127F_
-// C2762949418-POCLOUD
-// _PIXCVec_484_009_147R_
-// C2296989359-POCLOUD
-// _PIXCVec_406_009_226L_
-// C2799438266-POCLOUD
-// _PIXC_007_054_056L_
 
 export const spatialSearchResultLimit = 2000
 export const beforeCPS = '_PIXC_'

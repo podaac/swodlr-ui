@@ -65,11 +65,12 @@ const GeneratedProductHistory = () => {
                         {userProducts.map((generatedProductObject, index) => {
                             const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
                             const statusToUse = status[0].state
-                            const downloadUrl = granules && granules.length !== 0 ? granules[0].uri : 'N/A'
+                            const downloadUrl = granules && granules.length !== 0 ? <a href={granules[0].uri} target="_blank" rel="noreferrer">{granules[0].uri.split('/').pop()}</a> : 'N/A'
                             const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
                             const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
                             const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
-                            const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlag.toString(), outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
+                            const outputGranuleExtentFlagToUse = outputGranuleExtentFlag ? '256 x 128 km' : '128 x 128 km'
+                            const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlagToUse, outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
                             return (
                             <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
                             {Object.entries(productRowValues).map((entry, index2) => <td style={{}} key={`${index}-${index2}`}>{entry[1]}</td> )}
