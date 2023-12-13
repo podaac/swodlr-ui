@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { Button, Row } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
@@ -112,7 +112,7 @@ const WorldMap = () => {
     <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '0px', marginRight: '0%'}}>
       <MapContainer className='Map-container' 
       // center={[33.854457, -118.709093]} 
-      zoom={7} scrollWheelZoom={true} zoomControl={false}>
+      zoom={7} scrollWheelZoom={true} zoomControl={false} >
           {useLocation().pathname.includes('selectScenes') ? (
             <FeatureGroup>
               <EditControl 
@@ -149,5 +149,3 @@ const WorldMap = () => {
 }
 
 export default WorldMap;
-
-// https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=C2296989359-POCLOUD&polygon[]=-116.90002441406251,35.016424131174766,-117.02087402343751,34.917380419972105,-116.87255859375001,34.89034772491291,-116.90002441406251,35.016424131174766&page_size=2000

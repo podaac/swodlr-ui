@@ -339,7 +339,8 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       }).then(async granulesToAdd => {
         if (granulesToAdd.length > 0) {
           await Promise.all(granulesToAdd.map(async granule => {
-            const granuleIdForFootprint = `SWOT_L2_HR_PIXC_${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
+            const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
+            // const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(granule.scene))}*`
             return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
               const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
               const footprintResult = validFootprintResultArray[0]
