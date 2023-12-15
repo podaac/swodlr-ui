@@ -10,7 +10,7 @@ import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
 import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
-import { addSpatialSearchResults, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
+import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
 import { useLocation } from 'react-router-dom';
 
@@ -23,11 +23,12 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const granuleFocus = useAppSelector((state) => state.product.granuleFocus)
+  const mapFocus = useAppSelector((state) => state.product.mapFocus)
   const dispatch = useAppDispatch()
 
   const ChangeView = () => {
     const map = useMap();
-    map.setView(granuleFocus as LatLngExpression, 8);
+    map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom);
     return null
   }
 
@@ -64,7 +65,6 @@ const WorldMap = () => {
         })
         return polygonString
       }).join()
-      
       const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${spatialSearchCollectionConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
@@ -89,7 +89,6 @@ const WorldMap = () => {
       dispatch(setWaitingForSpatialSearch(false))
     } catch (err) {
       dispatch(setWaitingForSpatialSearch(false))
-      console.log (err)
       if (err instanceof Error) {
           return err
         } else {
@@ -101,6 +100,8 @@ const WorldMap = () => {
 
   const onCreate = async (createEvent: any) => {
       await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
+      // set the new map focus location to what it was when polygon created so it will stay the same after map reload
+      dispatch(setMapFocus({center: [createEvent.target._lastCenter.lat, createEvent.target._lastCenter.lng], zoom: createEvent.target._zoom}))
   }
 
   const onEdit = async (editEvent: any) => {

@@ -363,7 +363,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               setSaveGranulesAlert('success')
               dispatch(addProduct(productsInTimeRange))
               addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-              dispatch(setGranuleFocus(productsInTimeRange[productsInTimeRange.length-1].granuleId))
             }
             if (productsNotInTimeRange.length > 0) {
               // set alerts for not in range
@@ -385,10 +384,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       // remove all granules from checked
       dispatch(setSelectedGranules([]))
     }
-  }
-
-  const handleGranuleSelected = (granuleBeingSelected: string) => {
-    dispatch(setGranuleFocus(granuleBeingSelected))
   }
 
   const handleSelectRemoveGranuleCheckbox = (granuleBeingSelected: string) => {

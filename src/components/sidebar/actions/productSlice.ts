@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, SpatialSearchResult } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, SpatialSearchResult } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
@@ -20,7 +20,8 @@ interface GranuleState {
     waitingForSpatialSearch: boolean,
     waitingForFootprintSearch: boolean,
     spatialSearchStartDate: string,
-    spatialSearchEndDate: string
+    spatialSearchEndDate: string,
+    mapFocus: MapFocusObject
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -35,6 +36,7 @@ const initialState: GranuleState = {
     sampleGranuleDataArray: [],
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093],
+    mapFocus: {center: [33.854457, -118.709093], zoom: 7},
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
@@ -73,7 +75,10 @@ export const productSlice = createSlice({
       const granuleIdToFocus = action.payload
       const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint as LatLngExpression[]
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
-      state.granuleFocus = [centerOfFootprint.lat, centerOfFootprint.lng]
+      state.mapFocus = {center: [centerOfFootprint.lat, centerOfFootprint.lng], zoom: 7}
+    },
+    setMapFocus: (state, action: PayloadAction<MapFocusObject>) => {
+      state.mapFocus = action.payload
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]
@@ -159,7 +164,8 @@ export const {
     setWaitingForSpatialSearch,
     setWaitingForFootprintSearch,
     setSpatialSearchStartDate,
-    setSpatialSearchEndDate
+    setSpatialSearchEndDate,
+    setMapFocus
 } = productSlice.actions
 
 export default productSlice.reducer

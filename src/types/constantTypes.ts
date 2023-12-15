@@ -146,3 +146,8 @@ export interface SpatialSearchResult {
   scene: string
 }
 export type footprintResponse = LatLngExpression[] | boolean
+
+export interface MapFocusObject {
+  center: number[], 
+  zoom: number
+}
