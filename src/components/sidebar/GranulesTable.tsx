@@ -204,6 +204,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
 
   const getSceneFootprint = async (collectionId: string, granuleId: string) => {
     try {
+      console.log(collectionId, granuleId)
       // get session token to use in spatial search query
       const session = await Session.getCurrent();
       if (session === null) {
@@ -337,6 +338,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         }
         return granulesToAdd
       }).then(async granulesToAdd => {
+        // set alerts
         if (granulesToAdd.length > 0) {
           await Promise.all(granulesToAdd.map(async granule => {
             const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
@@ -345,11 +347,12 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
               const footprintResult = validFootprintResultArray[0]
               const isInTimeRange = validFootprintResultArray[1]
+              console.log(validFootprintResultArray)
               return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange} as allProductParameters
             }))
           })).then(async productsWithFootprints => {
             const productsInTimeRange: allProductParameters[] = []
-            const productsNotInTimeRange:allProductParameters[] = []
+            const productsNotInTimeRange: allProductParameters[] = []
             productsWithFootprints.forEach(product => {
               if (product.inTimeRange){
                 delete product.inTimeRange
