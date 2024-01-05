@@ -151,3 +151,5 @@ export interface MapFocusObject {
   center: number[], 
   zoom: number
 }
+
+export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'

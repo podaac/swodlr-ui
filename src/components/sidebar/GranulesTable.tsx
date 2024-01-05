@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit, spatialSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
@@ -53,14 +53,14 @@ const GranuleTable = (props: GranuleTableProps) => {
             dispatch(editProduct(editedProduct as allProductParameters))
           }
         }
-        handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
+        handleSave('urlParameter',splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
   }, [tableType === 'granuleSelection' ? null : addedProducts])
 
   useEffect(() => {
     if (spatialSearchResults.length > 0) {
-      spatialSearchResults.forEach(spatialSearchResult => handleSave(spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
+      spatialSearchResults.forEach(spatialSearchResult => handleSave('spatialSearch',spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
       // clear spatial results out of redux after use
       if(spatialSearchResults.length !== 0) dispatch(addSpatialSearchResults([] as SpatialSearchResult[]))
     }
@@ -222,20 +222,25 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           Authorization: `Bearer ${authToken}`
         }
       }).then(response => response.json()).then(data => {
-        const timeStart = new Date(data.feed.entry[0].time_start)
-        const timeEnd = new Date(data.feed.entry[0].time_end)
-        const spatialSearchStartDateToUse = new Date(spatialSearchStartDate)
-        const spatialSearchEndDateToUse = new Date(spatialSearchEndDate)
-        const granuleInTimeRange: boolean = timeStart > spatialSearchStartDateToUse && timeStart < spatialSearchEndDateToUse && timeEnd > spatialSearchStartDateToUse && timeEnd < spatialSearchEndDateToUse
-        const footprintCoordinatesSingleArray = (data.feed.entry[0].polygons[0][0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
-        let footprintLatLongArray: LatLngExpression[] = []
-        for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
-          if(i%2 === 0) {
-            //pair up current latitude and adjacent latitude
-            footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1]])
+        console.log(data)
+        if (data.feed.entry.length > 0) {
+          const timeStart = new Date(data.feed.entry[0].time_start)
+          const timeEnd = new Date(data.feed.entry[0].time_end)
+          const spatialSearchStartDateToUse = new Date(spatialSearchStartDate)
+          const spatialSearchEndDateToUse = new Date(spatialSearchEndDate)
+          const granuleInTimeRange: boolean = timeStart > spatialSearchStartDateToUse && timeStart < spatialSearchEndDateToUse && timeEnd > spatialSearchStartDateToUse && timeEnd < spatialSearchEndDateToUse
+          const footprintCoordinatesSingleArray = (data.feed.entry[0].polygons[0][0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
+          let footprintLatLongArray: LatLngExpression[] = []
+          for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
+            if(i%2 === 0) {
+              //pair up current latitude and adjacent latitude
+              footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1]])
+            }
           }
+          return [footprintLatLongArray,granuleInTimeRange]
+        } else {
+          return [[], true]
         }
-        return [footprintLatLongArray,granuleInTimeRange]
       })
       dispatch(setWaitingForFootprintSearch(false))
       return footprintResult
@@ -261,7 +266,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return cpsValueToReturn
   }
 
-  const handleSave = async (cycleParam?: string, passParam?: string, sceneParam?: string) => {
+  const handleSave = async (saveType: SaveType, cycleParam?: string, passParam?: string, sceneParam?: string) => {
     setWaitingForScenesToBeAdded(true)
     const cycleToUse = cycleParam ?? cycle
     const passToUse = passParam ?? pass
@@ -342,12 +347,14 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
             // const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(granule.scene))}*`
             return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
+
               const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
               const footprintResult = validFootprintResultArray[0]
               const isInTimeRange = validFootprintResultArray[1]
               return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange} as allProductParameters
             }))
           })).then(async productsWithFootprints => {
+            // don't run time range check if granule was manually entered
             const productsInTimeRange: allProductParameters[] = []
             const productsNotInTimeRange:allProductParameters[] = []
             productsWithFootprints.forEach(product => {
@@ -634,7 +641,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner> : 
-                <Button variant='primary' size='sm' onClick={() => handleSave()}>
+                <Button variant='primary' size='sm' onClick={() => handleSave('manual')}>
                   <Plus size={28}/> Add Scenes
                 </Button>
               }
