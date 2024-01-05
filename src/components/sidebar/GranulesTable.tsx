@@ -222,7 +222,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           Authorization: `Bearer ${authToken}`
         }
       }).then(response => response.json()).then(data => {
-        console.log(data)
         if (data.feed.entry.length > 0) {
           const timeStart = new Date(data.feed.entry[0].time_start)
           const timeEnd = new Date(data.feed.entry[0].time_end)
