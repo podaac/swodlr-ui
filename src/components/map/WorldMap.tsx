@@ -1,5 +1,5 @@
 import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup } from 'react-leaflet'
-import L, { LatLngExpression, map } from 'leaflet';
+import L, { CRS, LatLngExpression, map } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -97,11 +97,10 @@ const WorldMap = () => {
     }
   }
 
-
   const onCreate = async (createEvent: any) => {
       await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
       // set the new map focus location to what it was when polygon created so it will stay the same after map reload
-      dispatch(setMapFocus({center: [createEvent.target._lastCenter.lat, createEvent.target._lastCenter.lng], zoom: createEvent.target._zoom}))
+      dispatch(setMapFocus({center: [createEvent.layer._renderer._center.lat, createEvent.layer._renderer._center.lng], zoom: createEvent.target._zoom}))
   }
 
   const onEdit = async (editEvent: any) => {
@@ -113,7 +112,9 @@ const WorldMap = () => {
     <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '0px', marginRight: '0%'}}>
       <MapContainer className='Map-container' 
       // center={[33.854457, -118.709093]} 
-      zoom={7} scrollWheelZoom={true} zoomControl={false} >
+      zoom={7} scrollWheelZoom={true} zoomControl={false} 
+      // crs={CRS.EPSG4326}
+      >
           {useLocation().pathname.includes('selectScenes') ? (
             <FeatureGroup>
               <EditControl 

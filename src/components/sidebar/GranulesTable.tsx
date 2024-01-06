@@ -4,8 +4,8 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit, spatialSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
-import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch } from './actions/productSlice';
+import { AdjustType, AdjustValueDecoder, AlertMessageObject, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
+import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { graphQLClient } from '../../user/userData';
@@ -37,6 +37,7 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   // set the default url state parameters
   useEffect(() => {
+    dispatch(clearGranuleTableAlerts())
     // if any cycle scene and pass parameters in url, add them to table
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     if (cyclePassSceneParameters) {
@@ -57,8 +58,9 @@ const GranuleTable = (props: GranuleTableProps) => {
       })
     }
   }, [tableType === 'granuleSelection' ? null : addedProducts])
-
+  
   useEffect(() => {
+    dispatch(clearGranuleTableAlerts())
     if (spatialSearchResults.length > 0) {
       spatialSearchResults.forEach(spatialSearchResult => handleSave('spatialSearch',spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
       // clear spatial results out of redux after use
@@ -85,10 +87,11 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
   const [waitingForScenesToBeAdded, setWaitingForScenesToBeAdded] = useState(false)
+  const [localAddedAlerts, setLocalAddedAlerts] = useState<AlertMessageObject[]>([])
 
 const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[]): Promise<validScene> => {
   try {
-    // build grapql availableScene query with all cycle/pass/scene combos requested
+    // build graphql availableScene query with all cycle/pass/scene combos requested
     let queryAliasString = ``
     for(const specificScene of sceneToUse) {
       const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
@@ -123,28 +126,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
 
   const setSaveGranulesAlert = (alert: alertMessageInput) => {
     const {message, variant} = granuleAlertMessageConstant[alert]
-    const alertThatExists = granuleTableAlerts.find(alertObj => alertObj.type === alert)
-    if (alertThatExists) {
-      // if alert already in queue
-      // delete alert
-      dispatch(removeGranuleTableAlerts(alert))
-      // stop timeout
-      clearTimeout(alertThatExists.timeoutId)
-      // add alert again with timeout
-      let newTimeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
-
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection' }))
-    } else {
-      // if alert not in queue
-      // add alert with timeout
-      let timeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
-
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection' }))
-    }
+    dispatch(addGranuleTableAlerts({type: alert, message, variant, tableType: 'granuleSelection' }))
   }
 
   const checkInBounds = (inputType: string, inputValue: string): boolean => {
@@ -266,6 +248,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const handleSave = async (saveType: SaveType, cycleParam?: string, passParam?: string, sceneParam?: string) => {
+    if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
     const cycleToUse = cycleParam ?? cycle
     const passToUse = passParam ?? pass

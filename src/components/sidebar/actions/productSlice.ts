@@ -116,17 +116,16 @@ export const productSlice = createSlice({
       state.generateProductParameters = action.payload
     },
     addGranuleTableAlerts: (state, action: PayloadAction<AlertMessageObject>) => {
-      const newAlert = action.payload
-      if (state.granuleTableAlerts.map(alertObj => alertObj.message).includes(newAlert.message)) {
-        // alert already in there so just up the time for that alert
-      } else {
-        // alert not in there yet so add it and start with the default time
-        state.granuleTableAlerts = [...state.granuleTableAlerts, newAlert]
+      if (!state.granuleTableAlerts.find(alertObj => alertObj.message === action.payload.message)) {
+        state.granuleTableAlerts = [...state.granuleTableAlerts, action.payload]
       }
     },
     removeGranuleTableAlerts: (state, action: PayloadAction<string>) => {
-      const newAlerts = [...state.granuleTableAlerts].filter(alertObject => alertObject.type !== action.payload)
+      const newAlerts = state.granuleTableAlerts.filter(alertObject => alertObject.type !== action.payload)
       state.granuleTableAlerts = newAlerts
+    },
+    clearGranuleTableAlerts: (state) => {
+      state.granuleTableAlerts = []
     },
     setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
       state.showUTMAdvancedOptions = action.payload
@@ -165,7 +164,8 @@ export const {
     setWaitingForFootprintSearch,
     setSpatialSearchStartDate,
     setSpatialSearchEndDate,
-    setMapFocus
+    setMapFocus,
+    clearGranuleTableAlerts
 } = productSlice.actions
 
 export default productSlice.reducer

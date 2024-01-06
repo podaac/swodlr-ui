@@ -100,7 +100,7 @@ export interface AlertMessageObject {
   type: string,
   message: string,
   variant: "danger" | "success" | "warning",
-  timeoutId: ReturnType<typeof setTimeout>,
+  // timeoutId: ReturnType<typeof setTimeout>,
   tableType: TableTypes
 }
 
