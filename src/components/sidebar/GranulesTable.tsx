@@ -1,24 +1,31 @@
 import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit, spatialSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
-import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, removeGranuleTableAlerts, editProduct } from './actions/productSlice';
+import { AdjustType, AdjustValueDecoder, AlertMessageObject, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
+import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { graphQLClient } from '../../user/userData';
 import { useSearchParams } from 'react-router-dom';
+import { Session } from '../../authentication/session';
+import { LatLngExpression } from 'leaflet';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
+  const spatialSearchResults = useAppSelector((state) => state.product.spatialSearchResults)
   const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
   const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
+  const waitingForSpatialSearch = useAppSelector((state) => state.product.waitingForSpatialSearch)
+  const waitingForFootprintSearch = useAppSelector((state) => state.product.waitingForFootprintSearch)
+  const spatialSearchStartDate = useAppSelector((state) => state.product.spatialSearchStartDate)
+  const spatialSearchEndDate = useAppSelector((state) => state.product.spatialSearchEndDate)
 
   const dispatch = useAppDispatch()
   
@@ -30,6 +37,7 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   // set the default url state parameters
   useEffect(() => {
+    dispatch(clearGranuleTableAlerts())
     // if any cycle scene and pass parameters in url, add them to table
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     if (cyclePassSceneParameters) {
@@ -46,10 +54,19 @@ const GranuleTable = (props: GranuleTableProps) => {
             dispatch(editProduct(editedProduct as allProductParameters))
           }
         }
-        handleSave(splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
+        handleSave('urlParameter',splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
   }, [tableType === 'granuleSelection' ? null : addedProducts])
+  
+  useEffect(() => {
+    dispatch(clearGranuleTableAlerts())
+    if (spatialSearchResults.length > 0) {
+      spatialSearchResults.forEach(spatialSearchResult => handleSave('spatialSearch',spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
+      // clear spatial results out of redux after use
+      if(spatialSearchResults.length !== 0) dispatch(addSpatialSearchResults([] as SpatialSearchResult[]))
+    }
+  }, [spatialSearchResults])
 
   const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
       const currentSearchParams = Object.fromEntries(searchParams.entries())
@@ -70,10 +87,11 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
   const [waitingForScenesToBeAdded, setWaitingForScenesToBeAdded] = useState(false)
+  const [localAddedAlerts, setLocalAddedAlerts] = useState<AlertMessageObject[]>([])
 
 const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[]): Promise<validScene> => {
   try {
-    // build grapql availableScene query with all cycle/pass/scene combos requested
+    // build graphql availableScene query with all cycle/pass/scene combos requested
     let queryAliasString = ``
     for(const specificScene of sceneToUse) {
       const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
@@ -108,28 +126,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
 
   const setSaveGranulesAlert = (alert: alertMessageInput) => {
     const {message, variant} = granuleAlertMessageConstant[alert]
-    const alertThatExists = granuleTableAlerts.find(alertObj => alertObj.type === alert)
-    if (alertThatExists) {
-      // if alert already in queue
-      // delete alert
-      dispatch(removeGranuleTableAlerts(alert))
-      // stop timeout
-      clearTimeout(alertThatExists.timeoutId)
-      // add alert again with timeout
-      let newTimeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
-
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId: newTimeoutId, tableType: 'granuleSelection' }))
-    } else {
-      // if alert not in queue
-      // add alert with timeout
-      let timeoutId = setTimeout(() => {
-        dispatch(removeGranuleTableAlerts(alert))
-      }, 4000)
-
-      dispatch(addGranuleTableAlerts({type: alert, message, variant, timeoutId, tableType: 'granuleSelection' }))
-    }
+    dispatch(addGranuleTableAlerts({type: alert, message, variant, tableType: 'granuleSelection' }))
   }
 
   const checkInBounds = (inputType: string, inputValue: string): boolean => {
@@ -187,7 +184,71 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return existingValue
   }
 
-  const handleSave = async (cycleParam?: string, passParam?: string, sceneParam?: string) => {
+  const getSceneFootprint = async (collectionId: string, granuleId: string) => {
+    try {
+      // get session token to use in spatial search query
+      const session = await Session.getCurrent();
+      if (session === null) {
+        throw new Error('No current session');
+      }
+      const authToken = await session.getAccessToken();
+      if (authToken === null) {
+        throw new Error('Failed to get authentication token');
+      }
+      dispatch(setWaitingForFootprintSearch(true))
+      const footprintSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=${collectionId}&producer_granule_id\[\]=${granuleId}&options[producer_granule_id][pattern]=true`
+      const footprintResult = await fetch(footprintSearchUrl, {
+        method: 'GET',
+        credentials: 'omit',
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      }).then(response => response.json()).then(data => {
+        if (data.feed.entry.length > 0) {
+          const timeStart = new Date(data.feed.entry[0].time_start)
+          const timeEnd = new Date(data.feed.entry[0].time_end)
+          const spatialSearchStartDateToUse = new Date(spatialSearchStartDate)
+          const spatialSearchEndDateToUse = new Date(spatialSearchEndDate)
+          const granuleInTimeRange: boolean = timeStart > spatialSearchStartDateToUse && timeStart < spatialSearchEndDateToUse && timeEnd > spatialSearchStartDateToUse && timeEnd < spatialSearchEndDateToUse
+          const footprintCoordinatesSingleArray = (data.feed.entry[0].polygons[0][0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
+          let footprintLatLongArray: LatLngExpression[] = []
+          for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
+            if(i%2 === 0) {
+              //pair up current latitude and adjacent latitude
+              footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1]])
+            }
+          }
+          return [footprintLatLongArray,granuleInTimeRange]
+        } else {
+          return [[], true]
+        }
+      })
+      dispatch(setWaitingForFootprintSearch(false))
+      return footprintResult
+    } catch (err) {
+      dispatch(setWaitingForFootprintSearch(false))
+      console.log (err)
+      if (err instanceof Error) {
+          return err
+        } else {
+          return 'something happened'
+        }
+    }
+  }
+
+  const padCPSForCmrQuery = (cpsString: string): string => {
+    let cpsValueToReturn = cpsString
+    if (cpsString.length < 3) {
+      // add 0's to beginning of string
+      while(cpsValueToReturn.length < 3) {
+        cpsValueToReturn = '0' + cpsValueToReturn
+      }
+    }
+    return cpsValueToReturn
+  }
+
+  const handleSave = async (saveType: SaveType, cycleParam?: string, passParam?: string, sceneParam?: string) => {
+    if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
     const cycleToUse = cycleParam ?? cycle
     const passToUse = passParam ?? pass
@@ -202,6 +263,8 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       if (!validCycle) setSaveGranulesAlert('invalidCycle')
       if (!validPass) setSaveGranulesAlert('invalidPass')
       if (!validScene) setSaveGranulesAlert('invalidScene')
+    } else if (addedProducts.length >= granuleTableLimit) {
+      setSaveGranulesAlert('granuleLimit')
     } else {
       const granulesToAdd: allProductParameters[] = []
       let someGranulesAlreadyAdded = false
@@ -225,7 +288,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneId)
           const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
           if (cyclePassSceneInBounds && !comboAlreadyAdded) {
-            // NOTE: this is using sample json array but will be hooked up to the get granule API result later
             // get the granuleId from it and pass it to the parameters
             const parameters: allProductParameters = {
               granuleId: `${cycleToUse}_${passToUse}_${sceneId}`,
@@ -249,7 +311,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             someGranulesAlreadyAdded = true
           }
         })
-
         // check if any granules could not be found or they were already added    
         if (someGranulesAlreadyAdded) {
           setSaveGranulesAlert('alreadyAdded')
@@ -260,12 +321,43 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         if (someScenesNotAvailable) {
           setSaveGranulesAlert('someScenesNotAvailable')
           // set granule alert to show which scenes are missing but also say that you were successful
-        } 
+        }
+        return granulesToAdd
+      }).then(async granulesToAdd => {
         if (granulesToAdd.length > 0) {
-          setSaveGranulesAlert('success')
-          dispatch(addProduct(granulesToAdd))
-          addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-          dispatch(setGranuleFocus(granulesToAdd[0].granuleId))
+          await Promise.all(granulesToAdd.map(async granule => {
+            const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
+            // const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(granule.scene))}*`
+            return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
+
+              const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
+              const footprintResult = validFootprintResultArray[0]
+              const isInTimeRange = validFootprintResultArray[1]
+              return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange} as allProductParameters
+            }))
+          })).then(async productsWithFootprints => {
+            // don't run time range check if granule was manually entered
+            const productsInTimeRange: allProductParameters[] = []
+            const productsNotInTimeRange:allProductParameters[] = []
+            productsWithFootprints.forEach(product => {
+              if (product.inTimeRange){
+                delete product.inTimeRange
+                productsInTimeRange.push(product)
+              } else if (!product.inTimeRange) {
+                delete product.inTimeRange
+                productsNotInTimeRange.push(product)
+              }
+            })
+            if (productsInTimeRange.length > 0) {
+              setSaveGranulesAlert('success')
+              dispatch(addProduct(productsInTimeRange))
+              addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
+            }
+            if (productsNotInTimeRange.length > 0) {
+              // set alerts for not in range
+              setSaveGranulesAlert('notInTimeRange')
+            }
+          })
         }
       })
     }
@@ -281,10 +373,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       // remove all granules from checked
       dispatch(setSelectedGranules([]))
     }
-  }
-
-  const handleGranuleSelected = (granuleBeingSelected: string) => {
-    dispatch(setGranuleFocus(granuleBeingSelected))
   }
 
   const handleSelectRemoveGranuleCheckbox = (granuleBeingSelected: string) => {
@@ -478,7 +566,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             </tr>
           </thead>
           <tbody>
-            {addedProducts.map((productParameterObject, index) => {
+            {Array.from(new Set(addedProducts.map(obj => JSON.stringify(obj)))).map(obj => JSON.parse(obj)).map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
               const { cycle, pass, scene, granuleId} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
@@ -531,11 +619,11 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       {tableType === 'granuleSelection' ? (
           <Row>
             <Col style={{marginTop: '10px'}}>
-              {waitingForScenesToBeAdded ? 
+              {waitingForScenesToBeAdded || waitingForSpatialSearch || waitingForFootprintSearch ? 
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner> : 
-                <Button variant='primary' size='sm' onClick={() => handleSave()}>
+                <Button variant='primary' size='sm' onClick={() => handleSave('manual')}>
                   <Plus size={28}/> Add Scenes
                 </Button>
               }

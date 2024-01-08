@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters } from '../../../types/constantTypes'
-import L from 'leaflet'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, SpatialSearchResult } from '../../../types/constantTypes'
+import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
@@ -16,9 +16,17 @@ interface GranuleState {
     granuleTableAlerts: AlertMessageObject[],
     productCustomizationTableAlerts: AlertMessageObject[],
     showUTMAdvancedOptions: boolean,
+    spatialSearchResults: SpatialSearchResult[],
+    waitingForSpatialSearch: boolean,
+    waitingForFootprintSearch: boolean,
+    spatialSearchStartDate: string,
+    spatialSearchEndDate: string,
+    mapFocus: MapFocusObject
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
+
+const date = new Date()
 
 // Define the initial state using that type
 const initialState: GranuleState = {
@@ -28,11 +36,17 @@ const initialState: GranuleState = {
     sampleGranuleDataArray: [],
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093],
+    mapFocus: {center: [33.854457, -118.709093], zoom: 7},
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
     productCustomizationTableAlerts: [],
-    showUTMAdvancedOptions: false
+    showUTMAdvancedOptions: false,
+    spatialSearchResults: [],
+    waitingForSpatialSearch: false,
+    waitingForFootprintSearch: false,
+    spatialSearchStartDate: (new Date(date.setMonth(date.getMonth() - 1))).toISOString(),
+    spatialSearchEndDate: (new Date()).toISOString()
 }
 
 
@@ -43,7 +57,6 @@ export const productSlice = createSlice({
   reducers: {
     addProduct: (state, action: PayloadAction<allProductParameters[]>) => {
       action.payload.forEach(granuleObjectToAdd => state.addedProducts.push(Object.assign(granuleObjectToAdd)))
-      // add sample granule data
     },
     editProduct: (state, action: PayloadAction<allProductParameters>) => {
       const editedParameters = Object.assign(action.payload)
@@ -60,9 +73,12 @@ export const productSlice = createSlice({
     },
     setGranuleFocus: (state, action: PayloadAction<string>) => {
       const granuleIdToFocus = action.payload
-      const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint
+      const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint as LatLngExpression[]
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
-      state.granuleFocus = [centerOfFootprint.lat, centerOfFootprint.lng]
+      state.mapFocus = {center: [centerOfFootprint.lat, centerOfFootprint.lng], zoom: 7}
+    },
+    setMapFocus: (state, action: PayloadAction<MapFocusObject>) => {
+      state.mapFocus = action.payload
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
       const productsToBeGeneratedCopy = [...action.payload]
@@ -100,20 +116,34 @@ export const productSlice = createSlice({
       state.generateProductParameters = action.payload
     },
     addGranuleTableAlerts: (state, action: PayloadAction<AlertMessageObject>) => {
-      const newAlert = action.payload
-      if (state.granuleTableAlerts.map(alertObj => alertObj.message).includes(newAlert.message)) {
-        // alert already in there so just up the time for that alert
-      } else {
-        // alert not in there yet so add it and start with the default time
-        state.granuleTableAlerts = [...state.granuleTableAlerts, newAlert]
+      if (!state.granuleTableAlerts.find(alertObj => alertObj.message === action.payload.message)) {
+        state.granuleTableAlerts = [...state.granuleTableAlerts, action.payload]
       }
     },
     removeGranuleTableAlerts: (state, action: PayloadAction<string>) => {
-      const newAlerts = [...state.granuleTableAlerts].filter(alertObject => alertObject.type !== action.payload)
+      const newAlerts = state.granuleTableAlerts.filter(alertObject => alertObject.type !== action.payload)
       state.granuleTableAlerts = newAlerts
+    },
+    clearGranuleTableAlerts: (state) => {
+      state.granuleTableAlerts = []
     },
     setShowUTMAdvancedOptions: (state, action: PayloadAction<boolean>) => {
       state.showUTMAdvancedOptions = action.payload
+    },
+    addSpatialSearchResults: (state, action: PayloadAction<SpatialSearchResult[]>) => {
+      state.spatialSearchResults = action.payload
+    },
+    setWaitingForSpatialSearch: (state, action: PayloadAction<boolean>) => {
+      state.waitingForSpatialSearch = action.payload
+    },
+    setWaitingForFootprintSearch: (state, action: PayloadAction<boolean>) => {
+      state.waitingForFootprintSearch = action.payload
+    },
+    setSpatialSearchStartDate: (state, action: PayloadAction<string>) => {
+      state.spatialSearchStartDate = action.payload
+    },
+    setSpatialSearchEndDate: (state, action: PayloadAction<string>) => {
+      state.spatialSearchEndDate = action.payload
     },
   },
 })
@@ -128,7 +158,14 @@ export const {
     setGenerateProductParameters,
     addGranuleTableAlerts,
     removeGranuleTableAlerts,
-    setShowUTMAdvancedOptions
+    setShowUTMAdvancedOptions,
+    addSpatialSearchResults,
+    setWaitingForSpatialSearch,
+    setWaitingForFootprintSearch,
+    setSpatialSearchStartDate,
+    setSpatialSearchEndDate,
+    setMapFocus,
+    clearGranuleTableAlerts
 } = productSlice.actions
 
 export default productSlice.reducer
