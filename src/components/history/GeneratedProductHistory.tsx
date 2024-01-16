@@ -53,7 +53,7 @@ const GeneratedProductHistory = () => {
 
     const renderHistoryTable = () => {
         return (
-            <div style={{padding: '0px 20px 20px 20px'}}>
+            <div style={{padding: '0px 20px 20px 20px'}} id='history-table'>
                 <div className={`table-responsive-generatedProducts table-responsive`}>
                     <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>

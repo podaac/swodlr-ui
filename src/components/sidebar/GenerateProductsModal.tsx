@@ -17,7 +17,7 @@ const GenerateProductsModal = () => {
     }
 
   return (
-    <Modal show={showGenerateProductModal} onHide={() => dispatch(setShowGenerateProductModalFalse())}>
+    <Modal show={showGenerateProductModal} onHide={() => dispatch(setShowGenerateProductModalFalse())} id='generate-products-modal'>
     <Modal.Header className="modal-style" closeButton>
         <Modal.Title>Generate Products</Modal.Title>
     </Modal.Header>

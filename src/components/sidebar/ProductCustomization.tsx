@@ -47,6 +47,8 @@ const ProductCustomization = () => {
         return objectToReturn
     }
 
+    const [searchParams, setSearchParams] = useSearchParams();
+
     // set the default url state parameters
     useEffect(() => {
         const currentSearchParamObject = Object.fromEntries(searchParams.entries())
@@ -56,8 +58,6 @@ const ProductCustomization = () => {
             dispatch(setShowUTMAdvancedOptions(true))
         }
     }, [])
-
-    const [searchParams, setSearchParams] = useSearchParams();
 
     const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
         const currentSearchParams = Object.fromEntries(searchParams.entries())
@@ -183,7 +183,7 @@ const ProductCustomization = () => {
     }
 
   return (
-    <div style={{backgroundColor: '#2C415C', marginTop: '10px'}} className='g-0 shadow'>
+    <div style={{backgroundColor: '#2C415C', marginTop: '10px'}} className='g-0 shadow' id='parameter-options'>
         <Row style={{marginRight: '0px', marginLeft: '0px',}}>
             <h5 className={`${colorModeClass}-sidebar-section-title`} style={{paddingTop: '10px', paddingBottom: '10px'}}>Parameter Options</h5>
         </Row>

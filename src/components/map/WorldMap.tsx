@@ -110,10 +110,11 @@ const WorldMap = () => {
 
   return (
     <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '0px', marginRight: '0%'}}>
-      <MapContainer className='Map-container' 
-      // center={[33.854457, -118.709093]} 
-      zoom={7} scrollWheelZoom={true} zoomControl={false} 
-      // crs={CRS.EPSG4326}
+      <MapContainer className='Map-container' spatial-search-map
+        id='spatial-search-map'  
+        // center={[33.854457, -118.709093]} 
+        zoom={7} scrollWheelZoom={true} zoomControl={false} 
+        // crs={CRS.EPSG4326}
       >
           {useLocation().pathname.includes('selectScenes') ? (
             <FeatureGroup>

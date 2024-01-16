@@ -33,7 +33,7 @@ const MainNavbar = () => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/customizeProduct/selectScenes${search}`)}>Customization</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/customizeProduct/selectScenes${search}`)} id='customization-tab'>Customization</Nav.Link>
           <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/generatedProductHistory${search}`)}>My Data</Nav.Link>
           <NavDropdown  className={`${colorModeClass}-navbar-dropdown`} title="Data Discovery" id="basic-nav-dropdown" menuVariant="dark">
             <NavDropdown.Item href="https://search.earthdata.nasa.gov/search?q=SWOT%20Level%202%20Version%20Version%202.0&long=0.140625" target="_blank">Earthdata Search</NavDropdown.Item>

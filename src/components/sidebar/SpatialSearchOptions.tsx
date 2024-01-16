@@ -54,7 +54,7 @@ const SpatialSearchOptions = () => {
   }  
 
   return (
-    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '10px', paddingBottom: '10px'}} className='g-0 shadow'>
+    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '10px', paddingBottom: '10px'}} className='g-0 shadow' id='spatial-search-options'>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
         <Col><h5 className={`${colorModeClass}-text`} >Spatial Search Options</h5></Col>
       </Row>
@@ -97,7 +97,7 @@ const SpatialSearchOptions = () => {
             </p>
           </Alert> */}
           <p>
-            Draw areas to <b>search spatially</b> on the map by using the controls on the <b>top right</b>. The granule search will start once you finish drawing the search area shape.
+            Draw areas to <b>search spatially</b> on the map by using the controls on the <b>top right</b>. The scene search will start once you finish drawing the search area shape.
           </p>
         </Col>
       </Row>

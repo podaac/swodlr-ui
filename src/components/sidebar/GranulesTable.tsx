@@ -57,7 +57,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         handleSave('urlParameter',splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
-  }, [tableType === 'granuleSelection' ? null : addedProducts])
+  }, [tableType === 'granuleSelection' ? null : addedProducts, searchParams])
   
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
@@ -538,7 +538,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
   
   return (
-    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
+    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow' id={tableType === 'granuleSelection' ? 'added-scenes' : 'scenes-to-customize'}>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
         <Col><h5 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h5></Col>
       </Row>
@@ -594,7 +594,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               <>
                 <tr className='add-granules'>
                   <td colSpan={1}>
-                    <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
+                    <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())} id='remove-granules-button'>
                         <Trash color="white" size={18}/>
                     </Button>
                   </td>

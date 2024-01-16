@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Col } from 'react-bootstrap';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { setResizeActive, setResizeStartLocation, setResizeEndLocation } from './actions/sidebarSlice';
+import { setResizeActive, setResizeStartLocation, setResizeEndLocation, setSidebarWidth } from './actions/sidebarSlice';
 import { mouseLocation } from '../../types/sidebarTypes';
 import SidebarBreadcrumbs from './SidebarBreadcrumbs';
 import CustomizeProductView from './CustomizeProductView';
@@ -15,7 +15,7 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
     const resizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const footerRef = useRef<HTMLHeadingElement>(null);
-    const [sidebarWidth, setSidebarWidth] = useState('')
+    const [sidebarWidthLocal, setLocalSidebarWidth] = useState((footerRef.current?.clientWidth as number)/2)
 
     const dispatch = useAppDispatch()
 
@@ -43,12 +43,14 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
     }
 
     useEffect(() => {
-        const sidebarWidthNumber = footerRef.current?.clientWidth ? calculateSidebarWidthAfterResize(resizeStartLocation, resizeEndLocation, footerRef.current?.clientWidth) : sidebarWidth
-        setSidebarWidth(`${sidebarWidthNumber}px`)
+        const sidebarWidthNumber = footerRef.current?.clientWidth ? calculateSidebarWidthAfterResize(resizeStartLocation, resizeEndLocation, footerRef.current?.clientWidth) : sidebarWidthLocal
+        setLocalSidebarWidth(sidebarWidthNumber)
+        setSidebarWidth(sidebarWidthNumber)
+
     }, [resizeEndLocation])
 
   return (
-    <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: sidebarWidth}} ref={footerRef}>
+    <div className={`Customize-products-container-sidebar-all Customize-products-container fixed-left ${colorModeClass}-container-background`} style={{width: `${sidebarWidthLocal}px`}} ref={footerRef}>
         <Col style={{overflowY: 'auto', height: '100%'}}>
             <SidebarBreadcrumbs />
             <div style={{}}>
