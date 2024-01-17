@@ -22,12 +22,13 @@ const App = () => {
   const previousResizeEndLocation = useAppSelector((state) => state.sidebar.resizeEndLocation)
   const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
-  const currentUser = useAppSelector((state) => state.app.currentUser);
+  const currentUser = useAppSelector((state) => state.app.currentUser)
+  const startTutorial = useAppSelector((state) => state.app.startTutorial)
   const navigate = useNavigate();
   const { search } = useLocation();
 
-  const [{run, steps}, setState] = useState({
-    run: useLocation().pathname.includes('selectScenes'),
+  const [joyride, setState] = useState({
+    run: startTutorial,
     steps: [
       {
         target: "#customization-tab",
@@ -237,6 +238,11 @@ const App = () => {
     ]
   })
 
+  useEffect(() => {
+    setState({...joyride, run: startTutorial })
+
+  }, [startTutorial]);
+
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
     const { action, step, type, lifecycle } = data;
     const stepTarget = step.target
@@ -250,6 +256,8 @@ const App = () => {
       navigate('/customizeProduct/selectScenes')
     } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
       navigate(`/generatedProductHistory${search}`)
+    } else if (type === 'tour:end') {
+      navigate(`/customizeProduct/selectScenes${search}`)
     }
   };
 
@@ -292,8 +300,8 @@ const App = () => {
     <div className={`App ${userAuthenticated ? 'user-authenticated' : ''} ${colorModeClass}-background`} style={{cursor: footerResizeActive ? 'grabbing' : ''}} onMouseUp={(event) => handleSidebarResize(event)} onMouseMove={(event) => handleSidebarResize(event)}>
       <Joyride 
         callback={(data) => handleJoyrideCallback(data)}
-        run={run}
-        steps={steps}
+        run={joyride.run}
+        steps={joyride.steps}
         showProgress
         showSkipButton
         hideCloseButton

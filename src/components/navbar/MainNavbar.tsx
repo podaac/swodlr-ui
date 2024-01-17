@@ -4,7 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { PersonSquare } from 'react-bootstrap-icons';
-import { logoutCurrentUser } from '../app/appSlice';
+import { logoutCurrentUser, setStartTutorial } from '../app/appSlice';
 import { useLocation, useNavigate } from "react-router-dom";
 
 const MainNavbar = () => {
@@ -40,6 +40,7 @@ const MainNavbar = () => {
             <NavDropdown.Item href="https://podaac.jpl.nasa.gov/" target="_blank">PO.DAAC Portal</NavDropdown.Item>
           </NavDropdown>
           <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/about${search}`)}>About</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => dispatch(setStartTutorial(true))} id='tutorial-page'>Tutorial</Nav.Link>
         </Nav>
         <NavDropdown  className={`${colorModeClass}-text`} title={renderUserDropdownTitle()} id="basic-nav-dropdown" align="end" style={{marginRight: '20px'}} menuVariant="dark">
             <Row>
