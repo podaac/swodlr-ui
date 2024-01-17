@@ -202,8 +202,30 @@ const App = () => {
         }
       },
       {
+        target: "#my-data-page",
+        content: "This page shows you the statuses of products being generated and that have finished generating.",
+        disableBeacon: true,
+        styles: {
+            options: {
+                zIndex: 1000,
+                primaryColor: '#0d6efd',
+            }
+        }
+      },
+      {
         target: "#history-table",
-        content: "This table shows you the statuses of products being generated and that have finished generating.",
+        content: "This table shows more in depth details about the products that are being generated and that have been generated.",
+        disableBeacon: true,
+        styles: {
+            options: {
+                zIndex: 1000,
+                primaryColor: '#0d6efd',
+            }
+        }
+      },
+      {
+        target: "#download-url",
+        content: "Visit urls in this column to download your finished product. If it says N/A, check the status because this indicates that the product is not finished generating yet.",
         disableBeacon: true,
         styles: {
             options: {
@@ -218,7 +240,6 @@ const App = () => {
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
     const { action, step, type, lifecycle } = data;
     const stepTarget = step.target
-    console.log(data)
     if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev') {
@@ -227,7 +248,7 @@ const App = () => {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=1_413_120&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
-    } else if (stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') {
+    } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
       navigate(`/generatedProductHistory${search}`)
     }
   };

@@ -46,8 +46,9 @@ const GeneratedProductHistory = () => {
     
       const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
+        let labelId = (labelEntry[0] === 'downloadUrl') ? 'download-url' : ''
         return (
-          <th key={`${labelEntry[0]}-${index}`}>{labelEntry[1]} {infoIcon}</th>
+          <th key={`${labelEntry[0]}-${index}`} id={labelId}>{labelEntry[1]} {infoIcon}</th>
         )
       }
 
@@ -91,16 +92,16 @@ const GeneratedProductHistory = () => {
 
     const renderProductHistoryViews = () => {
         let viewToShow
-        if (userProducts.length === 0) {
-            viewToShow = productHistoryAlert()
-        } else {
-            viewToShow = renderHistoryTable()
-        } 
-
+        // if (userProducts.length === 0) {
+        //     viewToShow = productHistoryAlert()
+        // } else {
+        //     viewToShow = renderHistoryTable()
+        // } 
         return (
             <Col style={{marginRight: '50px', marginLeft: '50px', marginTop: '70px', height: '100%', width: '100%'}}>
                 <Row className='normal-row' style={{marginRight: '0px'}}><h4>Generated Products Data</h4></Row>
-                <Row className='normal-row' style={{marginRight: '0px'}}>{viewToShow}</Row>
+                <Row className='normal-row' style={{marginRight: '0px'}}>{renderHistoryTable()}</Row>
+                {userProducts.length === 0 ? <Row className='normal-row' style={{marginRight: '0px'}}>{productHistoryAlert()}</Row> : null}
             </Col>
         )
     }
