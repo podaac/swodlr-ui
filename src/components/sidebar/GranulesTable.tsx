@@ -121,6 +121,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     } else {
       scenesArray.push(sceneString)
     }
+    console.log('scenesArray: ',scenesArray)
     return scenesArray
   }
 
@@ -130,6 +131,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const checkInBounds = (inputType: string, inputValue: string): boolean => {
+    console.log('checkInBounds', inputType, inputValue.trim())
     return parseInt(inputValue) >= inputBounds[inputType].min && parseInt(inputValue) <= inputBounds[inputType].max && !isNaN(+(inputValue.trim()))
   }
 
@@ -248,17 +250,22 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const handleSave = async (saveType: SaveType, cycleParam?: string, passParam?: string, sceneParam?: string) => {
+    console.log(cycle)
     if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
-    const cycleToUse = cycleParam ?? cycle
-    const passToUse = passParam ?? pass
-    const sceneToUse = sceneParam ?? scene
+    // String(+(stringParam)) is used to remove the leading zeros
+    const cycleToUse = String(+(cycleParam ?? cycle))
+    const passToUse = String(+(passParam ?? pass))
+    const sceneToUse = String(+(sceneParam ?? scene))
+    console.log('test 1')
     // check if cycle pass and scene are all within a valid range
     const validCycle = inputIsValid('cycle', cycleToUse)
     const validPass = inputIsValid('pass', passToUse)
     const validScene = inputIsValid('scene', sceneToUse)
+    console.log('test 2')
 
     if (!validCycle || !validPass || !validScene) {
+      console.log('something not valid')
       setWaitingForScenesToBeAdded(false)
       if (!validCycle) setSaveGranulesAlert('invalidCycle')
       if (!validPass) setSaveGranulesAlert('invalidPass')
@@ -281,13 +288,14 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         const allScenesNotAvailable = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
           return !sceneObjectValidityEntry[1]
         })
-
+        console.log('testestes')
         // TODO: make alert more verbose if some granules are added and others are not when adding more than one with scene hyphen
         sceneArray.filter(sceneNumber => scenesAvailable[`${cycleToUse}_${passToUse}_${sceneNumber}`]).forEach(async sceneId => {
           // check if granule exists with that scene, cycle, and pass
           const comboAlreadyAdded = alreadyAddedCyclePassScene(cycleToUse, passToUse, sceneId)
           const cyclePassSceneInBounds = checkInBounds('cycle', cycleToUse) && checkInBounds('pass', passToUse) && checkInBounds('scene', sceneId)
           if (cyclePassSceneInBounds && !comboAlreadyAdded) {
+            console.log('YES!')
             // get the granuleId from it and pass it to the parameters
             const parameters: allProductParameters = {
               granuleId: `${cycleToUse}_${passToUse}_${sceneId}`,
@@ -307,21 +315,28 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               cyclePassSceneSearchParams += `${cyclePassSceneSearchParams.length === 0 ? '' : '-'}${cycleToUse}_${passToUse}_${sceneId}`
             }
             granulesToAdd.push(parameters)
+            console.log('sjdhkakljshlakjshdklasjhdweiuahskj')
           } else if (comboAlreadyAdded) {
+            console.log('someGranulesAlreadyAdded')
             someGranulesAlreadyAdded = true
           }
         })
+        console.log('after scene array filter')
         // check if any granules could not be found or they were already added    
         if (someGranulesAlreadyAdded) {
+          console.log('alreadyAdded')
           setSaveGranulesAlert('alreadyAdded')
         } 
         if (allScenesNotAvailable) {
+          console.log('allScenesNotAvailable')
           setSaveGranulesAlert('allScenesNotAvailable')
         }
         if (someScenesNotAvailable) {
+          console.log('someScenesNotAvailable')
           setSaveGranulesAlert('someScenesNotAvailable')
           // set granule alert to show which scenes are missing but also say that you were successful
         }
+        console.log('granulesToAdd', granulesToAdd)
         return granulesToAdd
       }).then(async granulesToAdd => {
         if (granulesToAdd.length > 0) {
