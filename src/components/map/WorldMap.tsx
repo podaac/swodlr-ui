@@ -1,5 +1,5 @@
 import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup } from 'react-leaflet'
-import L, { CRS, LatLngExpression, map } from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -22,9 +22,9 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
-  const granuleFocus = useAppSelector((state) => state.product.granuleFocus)
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
   const dispatch = useAppDispatch()
+  const footprintStyleOptions = { color: 'limegreen' }
 
   const ChangeView = () => {
     const map = useMap();
@@ -80,7 +80,8 @@ const WorldMap = () => {
         }))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
-          const sceneToUse = String(Math.floor(tileValue / 2))
+          // const sceneToUse = String(Math.floor(tileValue / 2))
+          const sceneToUse = String(Math.floor(tileValue))
           return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
         })
         return references
@@ -114,7 +115,6 @@ const WorldMap = () => {
         id='spatial-search-map'  
         // center={[33.854457, -118.709093]} 
         zoom={7} scrollWheelZoom={true} zoomControl={false} 
-        // crs={CRS.EPSG4326}
       >
           {useLocation().pathname.includes('selectScenes') ? (
             <FeatureGroup>
@@ -134,6 +134,7 @@ const WorldMap = () => {
             </FeatureGroup>
             ) : null
           }
+          <div style={{float:'right', width:'49%', height:'100%'}} id='map-tutorial-target'/>
           <TileLayer
             url='https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
@@ -142,8 +143,8 @@ const WorldMap = () => {
           <ChangeView />
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
-          <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]}>
-            <Tooltip sticky>{productObject.granuleId}</Tooltip>
+          <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
+            <Tooltip sticky>{[<h6>{`Cycle: ${productObject.cycle}`}</h6>, <h6>{`Pass: ${productObject.pass}`}</h6>, <h6>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

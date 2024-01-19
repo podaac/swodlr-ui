@@ -8,6 +8,7 @@ import CustomizeProductView from './CustomizeProductView';
 import GranuleSelectionView from './GranuleSelectionView';
 import { CustomizeProductSidebarProps } from '../../types/constantTypes';
 import { ArrowsExpand } from 'react-bootstrap-icons';
+import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
 
 const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
     const { mode } = props
@@ -62,6 +63,7 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
         <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
         </div>
+        <InteractiveTutorialModal />
     </div>
   );
 }

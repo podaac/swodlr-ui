@@ -1,11 +1,10 @@
-import { Alert, Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setSpatialSearchEndDate, setSpatialSearchStartDate } from './actions/productSlice';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Search } from 'react-bootstrap-icons';
 
 const SpatialSearchOptions = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
