@@ -1,8 +1,8 @@
-import { Alert, Col, OverlayTrigger, Row, Table, Tooltip } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button } from "react-bootstrap";
 import { useAppSelector } from "../../redux/hooks";
 import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
-import { InfoCircle } from "react-bootstrap-icons";
+import { InfoCircle, Clipboard, Download } from "react-bootstrap-icons";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp } from "../../constants/rasterParameterConstants";
 import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,12 +24,12 @@ const GeneratedProductHistory = () => {
       }, []);
 
     // TODO: implement download link copy button
-    // const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
+    const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
 
-    // const handleCopyClick = (downloadUrl: string) => {
-    //     navigator.clipboard.writeText(downloadUrl)
-    //     setCopyTooltipText('Copied!')
-    // }
+    const handleCopyClick = (downloadUrl: string) => {
+        navigator.clipboard.writeText(downloadUrl)
+        setCopyTooltipText('Copied!')
+    }
 
     const renderInfoIcon = (parameterId: string) => (
         <OverlayTrigger
@@ -66,7 +66,8 @@ const GeneratedProductHistory = () => {
                         {userProducts.map((generatedProductObject, index) => {
                             const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
                             const statusToUse = status[0].state
-                            const downloadUrl = granules && granules.length !== 0 ? <a href={granules[0].uri} target="_blank" rel="noreferrer">{granules[0].uri.split('/').pop()}</a> : 'N/A'
+                            // const downloadUrl = granules && granules.length !== 0 ? <a href={granules[0].uri} target="_blank" rel="noreferrer">{granules[0].uri.split('/').pop()}</a> : 'N/A'
+                            const downloadUrl = granules && granules.length !== 0 ? granules[0].uri.split('/').pop() : 'N/A'
                             const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
                             const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
                             const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
@@ -74,7 +75,18 @@ const GeneratedProductHistory = () => {
                             const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlagToUse, outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
                             return (
                             <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
-                            {Object.entries(productRowValues).map((entry, index2) => <td style={{}} key={`${index}-${index2}`}>{entry[1]}</td> )}
+                            {Object.entries(productRowValues).map((entry, index2) => {
+                                let iconToRight = null
+                                if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
+                                    const downloadUrlString = granules[0].uri
+                                    iconToRight = 
+                                    <Row>
+                                        <Col><Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button></Col>
+                                        <Col><Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button></Col>
+                                    </Row>
+                                }
+                                return <td style={{}} key={`${index}-${index2}`}>{entry[1]}{iconToRight}</td>
+                            } )}
                             </tr>
                         )})}
                     </tbody>
