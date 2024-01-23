@@ -57,7 +57,7 @@ const GranuleTable = (props: GranuleTableProps) => {
         handleSave('urlParameter', sceneParamArray.length, index, splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
-  }, [tableType === 'granuleSelection' ? null : addedProducts, searchParams])
+  }, [tableType === 'granuleSelection' ? null : addedProducts])
   
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
@@ -65,12 +65,9 @@ const GranuleTable = (props: GranuleTableProps) => {
       let scenesFoundArray: string[] = []
       const fetchData = async () => {
         for(let i=0; i<spatialSearchResults.length; i++) {
-          const saveResponse = await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
+          await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
  
             scenesFoundArray.push(result)
-            // if (result === 'noScenesFound') {
-            //   noScenesFound = true
-            // }
           })
         }
         return scenesFoundArray
@@ -82,16 +79,10 @@ const GranuleTable = (props: GranuleTableProps) => {
           if(scenesFoundArray.includes('noScenesFound') && !scenesFoundArray.includes('found something')){
             setSaveGranulesAlert('noScenesFound')
           }
-          if(scenesFoundArray.includes('found something')) {
-            setSaveGranulesAlert('success')
-          }
         })
         // make sure to catch any error
         .catch(console.error);
-      // for(let i=0; i<spatialSearchResults.length; i++) {
-      //   handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene)
-      // }
-      // spatialSearchResults.forEach((spatialSearchResult, index) => handleSave('spatialSearch', spatialSearchResults.length, index, spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
+
       // clear spatial results out of redux after use
       if(spatialSearchResults.length !== 0) dispatch(addSpatialSearchResults([] as SpatialSearchResult[]))
     }
