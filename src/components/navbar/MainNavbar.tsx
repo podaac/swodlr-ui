@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { PersonSquare } from 'react-bootstrap-icons';
 import { logoutCurrentUser } from '../app/appSlice';
 import { useLocation, useNavigate } from "react-router-dom";
+import { setShowTutorialModalTrue } from '../sidebar/actions/modalSlice';
 
 const MainNavbar = () => {
   const dispatch = useAppDispatch()
@@ -33,13 +34,14 @@ const MainNavbar = () => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/customizeProduct/selectScenes${search}`)}>Customization</Nav.Link>
-          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/generatedProductHistory${search}`)}>My Data</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/customizeProduct/selectScenes${search}`)} id='customization-tab'>Customization</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/generatedProductHistory${search}`)} id='my-data-page'>My Data</Nav.Link>
           <NavDropdown  className={`${colorModeClass}-navbar-dropdown`} title="Data Discovery" id="basic-nav-dropdown" menuVariant="dark">
-            <NavDropdown.Item href="https://search.earthdata.nasa.gov/search?q=SWOT%20Level%202%20Version%20Version%202.0&long=0.140625" target="_blank">Earthdata Search</NavDropdown.Item>
+            <NavDropdown.Item href="https://search.earthdata.nasa.gov/search/granules?p=C2799438271-POCLOUD&pg[0][v]=f&pg[0][gsk]=-start_date&q=SWOT_L2_HR_RASTER_2.0&tl=1705536407!3!!&lat=65.390625&zoom=1" target="_blank">Earthdata Search</NavDropdown.Item>
             <NavDropdown.Item href="https://podaac.jpl.nasa.gov/" target="_blank">PO.DAAC Portal</NavDropdown.Item>
           </NavDropdown>
           <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => navigate(`/about${search}`)}>About</Nav.Link>
+          <Nav.Link className={`${colorModeClass}-navbar-link`} onClick={() => dispatch(setShowTutorialModalTrue())} id='tutorial-page'>Tutorial</Nav.Link>
         </Nav>
         <NavDropdown  className={`${colorModeClass}-text`} title={renderUserDropdownTitle()} id="basic-nav-dropdown" align="end" style={{marginRight: '20px'}} menuVariant="dark">
             <Row>

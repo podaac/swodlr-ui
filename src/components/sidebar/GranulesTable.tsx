@@ -1,10 +1,11 @@
 import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
-import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit, spatialSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
+import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit,
+   footprintSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, AlertMessageObject, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
@@ -19,7 +20,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const selectedGranules = useAppSelector((state) => state.product.selectedGranules)
   const spatialSearchResults = useAppSelector((state) => state.product.spatialSearchResults)
-  const granuleTableAlerts = useAppSelector((state) => state.product.granuleTableAlerts)
   const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
   const showUTMAdvancedOptions = useAppSelector((state) => state.product.showUTMAdvancedOptions)
   const waitingForSpatialSearch = useAppSelector((state) => state.product.waitingForSpatialSearch)
@@ -42,7 +42,7 @@ const GranuleTable = (props: GranuleTableProps) => {
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     if (cyclePassSceneParameters) {
       const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
-      sceneParamArray.forEach(sceneParams => {
+      sceneParamArray.forEach((sceneParams, index) => {
         const splitSceneParams = sceneParams.split('_')
         if (splitSceneParams.length > 3) {
           // update zone and band adjust values
@@ -54,7 +54,7 @@ const GranuleTable = (props: GranuleTableProps) => {
             dispatch(editProduct(editedProduct as allProductParameters))
           }
         }
-        handleSave('urlParameter',splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
+        handleSave('urlParameter', sceneParamArray.length, index, splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
   }, [tableType === 'granuleSelection' ? null : addedProducts])
@@ -62,7 +62,27 @@ const GranuleTable = (props: GranuleTableProps) => {
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
     if (spatialSearchResults.length > 0) {
-      spatialSearchResults.forEach(spatialSearchResult => handleSave('spatialSearch',spatialSearchResult.cycle, spatialSearchResult.pass, spatialSearchResult.scene))
+      let scenesFoundArray: string[] = []
+      const fetchData = async () => {
+        for(let i=0; i<spatialSearchResults.length; i++) {
+          await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
+ 
+            scenesFoundArray.push(result)
+          })
+        }
+        return scenesFoundArray
+      }
+    
+      // call the function
+      fetchData()
+        .then((noScenesFoundResult) => {
+          if(scenesFoundArray.includes('noScenesFound') && !scenesFoundArray.includes('found something')){
+            setSaveGranulesAlert('noScenesFound')
+          }
+        })
+        // make sure to catch any error
+        .catch(console.error);
+
       // clear spatial results out of redux after use
       if(spatialSearchResults.length !== 0) dispatch(addSpatialSearchResults([] as SpatialSearchResult[]))
     }
@@ -87,7 +107,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
   const [waitingForScenesToBeAdded, setWaitingForScenesToBeAdded] = useState(false)
-  const [localAddedAlerts, setLocalAddedAlerts] = useState<AlertMessageObject[]>([])
 
 const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[]): Promise<validScene> => {
   try {
@@ -196,7 +215,11 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         throw new Error('Failed to get authentication token');
       }
       dispatch(setWaitingForFootprintSearch(true))
-      const footprintSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=${collectionId}&producer_granule_id\[\]=${granuleId}&options[producer_granule_id][pattern]=true`
+      // convert the tileId in the cps string to a sceneId (divide by 2)
+      const granuleIdTileToSceneArray = granuleId.split('_')
+      let sceneString = String(parseInt(granuleIdTileToSceneArray[2])/2).padStart(3, '0');
+      const granuleIdTileToScene = `${granuleIdTileToSceneArray[0]}_${granuleIdTileToSceneArray[1]}_${sceneString}*`
+      const footprintSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=${collectionId}&producer_granule_id\[\]=${granuleIdTileToScene}&options[producer_granule_id][pattern]=true`
       const footprintResult = await fetch(footprintSearchUrl, {
         method: 'GET',
         credentials: 'omit',
@@ -247,12 +270,13 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return cpsValueToReturn
   }
 
-  const handleSave = async (saveType: SaveType, cycleParam?: string, passParam?: string, sceneParam?: string) => {
+  const handleSave = async (saveType: SaveType, totalRuns: number, index: number, cycleParam?: string, passParam?: string, sceneParam?: string): Promise<string> => {
     if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
-    const cycleToUse = cycleParam ?? cycle
-    const passToUse = passParam ?? pass
-    const sceneToUse = sceneParam ?? scene
+    // String(+(stringParam)) is used to remove the leading zeros
+    const cycleToUse = String(+(cycleParam ?? cycle))
+    const passToUse = String(+(passParam ?? pass))
+    const sceneToUse = String(+(sceneParam ?? scene))
     // check if cycle pass and scene are all within a valid range
     const validCycle = inputIsValid('cycle', cycleToUse)
     const validPass = inputIsValid('pass', passToUse)
@@ -263,15 +287,17 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       if (!validCycle) setSaveGranulesAlert('invalidCycle')
       if (!validPass) setSaveGranulesAlert('invalidPass')
       if (!validScene) setSaveGranulesAlert('invalidScene')
+      return 'first step'
     } else if (addedProducts.length >= granuleTableLimit) {
       setSaveGranulesAlert('granuleLimit')
+      return 'second-step'
     } else {
       const granulesToAdd: allProductParameters[] = []
       let someGranulesAlreadyAdded = false
       let cyclePassSceneSearchParams = searchParams.get('cyclePassScene') ? String(searchParams.get('cyclePassScene')) : ''
       const sceneArray = getScenesArray(sceneToUse)
       // check scenes availability
-      await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
+      const validationResult = await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
         // return response
         setWaitingForScenesToBeAdded(false)
         const someScenesNotAvailable = Object.entries(scenesAvailable).some(sceneObjectValidityEntry => {
@@ -281,7 +307,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
         const allScenesNotAvailable = Object.entries(scenesAvailable).every(sceneObjectValidityEntry => {
           return !sceneObjectValidityEntry[1]
         })
-
         // TODO: make alert more verbose if some granules are added and others are not when adding more than one with scene hyphen
         sceneArray.filter(sceneNumber => scenesAvailable[`${cycleToUse}_${passToUse}_${sceneNumber}`]).forEach(async sceneId => {
           // check if granule exists with that scene, cycle, and pass
@@ -311,24 +336,26 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             someGranulesAlreadyAdded = true
           }
         })
-        // check if any granules could not be found or they were already added    
-        if (someGranulesAlreadyAdded) {
-          setSaveGranulesAlert('alreadyAdded')
-        } 
-        if (allScenesNotAvailable) {
-          setSaveGranulesAlert('allScenesNotAvailable')
-        }
-        if (someScenesNotAvailable) {
-          setSaveGranulesAlert('someScenesNotAvailable')
-          // set granule alert to show which scenes are missing but also say that you were successful
+        if (saveType !== 'spatialSearch') {
+          // check if any granules could not be found or they were already added    
+          if (someGranulesAlreadyAdded) {
+            setSaveGranulesAlert('alreadyAdded')
+          } 
+          if (allScenesNotAvailable) {
+            setSaveGranulesAlert('allScenesNotAvailable')
+          }
+          if (someScenesNotAvailable) {
+            setSaveGranulesAlert('someScenesNotAvailable')
+            // set granule alert to show which scenes are missing but also say that you were successful
+          }
         }
         return granulesToAdd
       }).then(async granulesToAdd => {
         if (granulesToAdd.length > 0) {
           await Promise.all(granulesToAdd.map(async granule => {
             const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
-            // const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(granule.scene))}*`
-            return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
+            //TODO: change back to spatialSearchCollectionConceptId
+            return Promise.resolve(await getSceneFootprint(footprintSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
 
               const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
               const footprintResult = validFootprintResultArray[0]
@@ -358,8 +385,17 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               setSaveGranulesAlert('notInTimeRange')
             }
           })
+          return 'found something'
+        } else {
+          if (index+1 === totalRuns){
+            return 'noScenesFound'
+          } else {
+            return 'not applicable'
+          }
         }
       })
+      return validationResult
+      // return 'third step'
     }
   }
 
@@ -538,7 +574,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
   
   return (
-    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow'>
+    <div style={{backgroundColor: '#2C415C', marginTop: '10px', marginBottom: '20px'}} className='g-0 shadow' id={tableType === 'granuleSelection' ? 'added-scenes' : 'scenes-to-customize'}>
       <Row style={{marginRight: '0px', marginLeft: '0px', paddingBottom: '5px', paddingTop: '5px'}} className={`${colorModeClass}-sidebar-section-title`}>
         <Col><h5 className={`${colorModeClass}-text`} >{tableType === 'granuleSelection' ? 'Added Scenes' : 'Scenes to Customize'}</h5></Col>
       </Row>
@@ -568,10 +604,10 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
           <tbody>
             {Array.from(new Set(addedProducts.map(obj => JSON.stringify(obj)))).map(obj => JSON.parse(obj)).map((productParameterObject, index) => {
               // remove footprint from product object when mapping to table
-              const { cycle, pass, scene, granuleId} = productParameterObject
+              const { cycle, pass, scene, granuleId, footprint} = productParameterObject
               const essentialsGranule = {granuleId, cycle, pass, scene}
               return (
-              <tr className={`${colorModeClass}-table hoverable-row`} key={`${granuleId}-${index}`} onClick={() => dispatch(setGranuleFocus(granuleId))}>
+              <tr className={`${colorModeClass}-table hoverable-row`} key={`${granuleId}-${index}`} onClick={() => {if (footprint.length !== 0) dispatch(setGranuleFocus(granuleId))}}>
                 {tableType === 'granuleSelection'  ? (
                   <td key={'remove-checkbox'}>
                     <Form.Check
@@ -594,7 +630,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
               <>
                 <tr className='add-granules'>
                   <td colSpan={1}>
-                    <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())}>
+                    <Button disabled={selectedGranules.length === 0} style={{width: '70px'}} variant='danger' onClick={() =>  dispatch(setShowDeleteProductModalTrue())} id='remove-granules-button'>
                         <Trash color="white" size={18}/>
                     </Button>
                   </td>
@@ -623,7 +659,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner> : 
-                <Button variant='primary' size='sm' onClick={() => handleSave('manual')}>
+                <Button variant='primary' size='sm' onClick={() => handleSave('manual', 1, 1)}>
                   <Plus size={28}/> Add Scenes
                 </Button>
               }

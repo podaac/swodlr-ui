@@ -74,6 +74,7 @@ export const productSlice = createSlice({
     setGranuleFocus: (state, action: PayloadAction<string>) => {
       const granuleIdToFocus = action.payload
       const footprintToFocus = state.addedProducts.find(addedGranule => addedGranule.granuleId === granuleIdToFocus)!.footprint as LatLngExpression[]
+      
       const centerOfFootprint = L.polygon(footprintToFocus).getBounds().getCenter()
       state.mapFocus = {center: [centerOfFootprint.lat, centerOfFootprint.lng], zoom: 7}
     },

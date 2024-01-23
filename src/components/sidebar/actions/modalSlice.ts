@@ -9,7 +9,9 @@ interface AddCustomProductModalState {
     showGenerateProductModal: boolean,
     addedProducts: allProductParameters[],
     sampleGranuleDataArray: number[],
-    selectedGranules: string[]
+    selectedGranules: string[],
+    showTutorialModal: boolean,
+    skipTutorial: boolean,
 }
 
 // Define the initial state using that type
@@ -18,6 +20,8 @@ const initialState: AddCustomProductModalState = {
     showEditProductModal: false,
     showDeleteProductModal: false,
     showGenerateProductModal: false,
+    showTutorialModal: true,
+    skipTutorial: true,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
     addedProducts: [],
@@ -57,6 +61,18 @@ export const modalSlice = createSlice({
     },
     setShowGenerateProductModalTrue: (state) => {
         state.showGenerateProductModal = true
+    },
+    setShowTutorialModalFalse: (state) => {
+        state.showTutorialModal = false
+    },
+    setShowTutorialModalTrue: (state) => {
+        state.showTutorialModal = true
+    },
+    setSkipTutorialFalse: (state) => {
+        state.skipTutorial = false
+    },
+    setSkipTutorialTrue: (state) => {
+        state.skipTutorial = true
     }
   },
 })
@@ -71,6 +87,10 @@ export const {
     setShowDeleteProductModalTrue,
     setShowGenerateProductModalFalse,
     setShowGenerateProductModalTrue,
+    setShowTutorialModalFalse,
+    setShowTutorialModalTrue,
+    setSkipTutorialFalse,
+    setSkipTutorialTrue
 } = modalSlice.actions
 
 export default modalSlice.reducer

@@ -63,7 +63,7 @@ const About = () => {
                             <Row className="align-items-center"><h5>Q: How do I find cycle, pass, and scene?</h5></Row>
                         </ListGroup.Item>
                         <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
-                            <Row><h5>A: The cycle, pass, and scene IDs can be found in the file name of the standard raster product. The files can be explored within {<a href="https://search.earthdata.nasa.gov/search" target="_">Earthdata Search</a>}. The file naming convention is like so: {`SWOT_L2_HR_Raster_<DescriptorString>_<CycleID>_<PassID>_<SceneID>
+                            <Row><h5>A: The cycle, pass, and scene IDs can be found in the file name of the standard raster product. The files can be explored within {<a href="https://search.earthdata.nasa.gov/search/granules?p=C2799438271-POCLOUD&pg[0][v]=f&pg[0][gsk]=-start_date&q=SWOT_L2_HR_RASTER_2.0&tl=1705536407!3!!&lat=65.390625&zoom=1" target="_">Earthdata Search</a>}. The file naming convention is like so: {`SWOT_L2_HR_Raster_<DescriptorString>_<CycleID>_<PassID>_<SceneID>
                             _<RangeBeginningDateTime>_<RangeEndingDateTime>_<CRID>_<ProductCounter>.nc`}</h5></Row>
                         </ListGroup.Item>
                     </ListGroup>
