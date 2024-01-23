@@ -105,8 +105,10 @@ const WorldMap = () => {
   }
 
   const onEdit = async (editEvent: any) => {
-    const coordinatesToSearch = Object.entries(editEvent.layers._layers).map((newLayer: [string, any]) => newLayer[1].editing.latlngs[0][0])
-    await getScenesWithinCoordinates(coordinatesToSearch)
+    if (Object.keys(editEvent.layers._layers).length !== 0) {
+      const coordinatesToSearch = Object.entries(editEvent.layers._layers).map((newLayer: [string, any]) => newLayer[1].editing.latlngs[0][0])
+      await getScenesWithinCoordinates(coordinatesToSearch)
+    }
   }
 
   return (
