@@ -139,7 +139,7 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     },
     alreadyAdded: {
         message: 'Some scenes have already been added.',
-        variant: 'danger',
+        variant: 'success',
     },
     allScenesNotAvailable:{
         message: 'The scenes entered are not available.',
@@ -151,6 +151,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     },
     alreadyAddedAndNotFound: {
         message: 'Some scenes have already been added or not found.',
+        variant: 'danger',
+    },
+   noScenesFound: {
+        message: 'No scenes were found.',
         variant: 'danger',
     },
     noScenesAdded: {

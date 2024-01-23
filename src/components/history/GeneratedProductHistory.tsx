@@ -76,16 +76,19 @@ const GeneratedProductHistory = () => {
                             return (
                             <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
                             {Object.entries(productRowValues).map((entry, index2) => {
-                                let iconToRight = null
+                                let cellContents = null
                                 if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
                                     const downloadUrlString = granules[0].uri
-                                    iconToRight = 
+                                    cellContents = 
                                     <Row>
+                                        <Col>{entry[1]}</Col>
                                         <Col><Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button></Col>
                                         <Col><Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button></Col>
                                     </Row>
+                                } else {
+                                    cellContents = entry[1]
                                 }
-                                return <td style={{}} key={`${index}-${index2}`}>{entry[1]}{iconToRight}</td>
+                                return <td style={{}} key={`${index}-${index2}`}>{cellContents}</td>
                             } )}
                             </tr>
                         )})}
