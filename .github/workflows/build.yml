@@ -238,7 +238,7 @@ jobs:
         run:
           aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete
       - name: Publish UMM-T with new version
-        uses: podaac/cmr-umm-updater@0.5.0
+        uses: podaac/cmr-umm-updater@0.6.0
         if: |
           env.TARGET_ENV_UPPERCASE == 'UAT' ||
           env.TARGET_ENV_UPPERCASE == 'OPS'
@@ -251,6 +251,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-t'
           use_associations: 'false'
+          umm_version: '1.2.0'
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
