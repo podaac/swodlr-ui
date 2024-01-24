@@ -1,5 +1,4 @@
 import { LatLngExpression } from "leaflet"
-import { Product } from "./graphqlTypes"
 
 export interface parameterValuesObject {
    values: string[] | number[],
@@ -25,21 +24,22 @@ export interface allProductParameters {
   rasterResolution: number,
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
-  footprint: LatLngExpression[]
+  footprint: LatLngExpression[],
+  inTimeRange?: boolean
 }
 
 export interface GranuleForTable {
-granuleId: string,
-cycle: string,
-pass: string,
-scene: string,
+  granuleId: string,
+  cycle: string,
+  pass: string,
+  scene: string,
 }
 
 export interface GenerateProductParameters {
-outputGranuleExtentFlag: number,
-outputSamplingGridType: string,
-rasterResolutionUTM: number,
-rasterResolutionGEO: number
+  outputGranuleExtentFlag: number,
+  outputSamplingGridType: string,
+  rasterResolutionUTM: number,
+  rasterResolutionGEO: number
 }
 
 export interface sampleGranuleData {
@@ -75,6 +75,10 @@ export interface ParameterOptions {
   [key: string]: string
 }
 
+export interface AdjustValueDecoder {
+  [key: string]: string
+}
+
 export type StatusTypes = 'In Progress' | 'Complete'
 
 export type TabTypes = 'granuleSelection' | 'productCustomization'
@@ -96,7 +100,7 @@ export interface AlertMessageObject {
   type: string,
   message: string,
   variant: "danger" | "success" | "warning",
-  timeoutId: ReturnType<typeof setTimeout>,
+  // timeoutId: ReturnType<typeof setTimeout>,
   tableType: TableTypes
 }
 
@@ -108,6 +112,10 @@ export interface CustomizeProductSidebarProps {
 export type TableTypes = 'granuleSelection' | 'productCustomization'
 export interface GranuleTableProps {
   tableType: TableTypes
+}
+
+export interface GranuleSelectionAndConfigurationViewProps {
+  mode: CustomizeProductSidebarTypes
 }
 
 export type AdjustType = "zone" | "band"
@@ -125,3 +133,23 @@ export interface inputValuesDictionary {
 export interface newUrlParamsObject {
   [key: string]: string | number | boolean
 }
+
+export interface validScene {
+  [key: string]: boolean
+}
+
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound'
+
+export interface SpatialSearchResult {
+  cycle: string,
+  pass: string,
+  scene: string
+}
+export type footprintResponse = LatLngExpression[] | boolean
+
+export interface MapFocusObject {
+  center: number[], 
+  zoom: number
+}
+
+export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'

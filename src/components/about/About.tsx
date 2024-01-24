@@ -15,10 +15,10 @@ const About = () => {
                 <h4 style={{marginTop: '10px',marginBottom: '20px', borderBottom: 'solid 1px'}}>Summary</h4>
                 <div className='howToListItem' style={{marginBottom: '20px', paddingRight: '5%', paddingLeft: '5%'}}>
                     <h5>
-                        SWODLR is an on-demand raster generation tool that generates customized Surface Water and Ocean Topography (SWOT) Level 2 raster products. SWOT standard products are released in geographically fixed tiles at 100m and 250m resolutions in a Universal Transverse Mercator (UTM) projection grid. SWODLR allows users to generate the same products at different resolutions in either the UTM or geodetic coordinate system (lat/lon). SWODLR also gives an option to change the output granule extent from a square 128 x 128 km to 256 x 128 km for a potentially more accurate view of raster cells on the edges of the original square extent.
+                        SWODLR is an on-demand raster generation tool that generates customized Surface Water and Ocean Topography (SWOT) Level 2 raster products. SWOT standard products are released in geographically fixed tiles at 100m and 250m resolutions in a Universal Transverse Mercator (UTM) projection grid. SWODLR allows users to generate the same products at different resolutions in either the UTM or geodetic coordinate system (lat/lon). SWODLR also gives an option to change the output granule extent from a nonoverlapping square 128 km x 128 km to an overlapping rectangle 256 km x 128 km to assist with observing areas of interest near the along-track edges of the original square extent.
                     </h5>
                     <h5>
-                        Like the standard product, the on-demand product contains rasterized water surface elevation and inundation-extents. This is derived through resampling the upstream pixel cloud (L2_HR_PIXC) and pixel vector (L2_HR_PIXCVEC) datasets onto a uniform grid. A uniform grid is superimposed onto the pixel cloud from the source products, and all pixel-cloud samples within each grid cell are aggregated to produce a single value per raster cell. SWODLR uses the <a href='https://github.com/SWOTAlgorithms/Raster-Processor' target="_">original algorithm</a> that standard SWOT products use to generate products but at a different resolution; it does not just re-grid the standard products.
+                        Like the standard product, the on-demand product contains rasterized water surface elevation and inundation-extents. This is derived through resampling the upstream pixel cloud (L2_HR_PIXC) and pixel vector (L2_HR_PIXCVEC) datasets onto a uniform grid. A uniform grid is superimposed onto the pixel cloud from the source products, and all pixel-cloud samples within each grid cell are aggregated to produce a single value per raster cell. SWODLR uses the <a href='https://deotb6e7tfubr.cloudfront.net/s3-edaf5da92e0ce48fb61175c28b67e95d/podaac-ops-cumulus-docs.s3.us-west-2.amazonaws.com/web-misc/swot_mission_docs/atbd/D-105507_SWOT_ATBD_L2_HR_Raster_w-sigs.pdf?A-userid=None&Expires=1701977957&Signature=O8RO~hg2I0pIgH2wSebhos861vC9zG77fk-9LsTCzBnTbTysg1p56rUxOTLycm0M1TnRlwjo5jfLGOkyEpqj~x50J-cxUl16wS1c~pA327KSf8~LZ5170e-azmLUFOgYhACgl23A6qhF9KGhF6yX-Ba4oW756UMg33teMWAAkowFXbi0JOdzIr~bkIcONk7MTr~jzU9G-Tum-yDwk3PEh8ch0sW~9QCJGXq0BjIu6wAquU8bA9wbonqV76w5VrzOiR~42h8jYaNq0MJ18zLwZIWKYQIbXfKHqlm6tWJ6Cwd80QOMAPdEQ5AsF83bG1Q4TxzEgF-GZ8n4nLZlSQObgg__&Key-Pair-Id=K3CPO4G5OR7B1G' target="_">original algorithm</a> that standard SWOT products use to generate products but at a different resolution; it does not just re-grid the standard products.
                     </h5>
                 </div>
             </Row>
@@ -41,7 +41,7 @@ const About = () => {
                         </ListGroup.Item>
                         <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
                             <Row className="align-items-center">
-                                <Col><h5>Researchers looking at floodplains and river deltas express the desire for finer spatial resolutions than the standard 100 m or 250 m resolutions</h5></Col>
+                                <Col><h5>Observing floodplains, river deltas and other complex hydrological environments at finer spatial resolutions than the standard SWOT products.</h5></Col>
                                 <Col><Image src={YukonImage} fluid/></Col>
                             </Row>
                         </ListGroup.Item>
@@ -63,7 +63,7 @@ const About = () => {
                             <Row className="align-items-center"><h5>Q: How do I find cycle, pass, and scene?</h5></Row>
                         </ListGroup.Item>
                         <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
-                            <Row><h5>A: The cycle, pass, and scene IDs can be found in the file name of the standard raster product. The files can be explored within {<a href="https://search.earthdata.nasa.gov/search" target="_">Earthdata Search</a>}. The file naming convention is like so: {`SWOT_L2_HR_Raster_<DescriptorString>_<CycleID>_<PassID>_<SceneID>
+                            <Row><h5>A: The cycle, pass, and scene IDs can be found in the file name of the standard raster product. The files can be explored within {<a href="https://search.earthdata.nasa.gov/search/granules?p=C2799438271-POCLOUD&pg[0][v]=f&pg[0][gsk]=-start_date&q=SWOT_L2_HR_RASTER_2.0&tl=1705536407!3!!&lat=65.390625&zoom=1" target="_">Earthdata Search</a>}. The file naming convention is like so: {`SWOT_L2_HR_Raster_<DescriptorString>_<CycleID>_<PassID>_<SceneID>
                             _<RangeBeginningDateTime>_<RangeEndingDateTime>_<CRID>_<ProductCounter>.nc`}</h5></Row>
                         </ListGroup.Item>
                     </ListGroup>

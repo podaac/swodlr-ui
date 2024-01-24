@@ -3,7 +3,7 @@ import Navbar from 'react-bootstrap/Navbar';
 
 const PodaacNavbar = () => {
   return (
-    <Navbar className={`Podaac-navbar`} expand="lg" style={{height: '70px'}}>
+    <Navbar className={`Podaac-navbar`} style={{height: '70px'}}>
       <Row style={{width: '100%'}}>
         <Col md={{ span: 1, offset: 0 }} style={{paddingRight: '0px'}}>
           <a href="https://www.nasa.gov/" target="_blank" rel="noreferrer">

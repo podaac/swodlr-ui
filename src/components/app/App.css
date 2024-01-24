@@ -70,6 +70,9 @@ MAP
   width: 100%;
 }
 
+.sr-only {
+  display: none;
+}
 
 /**************************************************
 NAVBAR
@@ -218,9 +221,9 @@ CUSTOMIZE PRODUCT CONTAINER
 
 .Customize-products-container-sidebar-all {
   height: 100%;
-  /* TODO: uncomment when granule footprints are being retreived to display on map */
-  /* width: 65%; */
-  width: 100%;
+  /* TODO: uncomment when granule footprints are being retrieved to display on map */
+  width: 50%;
+  /* width: 100%; */
   position: absolute;
   top: 0;
   left: 0;
@@ -627,3 +630,7 @@ TABS
   color: 'black' !important;
   font-size: '24px' !important;
 }
+
+/**************************************************
+WALKTHROUGH
+**************************************************/

@@ -20,7 +20,7 @@ const GenerateProducts = () => {
   return (
     <Row style={{marginBottom: '10px', marginRight: '10px', marginLeft: '10px'}}>
         <Col>
-            <Button variant='success' disabled={addedGranules.length === 0}  onClick={() => handleGenerateProducts()}>Generate Products <ArrowReturnRight /></Button>
+            <Button variant='success' disabled={addedGranules.length === 0}  onClick={() => handleGenerateProducts()} id='generate-products-button'>Generate Products <ArrowReturnRight /></Button>
         </Col>
         <GenerateProductsModal />
     </Row>
