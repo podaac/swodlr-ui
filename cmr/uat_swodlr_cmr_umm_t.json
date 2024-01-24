@@ -84,8 +84,8 @@
         }
     ],
     "MetadataSpecification": {
-        "URL": "https://cdn.earthdata.nasa.gov/umm/tool/v1.1.1",
+        "URL": "https://cdn.earthdata.nasa.gov/umm/tool/v1.2.0",
         "Name": "UMM-T",
-        "Version": "1.1.1"
+        "Version": "1.2.0"
     }
 }
