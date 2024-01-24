@@ -1,91 +1,90 @@
-
 {
-    "Name": "SWODLR",
-    "LongName": "SWOT On-Demand Level 2 Raster Generation",
-    "Type": "Web User Interface",
-    "Version": "#.#.#",
-    "URL": {
-        "URLContentType": "DistributionURL",
-        "Type": "GOTO WEB TOOL",
-        "URLValue": "http://swodlr.podaac.uat.earthdatacloud.nasa.gov/"
+  "Name": "SWODLR",
+  "LongName": "SWOT On-Demand Level 2 Raster Generation",
+  "Type": "Web User Interface",
+  "Version": "#.#.#",
+  "Description": "SWODLR (swaa·dler) is an open-source software system developed to generate custom Level 2 raster data products for the SWOT mission. It provides an Application Programming Interface (API) and Graphical User Interface (GUI) that allows end-users to provide custom configurations to generate on-demand raster data products from underlying standard data products (PIXC, PIXCVec).",
+  "ToolKeywords": [
+    {
+      "ToolCategory": "EARTH SCIENCE SERVICES",
+      "ToolTopic": "DATA ANALYSIS AND VISUALIZATION",
+      "ToolTerm": "DATA VISUALIZATION"
     },
-    "Description": "SWODLR (swaa·dler) is an open-source software system developed to generate custom Level 2 raster data products for the SWOT mission. It provides an Application Programming Interface (API) and Graphical User Interface (GUI) that allows end-users to provide custom configurations to generate on-demand raster data products from underlying standard data products (PIXC, PIXCVec).",
-    "ToolKeywords" : [
-        {
-            "ToolCategory": "EARTH SCIENCE SERVICES",
-            "ToolTopic": "DATA ANALYSIS AND VISUALIZATION",
-            "ToolTerm": "DATA VISUALIZATION"
-        },
-        {
-            "ToolCategory": "EARTH SCIENCE SERVICES",
-            "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
-            "ToolTerm": "SUBSETTING/SUPERSETTING",
-            "ToolSpecificTerm": "SPATIAL SUBSETTING"
-        },
-        {
-            "ToolCategory": "EARTH SCIENCE SERVICES",
-            "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
-            "ToolTerm": "SUBSETTING/SUPERSETTING",
-            "ToolSpecificTerm": "VARIABLE SUBSETTING"
-        },
-        {
-            "ToolCategory": "EARTH SCIENCE SERVICES",
-            "ToolTopic": "DATA ANALYSIS AND VISUALIZATION",
-            "ToolTerm": "GEOGRAPHIC INFORMATION SYSTEMS",
-            "ToolSpecificTerm": "WEB-BASED GEOGRAPHIC INFORMATION SYSTEMS"
-        },
-        {
-            "ToolCategory": "EARTH SCIENCE SERVICES",
-            "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
-            "ToolTerm": "DATA ACCESS/RETRIEVAL"
-        }
-    ],
-    "PotentialAction": {
-        "Type": "SearchAction",
-        "Target": {
-            "Type": "EntryPoint",
-            "ResponseContentType": [
-                "text/html"
-            ],
-            "UrlTemplate": "http://swodlr.podaac.uat.earthdatacloud.nasa.gov/l={+layers}&ve={+bbox}&d={+date}",
-            "Description": "SWODLR (swaa·dler) is an open-source software system developed to generate custom Level 2 raster data products for the SWOT mission. It provides an Application Programming Interface (API) and Graphical User Interface (GUI) that allows end-users to provide custom configurations to generate on-demand raster data products from underlying standard data products (PIXC, PIXCVec).",
-            "HttpMethod": [
-                "GET"
-            ]
-        },
-        "QueryInput": [
-            {
-                "ValueName": "layers",
-                "Description": "A comma-separated list of visualization layer ids, as defined by GIBS. These layers will be portrayed on the web application",
-                "ValueRequired": true,
-                "ValueType": "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-LayerNaming"
-            },
-            {
-                "ValueName": "date",
-                "Description": "A UTC ISO DateTime. The layers portrayed will correspond to this date.",
-                "ValueRequired": false,
-                "ValueType": "https://schema.org/startDate"
-            },
-            {
-                "ValueName": "bbox",
-                "Description": "A spatial bounding box that will set the spatial extent of the portrayed layers. The first point is the lower corner, the second point is the upper corner. A box is expressed as two points separated by a space character.",
-                "ValueRequired": false,
-                "ValueType": "https://schema.org/box"
-            }
-        ]
+    {
+      "ToolCategory": "EARTH SCIENCE SERVICES",
+      "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
+      "ToolTerm": "SUBSETTING/SUPERSETTING",
+      "ToolSpecificTerm": "SPATIAL SUBSETTING"
     },
-    "Organizations": [
-        {
-            "Roles": [
-                "ORIGINATOR"
-            ],
-            "ShortName": "NASA/JPL/PODAAC",
-            "LongName": "Physical Oceanography Distributed Active Archive Center, Jet Propulsion Laboratory, NASA"
-        }
-    ],
-    "MetadataSpecification": {
-        "URL": "https://cdn.earthdata.nasa.gov/umm/tool/v1.2.0",
-        "Name": "UMM-T",
-        "Version": "1.2.0"
+    {
+      "ToolCategory": "EARTH SCIENCE SERVICES",
+      "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
+      "ToolTerm": "SUBSETTING/SUPERSETTING",
+      "ToolSpecificTerm": "VARIABLE SUBSETTING"
+    },
+    {
+      "ToolCategory": "EARTH SCIENCE SERVICES",
+      "ToolTopic": "DATA ANALYSIS AND VISUALIZATION",
+      "ToolTerm": "GEOGRAPHIC INFORMATION SYSTEMS",
+      "ToolSpecificTerm": "WEB-BASED GEOGRAPHIC INFORMATION SYSTEMS"
+    },
+    {
+      "ToolCategory": "EARTH SCIENCE SERVICES",
+      "ToolTopic": "DATA MANAGEMENT/DATA HANDLING",
+      "ToolTerm": "DATA ACCESS/RETRIEVAL"
     }
+  ],
+  "Organizations": [
+    {
+      "Roles": [
+        "ORIGINATOR"
+      ],
+      "ShortName": "NASA/JPL/PODAAC",
+      "LongName": "Physical Oceanography Distributed Active Archive Center, Jet Propulsion Laboratory, NASA"
+    }
+  ],
+  "URL": {
+    "URLContentType": "DistributionURL",
+    "Type": "GOTO WEB TOOL",
+    "URLValue": "http://swodlr.podaac.uat.earthdatacloud.nasa.gov/"
+  },
+  "MetadataSpecification": {
+    "URL": "https://cdn.earthdata.nasa.gov/umm/tool/v1.2.0",
+    "Name": "UMM-T",
+    "Version": "1.2.0"
+  },
+  "PotentialAction": {
+    "Type": "SearchAction",
+    "Target": {
+      "Type": "EntryPoint",
+      "ResponseContentType": [
+        "text/html"
+      ],
+      "UrlTemplate": "http://swodlr.podaac.uat.earthdatacloud.nasa.gov/l={+layers}&ve={+bbox}&d={+date}",
+      "Description": "SWODLR (swaa·dler) is an open-source software system developed to generate custom Level 2 raster data products for the SWOT mission. It provides an Application Programming Interface (API) and Graphical User Interface (GUI) that allows end-users to provide custom configurations to generate on-demand raster data products from underlying standard data products (PIXC, PIXCVec).",
+      "HttpMethod": [
+        "GET"
+      ]
+    },
+    "QueryInput": [
+      {
+        "ValueName": "layers",
+        "Description": "A comma-separated list of visualization layer ids, as defined by GIBS. These layers will be portrayed on the web application",
+        "ValueRequired": true,
+        "ValueType": "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-LayerNaming"
+      },
+      {
+        "ValueName": "date",
+        "Description": "A UTC ISO DateTime. The layers portrayed will correspond to this date.",
+        "ValueRequired": false,
+        "ValueType": "https://schema.org/startDate"
+      },
+      {
+        "ValueName": "bbox",
+        "Description": "A spatial bounding box that will set the spatial extent of the portrayed layers. The first point is the lower corner, the second point is the upper corner. A box is expressed as two points separated by a space character.",
+        "ValueRequired": false,
+        "ValueType": "https://schema.org/box"
+      }
+    ]
+  }
 }
