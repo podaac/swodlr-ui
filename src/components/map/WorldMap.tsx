@@ -65,6 +65,7 @@ const WorldMap = () => {
         })
         return polygonString
       }).join()
+      console.log(polygonUrlString)
       const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${spatialSearchCollectionConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
@@ -75,6 +76,7 @@ const WorldMap = () => {
       }).then(response => response.text()).then(data => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, "application/xml");
+        console.log(xml)
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
           return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
         }))).map(foundIdString => {

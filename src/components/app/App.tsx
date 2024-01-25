@@ -68,6 +68,7 @@ const App = () => {
       if (session !== null) {
         if (currentUser === null) {
           dispatch(getCurrentUser());
+          // perform check to see if user is authenticated
         }
       } else {
         // navigate to welcome page if user isn't authenticated

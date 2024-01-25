@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { PageTypes, UserData } from '../../types/constantTypes'
+import { PageTypes } from '../../types/constantTypes'
 import { CurrentUserData } from '../../types/graphqlTypes'
 import { Session } from '../../authentication/session';
 import { getUserData } from '../../user/userData';
@@ -9,7 +9,8 @@ interface AppState {
   userAuthenticated: boolean,
   currentPage: PageTypes,
   currentUser: CurrentUserData | null,
-  startTutorial: boolean
+  startTutorial: boolean,
+  userHasCorrectEdlPermissions: boolean
 }
 
 export const getCurrentUser = createAsyncThunk<CurrentUserData | null>('currentUser', async () => {
@@ -21,7 +22,8 @@ const initialState: AppState = {
   userAuthenticated: false,
   currentPage: 'welcome',
   currentUser: null,
-  startTutorial: false
+  startTutorial: false,
+  userHasCorrectEdlPermissions: false
 }
 
 export const appSlice = createSlice({
@@ -36,6 +38,9 @@ export const appSlice = createSlice({
     },
     setStartTutorial: (state, action: PayloadAction<boolean>) => {
       state.startTutorial = action.payload
+    },
+    setUserHasCorrectEdlPermissions: (state, action: PayloadAction<boolean>) => {
+      state.userHasCorrectEdlPermissions = action.payload
     },
   },
   extraReducers(builder) {
@@ -55,6 +60,6 @@ export const appSlice = createSlice({
   },
 });
 
-export const { logoutCurrentUser, setStartTutorial } = appSlice.actions
+export const { logoutCurrentUser, setStartTutorial, setUserHasCorrectEdlPermissions } = appSlice.actions
 
 export default appSlice.reducer
