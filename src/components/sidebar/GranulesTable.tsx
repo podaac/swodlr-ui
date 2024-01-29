@@ -5,7 +5,7 @@ import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizati
    footprintSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
-import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, validScene } from '../../types/constantTypes';
+import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, handleSaveResult, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
@@ -33,7 +33,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const {outputSamplingGridType} = generateProductParameters
 
   // search parameters
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams()
 
   // set the default url state parameters
   useEffect(() => {
@@ -63,20 +63,25 @@ const GranuleTable = (props: GranuleTableProps) => {
     dispatch(clearGranuleTableAlerts())
     if (spatialSearchResults.length > 0) {
       let scenesFoundArray: string[] = []
+      let addedScenes: string[] = []
       const fetchData = async () => {
         for(let i=0; i<spatialSearchResults.length; i++) {
           await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
- 
-            scenesFoundArray.push(result)
+            if(result.savedScenes) {
+              addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
+            }
+            scenesFoundArray.push(result.result)
           })
         }
+        // add parameters
+        addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
         return scenesFoundArray
       }
     
       // call the function
       fetchData()
-        .then((noScenesFoundResult) => {
-          if(scenesFoundArray.includes('noScenesFound') && !scenesFoundArray.includes('found something')){
+        .then((noScenesFoundResults) => {
+          if(noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something')){
             setSaveGranulesAlert('noScenesFound')
           }
         })
@@ -89,16 +94,40 @@ const GranuleTable = (props: GranuleTableProps) => {
   }, [spatialSearchResults])
 
   const addSearchParamToCurrentUrlState = (newPairsObject: object, remove?: string) => {
-      const currentSearchParams = Object.fromEntries(searchParams.entries())
-      Object.entries(newPairsObject).forEach(pair => {
+    const currentSearchParams = Object.fromEntries(searchParams.entries())
+    const cyclePassSceneParameters = searchParams.get('cyclePassScene')
+    Object.entries(newPairsObject).forEach(pair => {
+      if (pair[0] === 'cyclePassScene') {
+        if(cyclePassSceneParameters !== null) {
+          // check if cps already exists in cyclePassSceneParameters
+          const currentCpsUrlSplit = cyclePassSceneParameters.split('-')
+          const paramsToAddSplit = pair[1].toString().split('-')
+          // let combinedParamsArray = currentCpsUrlSplit
+          let newParamsArray: string[] = []
+          paramsToAddSplit.forEach((newParam: string) => {
+            if(!currentCpsUrlSplit.includes(newParam)) {
+              newParamsArray.push(newParam)
+              // if cps combo not already in url param, add it
+              // NOTE FOR WHEN I GET BACK: making sure no duplicates of cps
+            }
+          })
+          if (newParamsArray.length > 0) {
+            currentSearchParams[pair[0]]  = [...currentCpsUrlSplit, ...newParamsArray].join('-')
+          }
+        } else {
           currentSearchParams[pair[0]] = pair[1].toString()
-      })
-      
-      // remove unused search param
-      if (remove) {
-          delete currentSearchParams[remove]
+        }
+        // currentSearchParams[pair[0]] = cyclePassSceneParameters !== null ? `${cyclePassSceneParameters}-${pair[1].toString()}` : pair[1].toString()
+      } else {
+        currentSearchParams[pair[0]] = pair[1].toString()
       }
-      setSearchParams(currentSearchParams)
+    })
+    
+    // remove unused search param
+    if (remove) {
+      delete currentSearchParams[remove]
+    }
+    setSearchParams(currentSearchParams)
   }
 
   // add granules
@@ -270,13 +299,14 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     return cpsValueToReturn
   }
 
-  const handleSave = async (saveType: SaveType, totalRuns: number, index: number, cycleParam?: string, passParam?: string, sceneParam?: string): Promise<string> => {
+  const handleSave = async (saveType: SaveType, totalRuns: number, index: number, cycleParam?: string, passParam?: string, sceneParam?: string): Promise<handleSaveResult> => {
     if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
     // String(+(stringParam)) is used to remove the leading zeros
     const cycleToUse = String(+(cycleParam ?? cycle))
     const passToUse = String(+(passParam ?? pass))
-    const sceneToUse = String(+(sceneParam ?? scene))
+    // const sceneToUse = String(+(sceneParam ?? scene))
+    const sceneToUse = (sceneParam ?? scene).split('-').map((sceneValueSplit: string) => String(+sceneValueSplit)).join('-')
     // check if cycle pass and scene are all within a valid range
     const validCycle = inputIsValid('cycle', cycleToUse)
     const validPass = inputIsValid('pass', passToUse)
@@ -287,10 +317,10 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
       if (!validCycle) setSaveGranulesAlert('invalidCycle')
       if (!validPass) setSaveGranulesAlert('invalidPass')
       if (!validScene) setSaveGranulesAlert('invalidScene')
-      return 'first step'
+      return {result: 'first step'}
     } else if (addedProducts.length >= granuleTableLimit) {
       setSaveGranulesAlert('granuleLimit')
-      return 'second-step'
+      return {result: 'second-step'}
     } else {
       const granulesToAdd: allProductParameters[] = []
       let someGranulesAlreadyAdded = false
@@ -364,38 +394,43 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             }))
           })).then(async productsWithFootprints => {
             // don't run time range check if granule was manually entered
-            const productsInTimeRange: allProductParameters[] = []
-            const productsNotInTimeRange:allProductParameters[] = []
-            productsWithFootprints.forEach(product => {
-              if (product.inTimeRange){
-                delete product.inTimeRange
-                productsInTimeRange.push(product)
-              } else if (!product.inTimeRange) {
-                delete product.inTimeRange
-                productsNotInTimeRange.push(product)
-              }
-            })
-            if (productsInTimeRange.length > 0) {
-              setSaveGranulesAlert('success')
-              dispatch(addProduct(productsInTimeRange))
+            if (saveType === 'manual' || saveType === 'urlParameter') {
               addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-            }
-            if (productsNotInTimeRange.length > 0) {
-              // set alerts for not in range
-              setSaveGranulesAlert('notInTimeRange')
+              setSaveGranulesAlert('success')
+              dispatch(addProduct(productsWithFootprints))
+            } else {
+              const productsInTimeRange: allProductParameters[] = []
+              const productsNotInTimeRange:allProductParameters[] = []
+              productsWithFootprints.forEach(product => {
+                if (product.inTimeRange){
+                  delete product.inTimeRange
+                  productsInTimeRange.push(product)
+                } else if (!product.inTimeRange) {
+                  delete product.inTimeRange
+                  productsNotInTimeRange.push(product)
+                }
+              })
+              if (productsInTimeRange.length > 0) {
+                // addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
+                setSaveGranulesAlert('success')
+                dispatch(addProduct(productsInTimeRange))
+              }
+              if (productsNotInTimeRange.length > 0) {
+                // set alerts for not in range
+                setSaveGranulesAlert('notInTimeRange')
+              }
             }
           })
-          return 'found something'
+          return {result: 'found something', savedScenes: granulesToAdd}
         } else {
           if (index+1 === totalRuns){
-            return 'noScenesFound'
+            return {result: 'noScenesFound'}
           } else {
-            return 'not applicable'
+            return {result: 'not applicable'}
           }
         }
       })
       return validationResult
-      // return 'third step'
     }
   }
 

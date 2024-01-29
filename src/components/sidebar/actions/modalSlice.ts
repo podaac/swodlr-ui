@@ -7,7 +7,6 @@ interface AddCustomProductModalState {
     showEditProductModal: boolean,
     showDeleteProductModal: boolean,
     showGenerateProductModal: boolean,
-    addedProducts: allProductParameters[],
     sampleGranuleDataArray: number[],
     selectedGranules: string[],
     showTutorialModal: boolean,
@@ -24,7 +23,6 @@ const initialState: AddCustomProductModalState = {
     skipTutorial: true,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
-    addedProducts: [],
     sampleGranuleDataArray: [],
     selectedGranules: []
 }

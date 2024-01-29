@@ -12,7 +12,7 @@ const GranuleSelectionView = () => {
     const { search } = useLocation();
 
   return (
-    <>
+    <div>
         <SpatialSearchOptions />
         <GranuleTable tableType='granuleSelection'/>
         <GranuleTableAlerts />
@@ -22,7 +22,7 @@ const GranuleSelectionView = () => {
                 <Button variant='success' disabled={addedProducts.length === 0} onClick={() => navigate(`/customizeProduct/configureOptions${search}`)} id='configure-products-button'>Configure Products <ArrowReturnRight /></Button>
             </Col>
         </Row>
-    </>
+    </div>
   );
 }
 

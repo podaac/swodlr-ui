@@ -153,3 +153,8 @@ export interface MapFocusObject {
 }
 
 export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'
+
+export interface handleSaveResult {
+  result: string, 
+  savedScenes?: allProductParameters[]
+}
