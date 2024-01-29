@@ -7,7 +7,7 @@ import { Session } from "../../authentication/session";
 import { spatialSearchCollectionConceptId, spatialSearchResultLimit } from "../../constants/rasterParameterConstants";
 import { setUserHasCorrectEdlPermissions } from "../app/appSlice";
 
-const checkUseHasCorrectEdlPermissions = async () => {
+export const checkUseHasCorrectEdlPermissions = async () => {
   try {
     // get session token to use in spatial search query
     const session = await Session.getCurrent();
@@ -62,8 +62,8 @@ export default function AuthorizationCodeHandler(): ReactElement {
 
     exchangeAuthenticationCode(code)
         .then(async () => {
-          const userHasCorrectEdlPermissions = await checkUseHasCorrectEdlPermissions()
-          dispatch(setUserHasCorrectEdlPermissions(userHasCorrectEdlPermissions))
+          // const userHasCorrectEdlPermissions = await checkUseHasCorrectEdlPermissions()
+          // dispatch(setUserHasCorrectEdlPermissions(userHasCorrectEdlPermissions))
           navigate(`/customizeProduct/selectScenes`);
         })
         .catch((ex) => {

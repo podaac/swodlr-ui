@@ -1,4 +1,4 @@
-import { Col, Row } from 'react-bootstrap';
+import { Alert, Col, Row } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -10,6 +10,7 @@ const SpatialSearchOptions = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const spatialSearchStartDate = useAppSelector((state) => state.product.spatialSearchStartDate)
   const spatialSearchEndDate = useAppSelector((state) => state.product.spatialSearchEndDate)
+  const userHasCorrectEdlPermissions = useAppSelector((state) => state.app.userHasCorrectEdlPermissions)
   const dispatch = useAppDispatch()
 
   // set spatial search start and end date if in url params
@@ -100,6 +101,17 @@ const SpatialSearchOptions = () => {
           </p>
         </Col>
       </Row>
+      {userHasCorrectEdlPermissions ? null :
+        (<Row style={{marginLeft: '0px', marginRight: '0px'}}>
+          <Col style={{}}>
+            <Alert variant="warning">
+              <p>
+                Spatial search is not available because the SWOT dataset that allows this feature is not currently publicly available.
+              </p>
+            </Alert>
+          </Col>
+        </Row>)
+      }
     </div>
   );
 }
