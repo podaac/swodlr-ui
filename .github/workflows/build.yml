@@ -258,8 +258,8 @@ jobs:
       - name: Publish UMM-T with new version
         uses: podaac/cmr-umm-updater@0.5.0
         if: |
-          ${{ needs.build.outputs.deploy_env }} == 'UAT' ||
-          ${{ needs.build.outputs.deploy_env }} == 'OPS'
+          needs.build.outputs.deploy_env == 'UAT' ||
+          needs.build.outputs.deploy_env == 'OPS'
         with:
           umm-json: 'cmr/${{ needs.build.outputs.deploy_env_lower }}_swodlr_cmr_umm_t.json'
           provider: 'POCLOUD'
