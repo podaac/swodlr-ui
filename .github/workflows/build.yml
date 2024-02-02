@@ -239,9 +239,10 @@ jobs:
         env:
           AWS_DEFAULT_REGION: us-west-2
         run: |
+          VENUE=$(echo "${{ needs.build.outputs.deploy_env }}" | tr '[:upper:]' '[:lower:]')
           export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
           export TF_VAR_cloudfront_allow_vpcs=${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
-          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue ${{ needs.build.outputs.deploy_env }}
+          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue $VENUE
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
       - uses: actions/download-artifact@v3
         id: download
@@ -254,8 +255,8 @@ jobs:
       - name: Publish UMM-T with new version
         uses: podaac/cmr-umm-updater@0.5.0
         if: |
-          env.TARGET_ENV_UPPERCASE == 'UAT' ||
-          env.TARGET_ENV_UPPERCASE == 'OPS'
+          ${{ needs.build.outputs.deploy_env }} == 'UAT' ||
+          ${{ needs.build.outputs.deploy_env }} == 'OPS'
         with:
           umm-json: 'cmr/${{env.THE_ENV}}_swodlr_cmr_umm_t.json'
           provider: 'POCLOUD'
