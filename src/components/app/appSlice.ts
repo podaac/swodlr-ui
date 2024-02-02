@@ -8,7 +8,8 @@ import { getUserData } from '../../user/userData';
 interface AppState {
   userAuthenticated: boolean,
   currentPage: PageTypes,
-  currentUser: CurrentUserData | null
+  currentUser: CurrentUserData | null,
+  startTutorial: boolean
 }
 
 export const getCurrentUser = createAsyncThunk<CurrentUserData | null>('currentUser', async () => {
@@ -19,7 +20,8 @@ export const getCurrentUser = createAsyncThunk<CurrentUserData | null>('currentU
 const initialState: AppState = {
   userAuthenticated: false,
   currentPage: 'welcome',
-  currentUser: null
+  currentUser: null,
+  startTutorial: false
 }
 
 export const appSlice = createSlice({
@@ -31,6 +33,9 @@ export const appSlice = createSlice({
       state.userAuthenticated = false;
       state.currentUser = null;
       Session.invalidateCurrentSession();
+    },
+    setStartTutorial: (state, action: PayloadAction<boolean>) => {
+      state.startTutorial = action.payload
     },
   },
   extraReducers(builder) {
@@ -50,6 +55,6 @@ export const appSlice = createSlice({
   },
 });
 
-export const { logoutCurrentUser } = appSlice.actions
+export const { logoutCurrentUser, setStartTutorial } = appSlice.actions
 
 export default appSlice.reducer
