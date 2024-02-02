@@ -149,7 +149,7 @@ jobs:
       - name: NPM install & NPM Lint
         id: npm-build
         run: |
-          VENUE=$(echo "${{ vars.TF_VENUE }}" | tr '[:upper:]' '[:lower:]')
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
           source terraform/environments/$VENUE.env
           npm install
           npm run build
