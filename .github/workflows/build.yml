@@ -233,7 +233,7 @@ jobs:
           aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
           aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
           mask-aws-account-id: true
-      - name: Deploy to venue
+      - name: Deploy to venue ${{ needs.build.outputs.deploy_env }}
         id: terraform-deploy
         working-directory: terraform/
         env:
@@ -241,7 +241,7 @@ jobs:
         run: |
           export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
           export TF_VAR_cloudfront_allow_vpcs=${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
-          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue ${{ vars.TF_VENUE }}
+          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue ${{ needs.build.outputs.deploy_env }}
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
       - uses: actions/download-artifact@v3
         id: download
