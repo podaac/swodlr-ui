@@ -149,7 +149,7 @@ jobs:
       - name: NPM install & NPM Lint
         id: npm-build
         run: |
-          source terraform/environments/${{ env.THE_ENV }}.env
+          source terraform/environments/${{ env.TARGET_ENV }}.env
           npm install
           npm run build
       - name: Upload package
