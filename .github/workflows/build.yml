@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deploy_env: ${{ steps.set-env.outputs.deploy_env }}
+      deploy_env_lower: ${{ steps.set-env.outputs.deploy_env_lower }}
       github_sha: ${{ steps.update-sha.outputs.github_sha }}
       software_version: ${{ steps.update-sha.outputs.software_version }}
     steps:
@@ -116,7 +117,9 @@ jobs:
         id: set-env
         run: |
           echo "deploy_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
-      ## Build
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
+          echo "deploy_env_lower=$VENUE" >> $GITHUB_OUTPUT
+      ## Build      
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -258,10 +261,10 @@ jobs:
           ${{ needs.build.outputs.deploy_env }} == 'UAT' ||
           ${{ needs.build.outputs.deploy_env }} == 'OPS'
         with:
-          umm-json: 'cmr/${{env.THE_ENV}}_swodlr_cmr_umm_t.json'
+          umm-json: 'cmr/${{ needs.build.outputs.deploy_env_lower }}_swodlr_cmr_umm_t.json'
           provider: 'POCLOUD'
-          env: ${{ env.THE_ENV }}
-          version: ${{ env.THE_VERSION }}
+          env: ${{ needs.build.outputs.deploy_env_lower }}
+          version: ${{ needs.build.outputs.software_version }}
           timeout: 60
           disable_removal: 'true'
           umm_type: 'umm-t'
