@@ -199,7 +199,7 @@ jobs:
         run: |
           SHA=$(git rev-parse HEAD)
           echo "github_sha=${SHA}" >> $GITHUB_OUTPUT      
-          echo "software_version=${{ env.software_version }}" >> $GITHUB_OUTPUT
+          echo "software_version=${{ steps.package-version.outputs.current-version}}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy
@@ -281,7 +281,7 @@ jobs:
         with:
           payload: |
             {
-              "message": "${{ github.repository }} [version ${{ env.SUBMODULE_VERSION }}] has been deployed to the ${{ needs.build.outputs.deploy_env }} environment"
+              "message": "${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has been deployed to the ${{ needs.build.outputs.deploy_env }} environment"
             }
       - name: Send failure notifications to slack
         if: failure()
@@ -291,5 +291,5 @@ jobs:
         with:
           payload: |
             {
-              "message": "ERROR: ${{ github.repository }} [version ${{ env.SUBMODULE_VERSION }}] has encountered an error while trying to deploy to the ${{ needs.build.outputs.deploy_env }} environment"
+              "message": "ERROR: ${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has encountered an error while trying to deploy to the ${{ needs.build.outputs.deploy_env }} environment"
             }
