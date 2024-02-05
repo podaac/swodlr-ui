@@ -27,7 +27,10 @@ on:
         options:
           - SIT
           - UAT
-
+      commit:
+        type: string
+        description: Custom commit hash
+    
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -40,9 +43,10 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     outputs:
-      deploy_env: ${{ steps.npm-build.outputs.deploy_env }}
-      deploy_env_lower: ${{ steps.npm-build.outputs.deploy_env_lower }}
-      version: ${{ steps.npm-build.outputs.the_version }}
+      deploy_env: ${{ steps.set-env.outputs.deploy_env }}
+      deploy_env_lower: ${{ steps.set-env.outputs.deploy_env_lower }}
+      github_sha: ${{ steps.update-sha.outputs.github_sha }}
+      software_version: ${{ steps.update-sha.outputs.software_version }}
     steps:
       - uses: getsentry/action-github-app-token@v2
         name: my-app-install token
@@ -50,35 +54,44 @@ jobs:
         with:
           app_id: ${{ secrets.CICD_APP_ID }}
           private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
-      - uses: actions/checkout@v3
+      - name: Initial checkout ${{ github.ref }}
+        if: github.event.inputs.commit == ''
+        uses: actions/checkout@v4
+      - name: Adjust to proper commit hash ${{ github.event.inputs.commit }}
+        if: github.event.inputs.commit != ''
+        uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}
-          token: ${{ steps.podaac-cicd.outputs.token }}
+          ref: ${{ github.event.inputs.commit }}
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
+      - name: Manual execution means no version bump
+        # If triggered by workflow dispatch, no version bump
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "TARGET_ENV=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
+          TARGET_ENV=${{ github.event.inputs.venue }}
       ## NPM Tagging
       - name: Bump pre-alpha version
         # If triggered by push to a non-tracked branch
         if: |
+          github.event_name != 'workflow_dispatch' &&
           github.ref != 'refs/heads/develop' &&
           github.ref != 'refs/heads/main'    &&
           !startsWith(github.ref, 'refs/heads/release')
         run: |
-          echo "THE_ENV=sit" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
           echo "software_version=$(npm --no-git-tag-version --allow-same-version version ${{ steps.package-version.outputs.current-version }}-${GITHUB_SHA})" >> $GITHUB_ENV
+          echo "TARGET_ENV=SIT" >> $GITHUB_ENV
       - name: Bump alpha version
         # If triggered by push to the develop branch
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: github.ref == 'refs/heads/develop' && github.event_name != 'workflow_dispatch'
         id: alpha
         run: |
-          echo "THE_ENV=sit" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
           echo "software_version=$(npm --no-git-tag-version version prerelease)" >> $GITHUB_ENV
+          echo "TARGET_ENV=SIT" >> $GITHUB_ENV
       - name: Bump rc version
         # If triggered by push to a release branch
-        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        if: startsWith(github.ref, 'refs/heads/release/') && github.event_name != 'workflow_dispatch'
         id: rc
         env:
           # True if the version already has a 'rc' pre-release identifier
@@ -90,25 +103,23 @@ jobs:
           else
             echo "software_version=$(npm --no-git-tag-version version ${GITHUB_REF#refs/heads/release/}-rc.1)" >> $GITHUB_ENV
           fi
-
-          echo "THE_ENV=uat" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
+          echo "TARGET_ENV=UAT" >> $GITHUB_ENV
       - name: Release version
         # If triggered by push to the main branch
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        if: github.ref == 'refs/heads/main' && github.event_name != 'workflow_dispatch'
         id: release
         run: |
-          echo "THE_ENV=ops" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
           echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
           THE_VERSION=${{ steps.package-version.outputs.current-version}}
           echo "software_version=${THE_VERSION//-*}" >> $GITHUB_ENV
           npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
-      - name: No version bump
-        # If triggered by workflow dispatch, no version bump
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Set the target environment to ${{ env.TARGET_ENV }}
+        id: set-env
         run: |
-          echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
+          echo "deploy_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
+          echo "deploy_env_lower=$VENUE" >> $GITHUB_OUTPUT
+      ## Build      
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -145,12 +156,10 @@ jobs:
       - name: NPM install & NPM Lint
         id: npm-build
         run: |
-          source terraform/environments/${{ env.THE_ENV }}.env
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
+          source terraform/environments/$VENUE.env
           npm install
           npm run build
-          echo "deploy_env=${{ env.TARGET_ENV_UPPERCASE }}" >> $GITHUB_OUTPUT
-          echo "deploy_env_lower=${{ env.THE_ENV }}" >> $GITHUB_OUTPUT
-          echo "the_version=${{ env.software_version }}" >> $GITHUB_OUTPUT
       - name: Upload package
         uses: actions/upload-artifact@v3
         with:
@@ -188,6 +197,13 @@ jobs:
           name: ${{ env.software_version }}
           prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
           tag: ${{ env.software_version }}
+      - name: Set github SHA for deployment
+        id: update-sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "github_sha=${SHA}" >> $GITHUB_OUTPUT      
+          echo "software_version=${{ steps.package-version.outputs.current-version}}" >> $GITHUB_OUTPUT
+
   deploy:
     name: Deploy
     needs: build
@@ -204,9 +220,10 @@ jobs:
       startsWith(github.ref, 'refs/heads/release') ||
       github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository for Deployment ${{ needs.build.outputs.github_sha }}
+        uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}
+          ref: ${{ needs.build.outputs.github_sha }}
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -219,15 +236,16 @@ jobs:
           aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
           aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
           mask-aws-account-id: true
-      - name: Deploy to venue
+      - name: Deploy to venue ${{ needs.build.outputs.deploy_env }}
         id: terraform-deploy
         working-directory: terraform/
         env:
           AWS_DEFAULT_REGION: us-west-2
         run: |
+          VENUE=$(echo "${{ needs.build.outputs.deploy_env }}" | tr '[:upper:]' '[:lower:]')
           export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
           export TF_VAR_cloudfront_allow_vpcs=${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
-          ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }}
+          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue $VENUE
           echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
       - uses: actions/download-artifact@v3
         id: download
@@ -240,13 +258,13 @@ jobs:
       - name: Publish UMM-T with new version
         uses: podaac/cmr-umm-updater@0.6.0
         if: |
-          env.TARGET_ENV_UPPERCASE == 'UAT' ||
-          env.TARGET_ENV_UPPERCASE == 'OPS'
+          needs.build.outputs.deploy_env == 'UAT' ||
+          needs.build.outputs.deploy_env == 'OPS'
         with:
-          umm-json: 'cmr/${{env.THE_ENV}}_swodlr_cmr_umm_t.json'
+          umm-json: 'cmr/${{ needs.build.outputs.deploy_env_lower }}_swodlr_cmr_umm_t.json'
           provider: 'POCLOUD'
-          env: ${{ env.THE_ENV }}
-          version: ${{ env.THE_VERSION }}
+          env: ${{ needs.build.outputs.deploy_env_lower }}
+          version: ${{ needs.build.outputs.software_version }}
           timeout: 60
           disable_removal: 'true'
           umm_type: 'umm-t'
@@ -256,3 +274,26 @@ jobs:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
           LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+      - name: Retrieve version number for notifications
+        run: |
+          VERSION=${{ needs.build.outputs.software_version }}
+          echo "SUBMODULE_VERSION=$VERSION">>$GITHUB_ENV
+      - name: Send notifications to slack
+        uses: slackapi/slack-github-action@v1.25.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK_SWODLR }}
+        with:
+          payload: |
+            {
+              "message": "${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has been deployed to the ${{ needs.build.outputs.deploy_env }} environment"
+            }
+      - name: Send failure notifications to slack
+        if: failure()
+        uses: slackapi/slack-github-action@v1.25.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK_SWODLR }}
+        with:
+          payload: |
+            {
+              "message": "ERROR: ${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has encountered an error while trying to deploy to the ${{ needs.build.outputs.deploy_env }} environment"
+            }
