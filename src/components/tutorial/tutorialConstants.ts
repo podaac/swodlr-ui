@@ -116,17 +116,17 @@ export const tutorialSteps = [
           }
       }
     },
-    {
-      target: "#configure-products-button",
-      content: "Click the Configure Products button to proceed to the Configure Options page where you can select options for how your selected scenes can be made into custom products.",
-      disableBeacon: true,
-      styles: {
-          options: {
-              zIndex: 1000,
-              primaryColor: '#0d6efd',
-          }
-      }
-    },
+    // {
+    //   target: "#configure-products-button",
+    //   content: "Click the Configure Products button to proceed to the Configure Options page where you can select options for how your selected scenes can be made into custom products.",
+    //   disableBeacon: true,
+    //   styles: {
+    //       options: {
+    //           zIndex: 1000,
+    //           primaryColor: '#0d6efd',
+    //       }
+    //   }
+    // },
     {
       target: "#configure-options-breadcrumb",
       content: "You can also click on the Configure Options tab to proceed to the Configure Options view.",

@@ -45,9 +45,12 @@ const App = () => {
     const stepTarget = step.target
     if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
-    } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev') {
+    } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/selectScenes${search}`)
-    } else if (stepTarget === '#my-data-page' && action === 'prev') {
+    } else if (stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init') {
+      // navigate(`/customizeProduct/selectScenes${search}`)
+    }
+     else if (stepTarget === '#my-data-page' && action === 'prev') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#added-scenes' && action === 'update') {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=1_413_120&showUTMAdvancedOptions=true`)

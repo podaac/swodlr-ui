@@ -14,6 +14,43 @@ import { useSearchParams } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { LatLngExpression } from 'leaflet';
 
+// const addSearchParamToCurrentUrlState = (newPairsObject: object, searchParams: string[], setSearchParams: Function, remove?: string) => {
+//   const currentSearchParams = Object.fromEntries(searchParams.entries())
+//   const cyclePassSceneParameters = searchParams.get('cyclePassScene')
+//   Object.entries(newPairsObject).forEach(pair => {
+//     if (pair[0] === 'cyclePassScene') {
+//       if(cyclePassSceneParameters !== null) {
+//         // check if cps already exists in cyclePassSceneParameters
+//         const currentCpsUrlSplit = cyclePassSceneParameters.split('-')
+//         const paramsToAddSplit = pair[1].toString().split('-')
+//         // let combinedParamsArray = currentCpsUrlSplit
+//         let newParamsArray: string[] = []
+//         paramsToAddSplit.forEach((newParam: string) => {
+//           if(!currentCpsUrlSplit.includes(newParam)) {
+//             newParamsArray.push(newParam)
+//             // if cps combo not already in url param, add it
+//             // NOTE FOR WHEN I GET BACK: making sure no duplicates of cps
+//           }
+//         })
+//         if (newParamsArray.length > 0) {
+//           currentSearchParams[pair[0]]  = [...currentCpsUrlSplit, ...newParamsArray].join('-')
+//         }
+//       } else {
+//         currentSearchParams[pair[0]] = pair[1].toString()
+//       }
+//       // currentSearchParams[pair[0]] = cyclePassSceneParameters !== null ? `${cyclePassSceneParameters}-${pair[1].toString()}` : pair[1].toString()
+//     } else {
+//       currentSearchParams[pair[0]] = pair[1].toString()
+//     }
+//   })
+  
+//   // remove unused search param
+//   if (remove) {
+//     delete currentSearchParams[remove]
+//   }
+//   setSearchParams(currentSearchParams)
+// }
+
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
@@ -178,6 +215,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
   }
 
   const checkInBounds = (inputType: string, inputValue: string): boolean => {
+    console.log(inputBounds[inputType].min, inputBounds[inputType].max)
     return parseInt(inputValue) >= inputBounds[inputType].min && parseInt(inputValue) <= inputBounds[inputType].max && !isNaN(+(inputValue.trim()))
   }
 
@@ -188,9 +226,11 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     // check for characters other than integers and one -
     if (inputValue.includes('-')) {
       const inputBoundsValue = inputValue.split('-')
+      console.log(inputBoundsValue)
       // const allInputsValidNumbers = inputBoundsValue.every(inputString => !isNaN(+inputString))
       const min: string = inputBoundsValue[0].trim()
       const max: string = inputBoundsValue[1].trim()
+      console.log(min,max)
       const minIsValid = checkInBounds(inputType, min)
       const maxIsValid = checkInBounds(inputType, max)
       validInput = minIsValid && maxIsValid

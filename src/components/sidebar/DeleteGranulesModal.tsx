@@ -11,6 +11,8 @@ const GenerateProductsModal = () => {
     const dispatch = useAppDispatch()
     const handleDelete = () => {
         dispatch(deleteProduct(selectedGranules))
+        // remove url parameters of selectedGranules
+        // addSearchParamToCurrentUrlState
         dispatch(setSelectedGranules([]))
         // unselect select-all box
         dispatch(setShowDeleteProductModalFalse())
