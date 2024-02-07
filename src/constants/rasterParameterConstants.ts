@@ -219,15 +219,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
   ] 
 
 export const spatialSearchResultLimit = 2000
-// export const beforeCPS = '_PIXC_'
-// export const afterCPSR = 'R_'
-// export const afterCPSL = 'L_'
-// export const spatialSearchCollectionConceptId = 'C2799438266-POCLOUD'
-// export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
-
 export const beforeCPS = '_x_x_x_'
 export const afterCPSR = 'F_'
 export const afterCPSL = 'F_'
 export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
-// export const footprintSearchCollectionConceptId = 'C2799438266-POCLOUD'
 export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
+
+export const userProductQueryLimit = 1000

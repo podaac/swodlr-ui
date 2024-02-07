@@ -1,3 +1,5 @@
+import { userProductQueryLimit } from "./rasterParameterConstants"
+
 export const userQuery = `
     {
         currentUser {
@@ -27,7 +29,7 @@ export const generateL2RasterProductQuery = `
 export const userProductsQuery = `
     {
         currentUser {
-            products {
+            products (limit: ${userProductQueryLimit}) {
                 id
                 timestamp
                 cycle

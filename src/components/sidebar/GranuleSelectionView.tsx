@@ -1,16 +1,8 @@
-import { Button, Col, Row } from 'react-bootstrap';
-import { ArrowReturnRight} from 'react-bootstrap-icons';
 import GranuleTable from './GranulesTable';
-import { useAppSelector } from '../../redux/hooks'
 import GranuleTableAlerts from './GranuleTableAlerts';
-import { useLocation, useNavigate } from 'react-router-dom';
 import SpatialSearchOptions from './SpatialSearchOptions';
 
 const GranuleSelectionView = () => {
-    const addedProducts = useAppSelector((state) => state.product.addedProducts)
-    const navigate = useNavigate();
-    const { search } = useLocation();
-
   return (
     <div>
         <SpatialSearchOptions />

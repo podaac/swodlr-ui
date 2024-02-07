@@ -129,14 +129,6 @@ export const getUserProducts = async () => {
   try {
       const userProductResponse = await graphQLClient.request(userProductsQuery).then(result => {
         const userProductsResult = (result as UserResponse).currentUser.products
-        // const userProductsGeneratedForm = userProductResponse.result.map(productResult => {
-        //   const {cycle, pass, scene, rasterResolution, outputGranuleExtentFlag, outputSamplingGridType, utmZoneAdjust, timestamp, id: productId, status} = productResult   
-        //   // const generatedFormToReuturn: GeneratedProduct = 
-        //   // return generatedFormToReuturn      
-        // })
-
-        // turn into GeneratedProduct
-        // const generatedProduct: GeneratedProduct = {}
         return {status: 'success', products: userProductsResult} as getUserProductsResponse
       })
       return userProductResponse

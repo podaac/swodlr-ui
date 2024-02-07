@@ -17,6 +17,7 @@ import GranuleSelectionAndConfigurationView from '../sidebar/GranuleSelectionAnd
 import Joyride from 'react-joyride';
 import { deleteProduct } from '../sidebar/actions/productSlice';
 import { tutorialSteps } from '../tutorial/tutorialConstants';
+import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -34,7 +35,6 @@ const App = () => {
     run: startTutorial,
     steps: tutorialSteps
   })
-
   useEffect(() => {
     setState({...joyride, run: startTutorial })
 
@@ -121,6 +121,7 @@ const App = () => {
         <Route path="/about" element={ getPageWithFormatting(<About />, true) } />
         <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>
       </Routes>
+      <InteractiveTutorialModal />
     </div>
   );
 }
