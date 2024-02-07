@@ -37,7 +37,6 @@ const App = () => {
   })
   useEffect(() => {
     setState({...joyride, run: startTutorial })
-
   }, [startTutorial]);
 
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
