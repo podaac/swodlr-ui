@@ -92,7 +92,6 @@ const WorldMap = () => {
         }))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
-          // const sceneToUse = String(Math.floor(tileValue / 2))
           const sceneToUse = String(Math.floor(tileValue))
           return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
         })
@@ -135,7 +134,6 @@ const WorldMap = () => {
                 position="topright" 
                 onCreated={(createEvent) => onCreate(createEvent)} 
                 onEdited={(editEvent) => onEdit(editEvent)} 
-                // onDeleted={(deleteEvent) => onDelete(deleteEvent)} 
                 draw={{
                   rectangle: false,
                   polyline: false,

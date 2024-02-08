@@ -96,7 +96,6 @@ export const parameterOptionDefaults = {
 }
 
 export const parameterHelp: ParameterHelp = {
-    // outputGranuleExtentFlag: `There are two sizing options for raster granules: square (128 km x 128 km) or rectangular (256 km x 128 km). The square granule extent utilizes the data from only the specific square scene ID indicated, whereas the rectangular granule extent utilizes the specific square scene ID indicated and data from the two adjacent scene IDs along the SWOT swath. At the very edges of scenes, there is a risk that the pixels SWOT measures will not be aggregated as accurately into the raster product. The rectangular extent addresses this issue and could be most helpful with points of interest near the edges of scenes.`,
     outputGranuleExtentFlag: `There are two sizing options for raster granules: nonoverlapping square (128 km x 128 km) or overlapping rectangular (256 km x 128 km). The rectangular granule extent is 64 km longer in along-track on both sides of the granule and can be useful for observing areas of interest near the along-track edges of the nonoverlapping granules without the need to stitch sequential granules together.`,
     outputSamplingGridType: `Specifies the type of the raster sampling grid. It can be either a Universal Transverse Mercator (UTM) grid or a geodetic latitude-longitude grid.`,
     rasterResolution: `Resolution of the raster sampling grid in units of integer meters for UTM grids and integer arc-seconds for latitude-longitude grids.`,

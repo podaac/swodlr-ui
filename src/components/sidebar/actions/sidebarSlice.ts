@@ -77,7 +77,4 @@ export const {
     setSidebarWidth
 } = sidebarSlice.actions
 
-// Other code such as selectors can use the imported `RootState` type
-// export const selectShowAddProductModal = (state: RootState) => state.addCustomProductModal.showAddProductModal
-
 export default sidebarSlice.reducer

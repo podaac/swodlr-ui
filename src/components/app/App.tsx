@@ -46,10 +46,7 @@ const App = () => {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/selectScenes${search}`)
-    } else if (stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init') {
-      // navigate(`/customizeProduct/selectScenes${search}`)
-    }
-     else if (stepTarget === '#my-data-page' && action === 'prev') {
+    } else if (stepTarget === '#my-data-page' && action === 'prev') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#added-scenes' && action === 'update') {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=1_413_120&showUTMAdvancedOptions=true`)
@@ -62,6 +59,7 @@ const App = () => {
       dispatch(setStartTutorial(false))
       navigate(`/customizeProduct/selectScenes`)
     }
+    // TODO: Make condition to load previous page when clicking previous before trying to target component to highlight. Use conditions "stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init'"
   };
 
   useEffect(() => {

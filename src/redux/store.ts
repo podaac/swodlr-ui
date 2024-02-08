@@ -4,7 +4,6 @@ import productSlice from '../components/sidebar/actions/productSlice'
 import navbarSlice from '../components/navbar/navbarSlice'
 import appSlice from '../components/app/appSlice'
 import sidebarSlice from '../components/sidebar/actions/sidebarSlice'
-// ...
 
 export const store = configureStore({
   reducer: {

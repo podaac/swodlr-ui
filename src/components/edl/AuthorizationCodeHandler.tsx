@@ -30,7 +30,6 @@ export default function AuthorizationCodeHandler(): ReactElement {
           } else if (ex instanceof TypeError) {
             console.debug('Network error')
           }
-
           // TODO: improve this handling
           resetAuth();
         });
