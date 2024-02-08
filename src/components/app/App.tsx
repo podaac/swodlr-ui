@@ -17,6 +17,7 @@ import GranuleSelectionAndConfigurationView from '../sidebar/GranuleSelectionAnd
 import Joyride from 'react-joyride';
 import { deleteProduct } from '../sidebar/actions/productSlice';
 import { tutorialSteps } from '../tutorial/tutorialConstants';
+import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -34,10 +35,8 @@ const App = () => {
     run: startTutorial,
     steps: tutorialSteps
   })
-
   useEffect(() => {
     setState({...joyride, run: startTutorial })
-
   }, [startTutorial]);
 
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
@@ -45,7 +44,7 @@ const App = () => {
     const stepTarget = step.target
     if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
-    } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev') {
+    } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/selectScenes${search}`)
     } else if (stepTarget === '#my-data-page' && action === 'prev') {
       navigate(`/customizeProduct/configureOptions${search}`)
@@ -60,6 +59,7 @@ const App = () => {
       dispatch(setStartTutorial(false))
       navigate(`/customizeProduct/selectScenes`)
     }
+    // TODO: Make condition to load previous page when clicking previous before trying to target component to highlight. Use conditions "stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init'"
   };
 
   useEffect(() => {
@@ -118,6 +118,7 @@ const App = () => {
         <Route path="/about" element={ getPageWithFormatting(<About />, true) } />
         <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>
       </Routes>
+      <InteractiveTutorialModal />
     </div>
   );
 }

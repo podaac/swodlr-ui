@@ -100,7 +100,6 @@ export interface AlertMessageObject {
   type: string,
   message: string,
   variant: "danger" | "success" | "warning",
-  // timeoutId: ReturnType<typeof setTimeout>,
   tableType: TableTypes
 }
 
@@ -153,3 +152,8 @@ export interface MapFocusObject {
 }
 
 export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'
+
+export interface handleSaveResult {
+  result: string, 
+  savedScenes?: allProductParameters[]
+}
