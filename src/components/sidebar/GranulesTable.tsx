@@ -304,7 +304,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     // String(+(stringParam)) is used to remove the leading zeros
     const cycleToUse = String(+(cycleParam ?? cycle))
     const passToUse = String(+(passParam ?? pass))
-    // const sceneToUse = String(+(sceneParam ?? scene))
     const sceneToUse = (sceneParam ?? scene).split('-').map((sceneValueSplit: string) => String(+sceneValueSplit)).join('-')
     // check if cycle pass and scene are all within a valid range
     const validCycle = inputIsValid('cycle', cycleToUse)
