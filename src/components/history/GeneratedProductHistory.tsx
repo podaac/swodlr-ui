@@ -8,7 +8,6 @@ import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const GeneratedProductHistory = () => {
-    // const generatedProducts = useAppSelector((state) => state.product.generatedProducts)
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const { search } = useLocation();
     const navigate = useNavigate()
@@ -66,7 +65,6 @@ const GeneratedProductHistory = () => {
                         {userProducts.map((generatedProductObject, index) => {
                             const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
                             const statusToUse = status[0].state
-                            // const downloadUrl = granules && granules.length !== 0 ? <a href={granules[0].uri} target="_blank" rel="noreferrer">{granules[0].uri.split('/').pop()}</a> : 'N/A'
                             const downloadUrl = granules && granules.length !== 0 ? granules[0].uri.split('/').pop() : 'N/A'
                             const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
                             const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
@@ -106,12 +104,6 @@ const GeneratedProductHistory = () => {
     }
 
     const renderProductHistoryViews = () => {
-        let viewToShow
-        // if (userProducts.length === 0) {
-        //     viewToShow = productHistoryAlert()
-        // } else {
-        //     viewToShow = renderHistoryTable()
-        // } 
         return (
             <Col style={{marginRight: '50px', marginLeft: '50px', marginTop: '70px', height: '100%', width: '100%'}}>
                 <Row className='normal-row' style={{marginRight: '0px'}}><h4>Generated Products Data</h4></Row>

@@ -45,7 +45,7 @@ const initialState: GranuleState = {
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
     waitingForFootprintSearch: false,
-    spatialSearchStartDate: (new Date(date.setMonth(date.getMonth() - 1))).toISOString(),
+    spatialSearchStartDate: (new Date(2022, 11, 16)).toISOString(),
     spatialSearchEndDate: (new Date()).toISOString()
 }
 

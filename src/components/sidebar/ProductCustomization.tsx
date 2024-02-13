@@ -81,7 +81,6 @@ const ProductCustomization = () => {
             if (showUTMAdvancedOptions) {
                 handleShowUTMAdvancedOptions()
             }
-            
         } else {
             gridType = "rasterResolutionUTM"
             searchParamToRemove = "rasterResolutionGEO"
@@ -113,13 +112,13 @@ const ProductCustomization = () => {
         if (outputSamplingGridType === 'utm') {
             return (
                 <Form.Select id='rasterResolutionUTMId' aria-label='rasterResolutionUTM' value={rasterResolutionUTM} onChange={event => setRasterResolutionUTM(parseInt(event.target.value))}>
-                    {parameterOptionValues.rasterResolutionUTM.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
+                    {parameterOptionValues.rasterResolutionUTM.values.map((parameterValue, index) => <option value={parameterValue} key={`rasterResolutionUTM-key-${index}`}>{parameterValue}</option>)}
                 </Form.Select>
             )
         } else if (outputSamplingGridType === 'lat/lon') {
             return (
                 <Form.Select id='rasterResolutionGEOId' aria-label='rasterResolutionGEO' value={rasterResolutionGEO} onChange={event => setRasterResolutionGEO(parseInt(event.target.value))}>
-                    {parameterOptionValues.rasterResolutionGEO.values.map(parameterValue => <option value={parameterValue}>{parameterValue}</option>)}
+                    {parameterOptionValues.rasterResolutionGEO.values.map((parameterValue, index) => <option value={parameterValue} key={`rasterResolutionGEO-key-${index}`}>{parameterValue}</option>)}
                 </Form.Select>
             )
         }
@@ -162,6 +161,7 @@ const ProductCustomization = () => {
                     type={'radio'} 
                     id={`outputSamplingGridTypeGroup-radio-${index}`} 
                     onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
+                    key={`outputSamplingGridTypeGroup-radio-key-${index}`}
                 />
             )}
         )
@@ -176,6 +176,7 @@ const ProductCustomization = () => {
                     label={'advanced options'} 
                     style={{marginTop: '10px'}}
                     disabled={!(outputSamplingGridType === 'utm')}
+                    key={`outputGranuleExtentFlag-switch-key`}
                 />
             )
         )
@@ -206,6 +207,7 @@ const ProductCustomization = () => {
                                 type={'radio'} 
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
                                 onChange={() => setOutputGranuleExtentFlag(value)}
+                                key={`outputGranuleExtentFlagTypeGroup-radio-key-${index}`}
                             />
                         )
                     })}

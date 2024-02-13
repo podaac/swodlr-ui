@@ -44,16 +44,6 @@ const GranuleTable = (props: GranuleTableProps) => {
       const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
       sceneParamArray.forEach((sceneParams, index) => {
         const splitSceneParams = sceneParams.split('_')
-        if (splitSceneParams.length > 3) {
-          // update zone and band adjust values
-          const zoneAdjustValue = adjustParamDecoder('value', splitSceneParams[3])
-          const bandAdjustValue = adjustParamDecoder('value', splitSceneParams[4])
-          const productToEdit = addedProducts.find(granuleObj => granuleObj.cycle === splitSceneParams[0] && granuleObj.pass === splitSceneParams[1] && granuleObj.scene === splitSceneParams[2])
-          if (productToEdit?.utmZoneAdjust !== zoneAdjustValue || productToEdit?.mgrsBandAdjust !== bandAdjustValue) {
-            const editedProduct = {...productToEdit, utmZoneAdjust: zoneAdjustValue, mgrsBandAdjust: bandAdjustValue}
-            dispatch(editProduct(editedProduct as allProductParameters))
-          }
-        }
         handleSave('urlParameter', sceneParamArray.length, index, splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
@@ -112,12 +102,22 @@ const GranuleTable = (props: GranuleTableProps) => {
             }
           })
           if (newParamsArray.length > 0) {
-            currentSearchParams[pair[0]]  = [...currentCpsUrlSplit, ...newParamsArray].join('-')
+            // if cps without adjust params is in currentCpsUrlSplit and newParamsArray has cps with added adjust params
+            const newCPSParams: string[] = []
+            newParamsArray.forEach(newParam => {
+              currentCpsUrlSplit.forEach(oldParam => {
+                const splitOldParam = oldParam.split('_')
+                if(!newParam.includes(`${splitOldParam[0]}_${splitOldParam[1]}_${splitOldParam[2]}`) && !newCPSParams.includes(oldParam)) {
+                  // remove old param
+                  newCPSParams.push(oldParam)
+                }
+              })
+            })
+            currentSearchParams[pair[0]]  = [...newCPSParams, ...newParamsArray].join('-')
           }
         } else {
           currentSearchParams[pair[0]] = pair[1].toString()
         }
-        // currentSearchParams[pair[0]] = cyclePassSceneParameters !== null ? `${cyclePassSceneParameters}-${pair[1].toString()}` : pair[1].toString()
       } else {
         currentSearchParams[pair[0]] = pair[1].toString()
       }
@@ -188,7 +188,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     // check for characters other than integers and one -
     if (inputValue.includes('-')) {
       const inputBoundsValue = inputValue.split('-')
-      // const allInputsValidNumbers = inputBoundsValue.every(inputString => !isNaN(+inputString))
       const min: string = inputBoundsValue[0].trim()
       const max: string = inputBoundsValue[1].trim()
       const minIsValid = checkInBounds(inputType, min)
@@ -305,7 +304,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
     // String(+(stringParam)) is used to remove the leading zeros
     const cycleToUse = String(+(cycleParam ?? cycle))
     const passToUse = String(+(passParam ?? pass))
-    // const sceneToUse = String(+(sceneParam ?? scene))
     const sceneToUse = (sceneParam ?? scene).split('-').map((sceneValueSplit: string) => String(+sceneValueSplit)).join('-')
     // check if cycle pass and scene are all within a valid range
     const validCycle = inputIsValid('cycle', cycleToUse)
@@ -366,7 +364,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             someGranulesAlreadyAdded = true
           }
         })
-        if (saveType !== 'spatialSearch') {
+        if (saveType !== 'spatialSearch' && saveType !== 'urlParameter') {
           // check if any granules could not be found or they were already added    
           if (someGranulesAlreadyAdded) {
             setSaveGranulesAlert('alreadyAdded')
@@ -396,7 +394,9 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             // don't run time range check if granule was manually entered
             if (saveType === 'manual' || saveType === 'urlParameter') {
               addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-              setSaveGranulesAlert('success')
+              if (saveType !== 'urlParameter') {
+                setSaveGranulesAlert('success')
+              }
               dispatch(addProduct(productsWithFootprints))
             } else {
               const productsInTimeRange: allProductParameters[] = []
@@ -411,7 +411,6 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
                 }
               })
               if (productsInTimeRange.length > 0) {
-                // addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
                 setSaveGranulesAlert('success')
                 dispatch(addProduct(productsInTimeRange))
               }

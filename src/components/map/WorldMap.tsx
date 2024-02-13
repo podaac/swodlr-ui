@@ -1,4 +1,4 @@
-import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup } from 'react-leaflet'
+import { MapContainer, Polygon, TileLayer, Tooltip, ZoomControl, useMap, FeatureGroup, useMapEvent } from 'react-leaflet'
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css'
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
@@ -20,6 +20,18 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
+function UpdateMapCenter() {
+  const dispatch = useAppDispatch()
+  const mapFocus = useAppSelector((state) => state.product.mapFocus)
+
+  const map = useMapEvent('moveend', () => {
+    const center = [map.getCenter().lat, map.getCenter().lng]
+    const zoom = map.getZoom()
+    if ((mapFocus.center[0] !== center[0] && mapFocus.center[1] !== center[1]) || mapFocus.zoom !== zoom) dispatch(setMapFocus({center, zoom}))
+  })
+  return null
+}
+
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
@@ -27,8 +39,8 @@ const WorldMap = () => {
   const footprintStyleOptions = { color: 'limegreen' }
 
   const ChangeView = () => {
-    const map = useMap();
-    map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom);
+    const map = useMap()
+    map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom)
     return null
   }
 
@@ -82,7 +94,6 @@ const WorldMap = () => {
         }))).map(foundIdString => {
           const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
-          // const sceneToUse = String(Math.floor(tileValue / 2))
           const sceneToUse = String(Math.floor(tileValue))
           return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
         })
@@ -117,7 +128,6 @@ const WorldMap = () => {
     <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '0px', marginRight: '0%'}}>
       <MapContainer className='Map-container' spatial-search-map
         id='spatial-search-map'  
-        // center={[33.854457, -118.709093]} 
         zoom={7} scrollWheelZoom={true} zoomControl={false} 
       >
           {useLocation().pathname.includes('selectScenes') ? (
@@ -126,7 +136,6 @@ const WorldMap = () => {
                 position="topright" 
                 onCreated={(createEvent) => onCreate(createEvent)} 
                 onEdited={(editEvent) => onEdit(editEvent)} 
-                // onDeleted={(deleteEvent) => onDelete(deleteEvent)} 
                 draw={{
                   rectangle: false,
                   polyline: false,
@@ -144,11 +153,12 @@ const WorldMap = () => {
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
             maxZoom = {18}
           />
+          <UpdateMapCenter />
           <ChangeView />
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip sticky>{[<h6>{`Cycle: ${productObject.cycle}`}</h6>, <h6>{`Pass: ${productObject.pass}`}</h6>, <h6>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
+            <Tooltip sticky>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

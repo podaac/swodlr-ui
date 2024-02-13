@@ -1,14 +1,16 @@
 import CustomizeProductsSidebar from './CustomizeProductsSidebar';
 import { GranuleSelectionAndConfigurationViewProps } from '../../types/constantTypes';
 import WorldMap from '../map/WorldMap'
+import { setShowTutorialModalTrue, setSkipTutorialTrue } from './actions/modalSlice';
 import { useEffect } from 'react';
-import { useAppDispatch } from '../../redux/hooks';
-import { setUserHasCorrectEdlPermissions } from '../app/appSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { checkUseHasCorrectEdlPermissions } from '../edl/AuthorizationCodeHandler';
+import { setUserHasCorrectEdlPermissions } from '../app/appSlice';
 
 const GranuleSelectionAndConfigurationView = (props: GranuleSelectionAndConfigurationViewProps) => {
-  const {mode} = props
   const dispatch = useAppDispatch()
+  const skipTutorial = useAppSelector((state) => state.modal.skipTutorial)
+  const {mode} = props
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,6 +22,13 @@ const GranuleSelectionAndConfigurationView = (props: GranuleSelectionAndConfigur
     fetchData()
   }, [])
   
+  useEffect(() => {
+    if (!skipTutorial) {
+      dispatch(setShowTutorialModalTrue())
+      dispatch(setSkipTutorialTrue())
+    }
+  }, []);
+
   return (
     <>
       <CustomizeProductsSidebar mode={mode}/>

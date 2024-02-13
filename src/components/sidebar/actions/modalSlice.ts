@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { allProductParameters } from '../../../types/constantTypes'
 
 // Define a type for the slice state
 interface AddCustomProductModalState {
@@ -19,7 +18,7 @@ const initialState: AddCustomProductModalState = {
     showEditProductModal: false,
     showDeleteProductModal: false,
     showGenerateProductModal: false,
-    showTutorialModal: true,
+    showTutorialModal: false,
     skipTutorial: true,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
