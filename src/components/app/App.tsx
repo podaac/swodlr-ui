@@ -14,7 +14,7 @@ import { Session } from '../../authentication/session';
 import { getCurrentUser, setStartTutorial } from './appSlice';
 import { useEffect, useState } from 'react';
 import GranuleSelectionAndConfigurationView from '../sidebar/GranuleSelectionAndConfigurationView';
-import Joyride from 'react-joyride';
+import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 import { deleteProduct } from '../sidebar/actions/productSlice';
 import { tutorialSteps } from '../tutorial/tutorialConstants';
 import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
@@ -33,15 +33,20 @@ const App = () => {
 
   const [joyride, setState] = useState({
     run: startTutorial,
-    steps: tutorialSteps
+    steps: tutorialSteps,
+    stepIndex: 0
   })
   useEffect(() => {
     setState({...joyride, run: startTutorial })
   }, [startTutorial]);
 
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
-    const { action, step, type, lifecycle } = data;
+    const { action, step, type, lifecycle, index } = data;
     const stepTarget = step.target
+    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+      // Update state to advance the tour
+      setState({...joyride, stepIndex: index + (action === ACTIONS.PREV ? -1 : 1) });
+    }
     if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
@@ -49,7 +54,7 @@ const App = () => {
     } else if (stepTarget === '#my-data-page' && action === 'prev') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#added-scenes' && action === 'update') {
-      navigate(`/customizeProduct/selectScenes?cyclePassScene=1_413_120&showUTMAdvancedOptions=true`)
+      navigate(`/customizeProduct/selectScenes?cyclePassScene=1_414_20&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
     } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
@@ -59,7 +64,6 @@ const App = () => {
       dispatch(setStartTutorial(false))
       navigate(`/customizeProduct/selectScenes`)
     }
-    // TODO: Make condition to load previous page when clicking previous before trying to target component to highlight. Use conditions "stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init'"
   };
 
   useEffect(() => {
@@ -103,6 +107,7 @@ const App = () => {
         callback={(data) => handleJoyrideCallback(data)}
         run={joyride.run}
         steps={joyride.steps}
+        stepIndex={joyride.stepIndex}
         showProgress
         showSkipButton
         hideCloseButton

@@ -19,7 +19,7 @@ const initialState: AddCustomProductModalState = {
     showDeleteProductModal: false,
     showGenerateProductModal: false,
     showTutorialModal: false,
-    skipTutorial: true,
+    skipTutorial: false,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
     sampleGranuleDataArray: [],

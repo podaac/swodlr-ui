@@ -6,7 +6,7 @@ import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizati
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, handleSaveResult, validScene } from '../../types/constantTypes';
-import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts } from './actions/productSlice';
+import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, setWaitingForFootprintSearch, clearGranuleTableAlerts, setWaitingForSpatialSearch } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
 import { graphQLClient } from '../../user/userData';
@@ -26,6 +26,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const waitingForFootprintSearch = useAppSelector((state) => state.product.waitingForFootprintSearch)
   const spatialSearchStartDate = useAppSelector((state) => state.product.spatialSearchStartDate)
   const spatialSearchEndDate = useAppSelector((state) => state.product.spatialSearchEndDate)
+  const startTutorial = useAppSelector((state) => state.app.startTutorial)
 
   const dispatch = useAppDispatch()
   
@@ -37,7 +38,7 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   // set the default url state parameters
   useEffect(() => {
-    dispatch(clearGranuleTableAlerts())
+    // dispatch(clearGranuleTableAlerts())
     // if any cycle scene and pass parameters in url, add them to table
     const cyclePassSceneParameters = searchParams.get('cyclePassScene')
     if (cyclePassSceneParameters) {
@@ -47,24 +48,71 @@ const GranuleTable = (props: GranuleTableProps) => {
         handleSave('urlParameter', sceneParamArray.length, index, splitSceneParams[0], splitSceneParams[1], splitSceneParams[2])
       })
     }
-  }, [tableType === 'granuleSelection' ? null : addedProducts])
+  }, [tableType === 'granuleSelection' ? null : addedProducts, searchParams])
   
+  const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], cpsList?: {cycle: string, pass: string, scene: string}[]): Promise<validScene> => {
+    try {
+      // build graphql availableScene query with all cycle/pass/scene combos requested
+      let queryAliasString = ``
+      // if there is a list of cycle pass and scenes go through them (spatial search) and if not, use first 3 function params (manual search)
+      if (cpsList) {
+        for(const specificCPS of cpsList) {
+          const {cycle, pass, scene} = specificCPS
+          const comboId = `${cycle}_${pass}_${scene}`
+          queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycle}, pass: ${pass}, scene: ${scene}) `
+        }
+      } else {
+        for(const specificScene of sceneToUse) {
+          const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
+          queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycleToUse}, pass: ${passToUse}, scene: ${specificScene}) `
+        }
+      }
+      const queryAliasObject = `{${queryAliasString}}`
+      const res: {availableScene: boolean} = await graphQLClient.request(queryAliasObject).then(response => {
+        const responseToReturn = Object.fromEntries(Object.entries(response as {availableScene: boolean}).map(responseObj => [responseObj[0].replace('s_', ''), responseObj[1]]))
+        return responseToReturn as {availableScene: boolean}
+      })
+      return res
+      
+    } catch (err) {
+        console.log (err)
+        return {}
+    }
+  }
+
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
     if (spatialSearchResults.length > 0) {
       let scenesFoundArray: string[] = []
       let addedScenes: string[] = []
+
       const fetchData = async () => {
-        for(let i=0; i<spatialSearchResults.length; i++) {
-          await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
-            if(result.savedScenes) {
-              addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
-            }
-            scenesFoundArray.push(result.result)
-          })
+        // check validity before saving
+        dispatch(setWaitingForSpatialSearch(true))
+        const validationResult = await validateSceneAvailability(0,0,[0],spatialSearchResults).then(result => Object.entries(result).filter(resultEntry => resultEntry[1]).map(valuePair => {
+          const cpsSplit = valuePair[0].split('_')
+          return {cycle: cpsSplit[0], pass: cpsSplit[1], scene: cpsSplit[2]}
+        }))
+
+        if (validationResult.length > 0) {
+          for(let i=0; i<validationResult.length; i++) {
+            await handleSave('spatialSearch', validationResult.length, i, validationResult[i].cycle, validationResult[i].pass, validationResult[i].scene).then(result => {
+              if(result.savedScenes) {
+                addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
+              }
+              scenesFoundArray.push(result.result)
+            })
+          }
+          dispatch(setWaitingForSpatialSearch(false))
+          if(addedScenes.length > 0) {
+            // add parameters
+            addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
+          }
+        } else {
+          dispatch(setWaitingForSpatialSearch(false))
+          scenesFoundArray.push('noScenesFound')
         }
-        // add parameters
-        addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
+
         return scenesFoundArray
       }
     
@@ -136,26 +184,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   const [scene, setScene] = useState('');
   const allAddedGranules = addedProducts.map(parameterObject => parameterObject.granuleId)
   const [waitingForScenesToBeAdded, setWaitingForScenesToBeAdded] = useState(false)
-
-const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[]): Promise<validScene> => {
-  try {
-    // build graphql availableScene query with all cycle/pass/scene combos requested
-    let queryAliasString = ``
-    for(const specificScene of sceneToUse) {
-      const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
-      queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycleToUse}, pass: ${passToUse}, scene: ${specificScene}) `
-    }
-    const queryAliasObject = `{${queryAliasString}}`
-    const res: {availableScene: boolean} = await graphQLClient.request(queryAliasObject, {cycle: cycleToUse, pass: passToUse, scene: sceneToUse[0]}).then(response => {
-      const responseToReturn = Object.fromEntries(Object.entries(response as {availableScene: boolean}).map(responseObj => [responseObj[0].replace('s_', ''), responseObj[1]]))
-      return responseToReturn as {availableScene: boolean}
-    })
-    return res
-  } catch (err) {
-      console.log (err)
-      return {}
-  }
-}
 
   const getScenesArray = (sceneString: string): string[] => {
     const scenesArray = []
@@ -394,7 +422,7 @@ const validateSceneAvailability = async (cycleToUse: number, passToUse: number, 
             // don't run time range check if granule was manually entered
             if (saveType === 'manual' || saveType === 'urlParameter') {
               addSearchParamToCurrentUrlState({'cyclePassScene': cyclePassSceneSearchParams})
-              if (saveType !== 'urlParameter') {
+              if (saveType !== 'urlParameter' || startTutorial) {
                 setSaveGranulesAlert('success')
               }
               dispatch(addProduct(productsWithFootprints))
