@@ -4,9 +4,19 @@ import CompareImage from '../../assets/comparing-images.png'
 import YukonImage from '../../assets/SWOT-YUKON.jpeg'
 import LatLongUTM from '../../assets/lat-lon-vs-utm.png'
 import UpSWOTResolution from '../../assets/swot-go-up-resolution.jpg'
+import packageJson from '../../../package.json'
+import { useEffect, useState } from "react";
 
 const About = () => {
-
+    const [backendVersion, setBackendVersion] = useState('')
+    useEffect(() => {
+        const fetchData = async () => {
+            setBackendVersion(await fetch('https://swodlr.podaac.sit.earthdatacloud.nasa.gov/api/about').then((version) => version.json()).then(response => response.version))
+        }
+        fetchData()
+        .catch(console.error);
+      }, []);
+      
     return (
         <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '0px', height: '100%'}}>
             <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h4></Row>
@@ -18,7 +28,7 @@ const About = () => {
                         SWODLR is an on-demand raster generation tool that generates customized Surface Water and Ocean Topography (SWOT) Level 2 raster products. SWOT standard products are released in geographically fixed tiles at 100m and 250m resolutions in a Universal Transverse Mercator (UTM) projection grid. SWODLR allows users to generate the same products at different resolutions in either the UTM or geodetic coordinate system (lat/lon). SWODLR also gives an option to change the output granule extent from a nonoverlapping square 128 km x 128 km to an overlapping rectangle 256 km x 128 km to assist with observing areas of interest near the along-track edges of the original square extent.
                     </h5>
                     <h5>
-                        Like the standard product, the on-demand product contains rasterized water surface elevation and inundation-extents. This is derived through resampling the upstream pixel cloud (L2_HR_PIXC) and pixel vector (L2_HR_PIXCVEC) datasets onto a uniform grid. A uniform grid is superimposed onto the pixel cloud from the source products, and all pixel-cloud samples within each grid cell are aggregated to produce a single value per raster cell. SWODLR uses the <a href='https://deotb6e7tfubr.cloudfront.net/s3-edaf5da92e0ce48fb61175c28b67e95d/podaac-ops-cumulus-docs.s3.us-west-2.amazonaws.com/web-misc/swot_mission_docs/atbd/D-105507_SWOT_ATBD_L2_HR_Raster_w-sigs.pdf?A-userid=None&Expires=1701977957&Signature=O8RO~hg2I0pIgH2wSebhos861vC9zG77fk-9LsTCzBnTbTysg1p56rUxOTLycm0M1TnRlwjo5jfLGOkyEpqj~x50J-cxUl16wS1c~pA327KSf8~LZ5170e-azmLUFOgYhACgl23A6qhF9KGhF6yX-Ba4oW756UMg33teMWAAkowFXbi0JOdzIr~bkIcONk7MTr~jzU9G-Tum-yDwk3PEh8ch0sW~9QCJGXq0BjIu6wAquU8bA9wbonqV76w5VrzOiR~42h8jYaNq0MJ18zLwZIWKYQIbXfKHqlm6tWJ6Cwd80QOMAPdEQ5AsF83bG1Q4TxzEgF-GZ8n4nLZlSQObgg__&Key-Pair-Id=K3CPO4G5OR7B1G' target="_">original algorithm</a> that standard SWOT products use to generate products but at a different resolution; it does not just re-grid the standard products.
+                        Like the standard product, the on-demand product contains rasterized water surface elevation and inundation-extents. This is derived through resampling the upstream pixel cloud (L2_HR_PIXC) and pixel vector (L2_HR_PIXCVEC) datasets onto a uniform grid. A uniform grid is superimposed onto the pixel cloud from the source products, and all pixel-cloud samples within each grid cell are aggregated to produce a single value per raster cell. SWODLR uses the <a href='https://archive.podaac.earthdata.nasa.gov/podaac-ops-cumulus-docs/web-misc/swot_mission_docs/atbd/D-105507_SWOT_ATBD_L2_HR_Raster_w-sigs.pdf' target="_">original algorithm</a> that standard SWOT products use to generate products but at a different resolution; it does not just re-grid the standard products.
                     </h5>
                 </div>
             </Row>
@@ -69,8 +79,6 @@ const About = () => {
                     </ListGroup>
                 </div>
             </Row>
-
-            {/* <Row className='about-card'><h4 style={{marginTop: '10px', marginBottom: '20px'}}>FAQ</h4></Row> */}
 
             <Row className='about-card' style={{marginRight: '10%', marginLeft: '10%', marginBottom: '40px'}}>
                 <div className='about-card' style={{paddingTop: '20px', paddingBottom: '30px', paddingRight: '5%', paddingLeft: '5%'}}>
@@ -131,10 +139,34 @@ const About = () => {
 
             <Row className='about-card' style={{marginRight: '10%', marginLeft: '10%', marginBottom: '40px'}}>
                 <div className='howToListItem' style={{marginBottom: '20px', paddingRight: '5%', paddingLeft: '5%'}}>
+                    <h4 style={{marginTop: '10px', marginBottom: '20px'}}>Current Version</h4>
+                    <ListGroup>
+                        <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
+                            <Row>
+                                <h5>
+                                    <b>SWODLR UI: </b> 
+                                    {packageJson.version}
+                                </h5>
+                            </Row>
+                        </ListGroup.Item>
+                        <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
+                            <Row>
+                                <h5>
+                                    <b>SWODLR API: </b>
+                                    {backendVersion}
+                                </h5>
+                            </Row>
+                        </ListGroup.Item>
+                    </ListGroup>
+                </div>
+            </Row>
+
+            <Row className='about-card' style={{marginRight: '10%', marginLeft: '10%', marginBottom: '40px'}}>
+                <div className='howToListItem' style={{marginBottom: '20px', paddingRight: '5%', paddingLeft: '5%'}}>
                     <h4 style={{marginTop: '10px', marginBottom: '20px'}}>Version History</h4>
                     <ListGroup>
                         <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
-                            <Row><h5><b>Version 1</b> (9/05/2023)</h5></Row>
+                            <Row><h5><b>Version 1 Pre-Alpha</b> (9/05/2023)</h5></Row>
                         </ListGroup.Item>
                     </ListGroup>
                 </div>

@@ -14,10 +14,11 @@ import { Session } from '../../authentication/session';
 import { getCurrentUser, setStartTutorial } from './appSlice';
 import { useEffect, useState } from 'react';
 import GranuleSelectionAndConfigurationView from '../sidebar/GranuleSelectionAndConfigurationView';
-import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
+import Joyride, { ACTIONS, EVENTS } from 'react-joyride';
 import { deleteProduct } from '../sidebar/actions/productSlice';
 import { tutorialSteps } from '../tutorial/tutorialConstants';
 import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
+import { setSkipTutorialTrue } from '../sidebar/actions/modalSlice';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -36,8 +37,10 @@ const App = () => {
     steps: tutorialSteps,
     stepIndex: 0
   })
+  
   useEffect(() => {
-    setState({...joyride, run: startTutorial })
+    setState({...joyride, run: startTutorial, stepIndex: 0})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTutorial]);
 
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
@@ -60,8 +63,9 @@ const App = () => {
     } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
       navigate(`/generatedProductHistory${search}`)
     } else if (type === 'tour:end') {
-      dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
+      dispatch(setSkipTutorialTrue())
       dispatch(setStartTutorial(false))
+      dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
       navigate(`/customizeProduct/selectScenes`)
     }
   };

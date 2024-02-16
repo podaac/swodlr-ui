@@ -12,7 +12,8 @@ import booleanClockwise from '@turf/boolean-clockwise';
 import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -20,15 +21,33 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-function UpdateMapCenter() {
+const UpdateMapCenter = () => {
   const dispatch = useAppDispatch()
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  // search parameters
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // put the current center and zoom into the url parameters
+  const handleMapFocus = (center: number[], zoom: number) => {
+    const currentSearchParams = Object.fromEntries(searchParams.entries())
+    currentSearchParams.center = `${center[0]}_${center[1]}`
+    currentSearchParams.zoom = String(zoom)
+    setSearchParams(currentSearchParams)
+    dispatch(setMapFocus({center, zoom}))
+  }
 
   const map = useMapEvent('moveend', () => {
     const center = [map.getCenter().lat, map.getCenter().lng]
     const zoom = map.getZoom()
-    if ((mapFocus.center[0] !== center[0] && mapFocus.center[1] !== center[1]) || mapFocus.zoom !== zoom) dispatch(setMapFocus({center, zoom}))
+    if ((mapFocus.center[0] !== center[0] && mapFocus.center[1] !== center[1]) || mapFocus.zoom !== zoom) handleMapFocus(center, zoom)
   })
+  return null
+}
+
+const ChangeView = () => {
+  const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  const map = useMap()
+  map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom)
   return null
 }
 
@@ -37,12 +56,24 @@ const WorldMap = () => {
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
   const dispatch = useAppDispatch()
   const footprintStyleOptions = { color: 'limegreen' }
+    // search parameters
+    const [searchParams, setSearchParams] = useSearchParams()
 
-  const ChangeView = () => {
-    const map = useMap()
-    map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom)
-    return null
-  }
+  useEffect(() => {
+    // if center and zoom are in url params, set the current center to them
+    const center = searchParams.get('center')
+    const zoom = searchParams.get('zoom')
+    if (center && zoom) {
+      const centerParamSplit = center.split('_')
+      const centerToUse: number[] = [parseFloat(centerParamSplit[0]), parseFloat(centerParamSplit[1])]
+      const zoomToUse = parseInt(zoom)
+      if (centerToUse !== mapFocus.center || zoomToUse !== mapFocus.zoom) {
+        dispatch(setMapFocus({center: centerToUse, zoom: zoomToUse}))
+      }
+    }
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getScenesWithinCoordinates = async (coordinatesToSearch: {lat: number, lng: number}[][]) => {
     try {
@@ -98,9 +129,7 @@ const WorldMap = () => {
         return references
       })
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
-      dispatch(setWaitingForSpatialSearch(false))
     } catch (err) {
-      dispatch(setWaitingForSpatialSearch(false))
       if (err instanceof Error) {
           return err
         } else {
@@ -150,13 +179,14 @@ const WorldMap = () => {
             url='https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
             maxZoom = {18}
+            noWrap
           />
           <UpdateMapCenter />
           <ChangeView />
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip sticky>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
+            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

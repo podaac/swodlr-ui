@@ -8,14 +8,16 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 const GranuleSelectionAndConfigurationView = (props: GranuleSelectionAndConfigurationViewProps) => {
   const dispatch = useAppDispatch()
   const skipTutorial = useAppSelector((state) => state.modal.skipTutorial)
+  const userAuthenticated = useAppSelector((state) => state.app.userAuthenticated)
   const {mode} = props
   
   useEffect(() => {
-    if (!skipTutorial) {
+    if (!skipTutorial && userAuthenticated) {
       dispatch(setShowTutorialModalTrue())
       dispatch(setSkipTutorialTrue())
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userAuthenticated]);
 
   return (
     <>

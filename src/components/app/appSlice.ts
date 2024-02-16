@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { PageTypes, UserData } from '../../types/constantTypes'
+import { PageTypes } from '../../types/constantTypes'
 import { CurrentUserData } from '../../types/graphqlTypes'
 import { Session } from '../../authentication/session';
 import { getUserData } from '../../user/userData';
