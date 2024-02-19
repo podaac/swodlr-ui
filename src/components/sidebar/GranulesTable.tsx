@@ -47,7 +47,7 @@ const GranuleTable = (props: GranuleTableProps) => {
       })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableType === 'granuleSelection' ? null : addedProducts, searchParams])
+  }, [tableType === 'granuleSelection' ? null : addedProducts, startTutorial ? searchParams : null])
   
   const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], cpsList?: {cycle: string, pass: string, scene: string}[]): Promise<validScene> => {
     try {
@@ -210,9 +210,6 @@ const GranuleTable = (props: GranuleTableProps) => {
 
   const setSaveGranulesAlert = (alert: alertMessageInput, additionalParameters?: any[]) => {
     const {message, variant} = granuleAlertMessageConstant[alert]
-    if(alert === 'someSuccess') {
-
-    }
     dispatch(addGranuleTableAlerts({type: alert, message, variant, tableType: 'granuleSelection' }))
   }
 

@@ -57,7 +57,7 @@ const App = () => {
     } else if (stepTarget === '#my-data-page' && action === 'prev') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#added-scenes' && action === 'update') {
-      navigate(`/customizeProduct/selectScenes?cyclePassScene=1_414_20&showUTMAdvancedOptions=true`)
+      navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
     } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {

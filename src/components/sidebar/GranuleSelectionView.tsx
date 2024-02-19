@@ -7,7 +7,7 @@ const GranuleSelectionView = () => {
     <div>
         <SpatialSearchOptions />
         <GranuleTable tableType='granuleSelection'/>
-        <GranuleTableAlerts />
+        <GranuleTableAlerts tableType='granuleSelection'/>
     </div>
   );
 }

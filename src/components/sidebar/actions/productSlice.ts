@@ -33,7 +33,7 @@ const initialState: GranuleState = {
     sampleGranuleDataArray: [],
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093],
-    mapFocus: {center: [33.854457, -118.709093], zoom: 7},
+    mapFocus: {center: [33.854457, -118.709093], zoom: 6},
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],

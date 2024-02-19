@@ -188,6 +188,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     someSuccess: {
         message: `Successfully added some scenes.`,
         variant: 'success'
+    },
+    successfullyGenerated: {
+        message: `Successfully started product generation! Go to the 'My Data' page to track progress.`,
+        variant: 'success'
     }
   }
 

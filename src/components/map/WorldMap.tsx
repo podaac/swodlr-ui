@@ -86,7 +86,6 @@ const WorldMap = () => {
       if (authToken === null) {
         throw new Error('Failed to get authentication token');
       }
-
       dispatch(setWaitingForSpatialSearch(true))
 
       const polygonUrlString = coordinatesToSearch.map((polygon) => {
@@ -115,9 +114,13 @@ const WorldMap = () => {
         headers: {
           Authorization: `Bearer ${authToken}`
         }
-      }).then(response => response.text()).then(data => {
+      }).then(async data => {
+        const responseText = await data.text()
+        // TODO: make subsequent calls to get granules in spatial search area till everything is found.
+        // current issue is that 1000 (2000 total divided by 2) is limited by the cmr api.
+        // const responseHeaders = data.headers
         const parser = new DOMParser();
-        const xml = parser.parseFromString(data, "application/xml");
+        const xml = parser.parseFromString(responseText, "application/xml");
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
           return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
         }))).map(foundIdString => {
@@ -180,6 +183,12 @@ const WorldMap = () => {
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
             maxZoom = {18}
             noWrap
+            bounds={
+              [
+                [-89.9999, -179.9999],
+                [89.9999, 179.9999]
+              ]
+            }
           />
           <UpdateMapCenter />
           <ChangeView />

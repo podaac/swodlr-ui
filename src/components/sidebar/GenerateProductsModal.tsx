@@ -2,18 +2,26 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { setShowGenerateProductModalFalse } from './actions/modalSlice'
-import { addGeneratedProducts } from './actions/productSlice'
+import { addGeneratedProducts, addGranuleTableAlerts } from './actions/productSlice'
 import { Row } from 'react-bootstrap';
+import { granuleAlertMessageConstant } from '../../constants/rasterParameterConstants';
+import { alertMessageInput } from '../../types/constantTypes';
 
 const GenerateProductsModal = () => {
     const showGenerateProductModal = useAppSelector((state) => state.modal.showGenerateProductModal)
     const addedGranules = useAppSelector((state) => state.product.addedProducts)
     const dispatch = useAppDispatch()
 
+    const setSaveGranulesAlert = (alert: alertMessageInput, additionalParameters?: any[]) => {
+        const {message, variant} = granuleAlertMessageConstant[alert]
+        dispatch(addGranuleTableAlerts({type: alert, message, variant, tableType: 'productCustomization' }))
+      }
+
     const handleGenerate = () => {
         // unselect select-all box
         dispatch(addGeneratedProducts(addedGranules.map(granuleObj => granuleObj.granuleId)))
         dispatch(setShowGenerateProductModalFalse())
+        setSaveGranulesAlert('successfullyGenerated')
     }
 
   return (
