@@ -192,6 +192,10 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     successfullyGenerated: {
         message: `Successfully started product generation! Go to the 'My Data' page to track progress.`,
         variant: 'success'
+    },
+    spatialSearchAreaTooLarge: {
+        message: `The search area you have drawn on the map is too large. Please search a smaller area.`,
+        variant: 'warning'
     }
   }
 

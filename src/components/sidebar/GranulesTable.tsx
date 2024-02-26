@@ -87,33 +87,41 @@ const GranuleTable = (props: GranuleTableProps) => {
       let addedScenes: string[] = []
 
       const fetchData = async () => {
-        // check validity before saving
-        const validationResult = await validateSceneAvailability(0,0,[0],spatialSearchResults).then(result => Object.entries(result).filter(resultEntry => resultEntry[1]).map(valuePair => {
-          const cpsSplit = valuePair[0].split('_')
-          return {cycle: cpsSplit[0], pass: cpsSplit[1], scene: cpsSplit[2]}
-        }))
+        if (spatialSearchResults.length < 1000) {
+          // check validity before saving
+          const validationResult = await validateSceneAvailability(0,0,[0],spatialSearchResults).then(result => Object.entries(result).filter(resultEntry => resultEntry[1]).map(valuePair => {
+            const cpsSplit = valuePair[0].split('_')
+            return {cycle: cpsSplit[0], pass: cpsSplit[1], scene: cpsSplit[2]}
+          }))
 
-        if (validationResult.length > 0) {
-          for(let i=0; i<validationResult.length; i++) {
-            if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
-              // don't let more than 10 be added
-              scenesFoundArray.push('hit granule limit')
-            } else {
-              await handleSave('spatialSearch', validationResult.length, i, validationResult[i].cycle, validationResult[i].pass, validationResult[i].scene).then(result => {
-                if(result.savedScenes) {
-                  addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
-                }
-                scenesFoundArray.push(result.result)
-              })
+          if (validationResult.length > 0) {
+            for(let i=0; i<validationResult.length; i++) {
+              if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
+                // don't let more than 10 be added
+                scenesFoundArray.push('hit granule limit')
+              } else {
+                await handleSave('spatialSearch', validationResult.length, i, validationResult[i].cycle, validationResult[i].pass, validationResult[i].scene).then(result => {
+                  if(result.savedScenes) {
+                    addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
+                  }
+                  scenesFoundArray.push(result.result)
+                })
+              }
+
             }
-
-          }
-          if(addedScenes.length > 0) {
-            // add parameters
-            addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
+            if(addedScenes.length > 0) {
+              // add parameters
+              addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
+            }
+          } else {
+            scenesFoundArray.push('noScenesFound')
           }
         } else {
-          scenesFoundArray.push('noScenesFound')
+          // If too many spatial search results, the search doesn't work because there too many granules and a limit was reached.
+          // In this scenario, make an alert that indicates that the search area was too large.
+          // TODO: remove this alert when there is a fix implemented for cmr spatial search limit.
+          // The valid granules are sometimes not a part of the first 1000 results which is the bug here.
+          scenesFoundArray.push('spatialSearchAreaTooLarge')
         }
         dispatch(setWaitingForSpatialSearch(false))
         return scenesFoundArray
@@ -122,12 +130,9 @@ const GranuleTable = (props: GranuleTableProps) => {
       // call the function
       fetchData()
         .then((noScenesFoundResults) => {
-          if(noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something')){
-            setSaveGranulesAlert('noScenesFound')
-          }
-          if(noScenesFoundResults.includes('hit granule limit')) {
-            setSaveGranulesAlert('granuleLimit')
-          }
+          if(noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something')) setSaveGranulesAlert('noScenesFound')
+          if(noScenesFoundResults.includes('hit granule limit')) setSaveGranulesAlert('granuleLimit')
+          if(noScenesFoundResults.includes('spatialSearchAreaTooLarge')) setSaveGranulesAlert('spatialSearchAreaTooLarge')
         })
         // make sure to catch any error
         .catch(console.error);
