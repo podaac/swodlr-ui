@@ -194,7 +194,7 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
         variant: 'success'
     },
     spatialSearchAreaTooLarge: {
-        message: `The search area you have drawn on the map is too large. Please search a smaller area.`,
+        message: `The search area you've selected on the map is too large. Please choose a smaller area to search.`,
         variant: 'warning'
     }
   }
