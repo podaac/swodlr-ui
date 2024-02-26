@@ -30,7 +30,7 @@ const UpdateMapCenter = () => {
   // put the current center and zoom into the url parameters
   const handleMapFocus = (center: number[], zoom: number) => {
     const currentSearchParams = Object.fromEntries(searchParams.entries())
-    currentSearchParams.center = `${center[0]}_${center[1]}`
+    currentSearchParams.center = `${center[0]},${center[1]}`
     currentSearchParams.zoom = String(zoom)
     setSearchParams(currentSearchParams)
     dispatch(setMapFocus({center, zoom}))
@@ -64,14 +64,17 @@ const WorldMap = () => {
     const center = searchParams.get('center')
     const zoom = searchParams.get('zoom')
     if (center && zoom) {
-      const centerParamSplit = center.split('_')
+      const centerParamSplit = center.split(',')
       const centerToUse: number[] = [parseFloat(centerParamSplit[0]), parseFloat(centerParamSplit[1])]
       const zoomToUse = parseInt(zoom)
       if (centerToUse !== mapFocus.center || zoomToUse !== mapFocus.zoom) {
         dispatch(setMapFocus({center: centerToUse, zoom: zoomToUse}))
       }
     }
-    
+
+    // TODO: implement search polygon search param
+    // const searchPolygon = searchParams.get('searchPolygon')
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -118,7 +121,6 @@ const WorldMap = () => {
         const responseText = await data.text()
         // TODO: make subsequent calls to get granules in spatial search area till everything is found.
         // current issue is that 1000 (2000 total divided by 2) is limited by the cmr api.
-        // const responseHeaders = data.headers
         const parser = new DOMParser();
         const xml = parser.parseFromString(responseText, "application/xml");
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
@@ -142,9 +144,17 @@ const WorldMap = () => {
   }
 
   const onCreate = async (createEvent: any) => {
-      await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
-      // set the new map focus location to what it was when polygon created so it will stay the same after map reload
-      dispatch(setMapFocus({center: [createEvent.layer._renderer._center.lat, createEvent.layer._renderer._center.lng], zoom: createEvent.target._zoom}))
+    const searchPolygonLatLngs = createEvent.layer.getLatLngs()[0]
+    
+    // TODO: implement search polygon search param
+    // const currentSearchParams = Object.fromEntries(searchParams.entries())
+    // const searchPolygonLatLngsString = searchPolygonLatLngs.map((latLngObject: {lat: number, lng: number}) => `${latLngObject.lat},${latLngObject.lng}`).join('_')
+    // currentSearchParams.searchPolygon = searchPolygonLatLngsString
+    // setSearchParams(currentSearchParams)
+
+    await getScenesWithinCoordinates([searchPolygonLatLngs])
+    // set the new map focus location to what it was when polygon created so it will stay the same after map reload
+    dispatch(setMapFocus({center: [createEvent.layer._renderer._center.lat, createEvent.layer._renderer._center.lng], zoom: createEvent.target._zoom}))
   }
 
   const onEdit = async (editEvent: any) => {

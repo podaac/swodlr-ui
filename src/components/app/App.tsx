@@ -60,7 +60,8 @@ const App = () => {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
-    } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
+    // } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
+    } else if ((action === 'next' || action === 'close') && stepTarget === '#my-data-page') {
       navigate(`/generatedProductHistory${search}`)
     } else if (type === 'tour:end') {
       dispatch(setSkipTutorialTrue())

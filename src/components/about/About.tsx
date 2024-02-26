@@ -148,6 +148,7 @@ const About = () => {
                                     {packageJson.version}
                                 </h5>
                             </Row>
+                            <Row><h5><a href="https://github.com/podaac/swodlr-ui/releases" target="_">{`(Release Notes)`}</a></h5></Row>
                         </ListGroup.Item>
                         <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
                             <Row>
@@ -156,17 +157,6 @@ const About = () => {
                                     {backendVersion}
                                 </h5>
                             </Row>
-                        </ListGroup.Item>
-                    </ListGroup>
-                </div>
-            </Row>
-
-            <Row className='about-card' style={{marginRight: '10%', marginLeft: '10%', marginBottom: '40px'}}>
-                <div className='howToListItem' style={{marginBottom: '20px', paddingRight: '5%', paddingLeft: '5%'}}>
-                    <h4 style={{marginTop: '10px', marginBottom: '20px'}}>Version History</h4>
-                    <ListGroup>
-                        <ListGroup.Item className='howToListItem' style={{marginRight: '0%', marginLeft: '0%'}}>
-                            <Row><h5><b>Version 1 Pre-Alpha</b> (9/05/2023)</h5></Row>
                         </ListGroup.Item>
                     </ListGroup>
                 </div>

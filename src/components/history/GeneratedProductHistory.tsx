@@ -1,4 +1,4 @@
-import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner } from "react-bootstrap";
 import { useAppSelector } from "../../redux/hooks";
 import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
@@ -12,10 +12,14 @@ const GeneratedProductHistory = () => {
     const { search } = useLocation();
     const navigate = useNavigate()
     const [userProducts, setUserProducts] = useState<Product[]>([])
+    const [waitingForProductsToLoad, setWaitingForProductsToLoad] = useState(true)
     
     useEffect(() => {
         const fetchData = async () => {
-            const userProductsResponse: getUserProductsResponse = await getUserProducts()
+            const userProductsResponse: getUserProductsResponse = await getUserProducts().then((response) => {
+                setWaitingForProductsToLoad(false)
+                return response
+            })
             if (userProductsResponse.status === 'success') setUserProducts(userProductsResponse.products as Product[])
         }
         fetchData()
@@ -103,20 +107,28 @@ const GeneratedProductHistory = () => {
         return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/generatedProductHistory${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
-    const renderProductHistoryViews = () => {
+    const waitingForProductsToLoadSpinner = () => {
         return (
-            <Col style={{marginRight: '50px', marginLeft: '50px', marginTop: '70px', height: '100%', width: '100%'}}>
-                <Row className='normal-row' style={{marginRight: '0px'}}><h4>Generated Products Data</h4></Row>
-                <Row className='normal-row' style={{marginRight: '0px'}}>{renderHistoryTable()}</Row>
-                {userProducts.length === 0 ? <Row className='normal-row' style={{marginRight: '0px'}}>{productHistoryAlert()}</Row> : null}
-            </Col>
+            <div>
+                <h5>Loading Data Table...</h5>
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner> 
+            </div>
         )
     }
 
+    const renderProductHistoryViews = () => {
+        return userProducts.length === 0  ? productHistoryAlert() : renderHistoryTable()
+    }
+
     return (
-        <Row className='about-page' style={{marginRight: '0%'}}>
-            {renderProductHistoryViews()}
-        </Row>
+        <>
+        <Row className='normal-row' style={{marginTop: '70px'}}><h4>Generated Products Data</h4></Row>
+        <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
+            <Row className='normal-row'>{waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
+        </Col>
+        </>
     );
 }
 
