@@ -46,6 +46,32 @@ const GeneratedProductHistory = () => {
            <InfoCircle/>
         </OverlayTrigger>
     )
+
+    const renderCopyDownloadButton = (downloadUrlString: string) => (
+        <OverlayTrigger
+            placement="bottom"
+            overlay={
+                <Tooltip id="button-tooltip">
+                    Copy
+                </Tooltip>
+            }
+        >
+            <Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button>
+        </OverlayTrigger>
+    )
+
+    const renderDownloadButton = (downloadUrlString: string) => (
+        <OverlayTrigger
+            placement="bottom"
+            overlay={
+                <Tooltip id="button-tooltip">
+                    Download
+                </Tooltip>
+            }
+        >
+            <Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button>
+        </OverlayTrigger>
+    )
     
       const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
@@ -82,10 +108,10 @@ const GeneratedProductHistory = () => {
                                 if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
                                     const downloadUrlString = granules[0].uri
                                     cellContents = 
-                                    <Row>
+                                    <Row className='normal-row'>
                                         <Col>{entry[1]}</Col>
-                                        <Col><Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button></Col>
-                                        <Col><Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button></Col>
+                                        <Col>{(renderCopyDownloadButton(downloadUrlString))}</Col>
+                                        <Col>{renderDownloadButton(downloadUrlString)}</Col>
                                     </Row>
                                 } else {
                                     cellContents = entry[1]
@@ -124,7 +150,7 @@ const GeneratedProductHistory = () => {
 
     return (
         <>
-        <Row className='normal-row' style={{marginTop: '70px'}}><h4>Generated Products Data</h4></Row>
+        <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
         <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
             <Row className='normal-row'>{waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
         </Col>

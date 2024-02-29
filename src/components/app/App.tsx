@@ -46,11 +46,18 @@ const App = () => {
   const handleJoyrideCallback = (data: { action: any; index: any; status: any; type: any; step: any; lifecycle: any; }) => {
     const { action, step, type, lifecycle, index } = data;
     const stepTarget = step.target
+
     if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
       // Update state to advance the tour
       setState({...joyride, stepIndex: index + (action === ACTIONS.PREV ? -1 : 1) });
     }
-    if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
+
+    if (action === 'close') {
+      dispatch(setSkipTutorialTrue())
+      dispatch(setStartTutorial(false))
+      dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
+      navigate(`/customizeProduct/selectScenes`)
+    } else if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/selectScenes${search}`)
@@ -60,8 +67,7 @@ const App = () => {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
-    // } else if ((stepTarget === '#generate-products-button' && action === 'close' && lifecycle === 'complete') || (stepTarget === '#my-data-page' && action === 'next')) {
-    } else if ((action === 'next' || action === 'close') && stepTarget === '#my-data-page') {
+    } else if (action === 'next' && stepTarget === '#my-data-page') {
       navigate(`/generatedProductHistory${search}`)
     } else if (type === 'tour:end') {
       dispatch(setSkipTutorialTrue())
@@ -114,8 +120,8 @@ const App = () => {
         steps={joyride.steps}
         stepIndex={joyride.stepIndex}
         showProgress
-        showSkipButton
-        hideCloseButton
+        // showSkipButton
+        // hideCloseButton
         continuous
         scrollToFirstStep
       />
