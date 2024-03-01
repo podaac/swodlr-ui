@@ -23,7 +23,7 @@ const initialState: AppState = {
   currentPage: 'welcome',
   currentUser: null,
   startTutorial: false,
-  userHasCorrectEdlPermissions: false
+  userHasCorrectEdlPermissions: true
 }
 
 export const appSlice = createSlice({
