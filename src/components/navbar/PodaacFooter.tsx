@@ -14,7 +14,7 @@ const PodaacFooter = () => {
     <Navbar className={`${colorModeClass}-navbar-background Main-navbar fixed-bottom`} style={{paddingTop: '0px', paddingBottom: "0px", marginRight: '0px'}} expand="lg">
       <Row style={{width: '100%', paddingTop: '5px', paddingBottom: '5px'}}>
         <Col md={{ span: 6, offset: 0 }}><Navbar.Text style={{marginLeft: '0px', color: '#C8C7C5'}}>
-          {`Version ${packageJson.version} Pre-Alpha of SWOT On-Demand Level-2 Raster Generator (SWODLR)`}
+          {`Version ${packageJson.version} Beta of SWOT On-Demand Level-2 Raster Generator (SWODLR)`}
         </Navbar.Text>
         </Col>
         <Col md={{ span: 5, offset: 1 }}><Row>       

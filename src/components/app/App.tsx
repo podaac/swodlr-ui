@@ -18,7 +18,8 @@ import Joyride, { ACTIONS, EVENTS } from 'react-joyride';
 import { deleteProduct } from '../sidebar/actions/productSlice';
 import { tutorialSteps } from '../tutorial/tutorialConstants';
 import InteractiveTutorialModal from '../tutorial/InteractiveTutorialModal';
-import { setSkipTutorialTrue } from '../sidebar/actions/modalSlice';
+import { setShowCloseTutorialTrue, setSkipTutorialTrue } from '../sidebar/actions/modalSlice';
+import InteractiveTutorialModalClose from '../tutorial/InteractiveTutorialModalClose';
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -53,10 +54,7 @@ const App = () => {
     }
 
     if (action === 'close') {
-      dispatch(setSkipTutorialTrue())
-      dispatch(setStartTutorial(false))
-      dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
-      navigate(`/customizeProduct/selectScenes`)
+      dispatch(setShowCloseTutorialTrue())
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'update') {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
@@ -120,8 +118,6 @@ const App = () => {
         steps={joyride.steps}
         stepIndex={joyride.stepIndex}
         showProgress
-        // showSkipButton
-        // hideCloseButton
         continuous
         scrollToFirstStep
       />
@@ -135,6 +131,7 @@ const App = () => {
         <Route path='*' element={getPageWithFormatting(<NotFound errorCode='404'/>, true)}/>
       </Routes>
       <InteractiveTutorialModal />
+      <InteractiveTutorialModalClose />
     </div>
   );
 }
