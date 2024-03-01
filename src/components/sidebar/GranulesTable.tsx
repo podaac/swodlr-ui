@@ -26,6 +26,7 @@ const GranuleTable = (props: GranuleTableProps) => {
   const spatialSearchStartDate = useAppSelector((state) => state.product.spatialSearchStartDate)
   const spatialSearchEndDate = useAppSelector((state) => state.product.spatialSearchEndDate)
   const startTutorial = useAppSelector((state) => state.app.startTutorial)
+  const userHasCorrectEdlPermissions = useAppSelector((state) => state.app.userHasCorrectEdlPermissions)
 
   const dispatch = useAppDispatch()
   
@@ -745,7 +746,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner> : 
-                <Button variant='primary' size='sm' disabled={addedProducts.length >= granuleTableLimit || (cycle === '' || pass === '' || scene === '')} onClick={() => handleSave('manual', 1, 1)}>
+                <Button variant='primary' size='sm' disabled={addedProducts.length >= granuleTableLimit || (cycle === '' || pass === '' || scene === '') || !userHasCorrectEdlPermissions} onClick={() => handleSave('manual', 1, 1)}>
                   <Plus size={28}/> Add Scenes
                 </Button>
               }

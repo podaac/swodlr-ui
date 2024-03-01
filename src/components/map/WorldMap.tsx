@@ -54,6 +54,7 @@ const ChangeView = () => {
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  const userHasCorrectEdlPermissions = useAppSelector((state) => state.app.userHasCorrectEdlPermissions)
   const dispatch = useAppDispatch()
   const footprintStyleOptions = { color: 'limegreen' }
     // search parameters
@@ -170,7 +171,7 @@ const WorldMap = () => {
         id='spatial-search-map'  
         zoom={7} scrollWheelZoom={true} zoomControl={false} 
       >
-          {useLocation().pathname.includes('selectScenes') ? (
+          {(useLocation().pathname.includes('selectScenes') && userHasCorrectEdlPermissions) ? (
             <FeatureGroup>
               <EditControl 
                 position="topright" 
