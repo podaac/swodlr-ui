@@ -1,0 +1,636 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+3');
+
+html, body, #root, .App {
+  height: 100%;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+.user-authenticated {
+  padding-top: 55px;
+  width: 100%;
+}
+
+/**************************************************
+APP
+**************************************************/
+
+.App {
+  text-align: center;
+  height: 97.5%;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: #FAF9F6;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/**************************************************
+MAP
+**************************************************/
+
+.Map-container {
+  height: 100%;
+  background-color: #c7c7c7;
+  position: relative;
+}
+
+.Map-component {
+  height: 100%;
+  width: 100%;
+}
+
+.sr-only {
+  display: none;
+}
+
+/**************************************************
+NAVBAR
+**************************************************/
+
+.dark-mode-switch .form-check-input {
+  height: 20px;
+  width: 48px;
+  margin-right: 10px;
+}
+.dark-mode-switch .form-check-input:focus {
+  border-color: rgba(0, 0, 0, 0.25);
+  outline: 0;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
+  cursor: 'pointer';
+}
+.dark-mode-switch .form-check-input:checked {
+  /* background-color: #5C946E;
+  border-color: #2ab464ff; */
+  /* background-color: ; */
+  border: none;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
+  cursor: 'pointer';
+}
+
+.dark-mode-background {
+  /* background-color: #274c61ff; */
+  background-color: #3d5d82;
+  /* background-color: #25325c; */
+  color: #FAF9F6
+}
+
+.dark-mode-navbar-background {
+  background-color: #1A2535;
+  color: #FAF9F6
+}
+
+.dark-mode-container-background {
+  background-color: #3D5D82;
+  /* background-color:#2C3E50; */
+  /* background-color: #25325c; */
+  /* background: rgba(51, 170, 51, .7); */
+  color: #FAF9F6
+}
+
+.dark-mode-text {
+  color: #FAF9F6
+}
+
+.dark-mode-navbar-link {
+  color: #C8C7C5;
+}
+
+.dark-mode-navbar-dropdown .dropdown-toggle {
+  color: #C8C7C5 !important;
+}
+
+.dark-mode-navbar-link:hover {
+  color: #FAF9F6
+}
+
+.dark-mode-navbar-link:focus {
+  color: #FAF9F6
+}
+
+.light-mode-background {
+  background-color:	#FAF9F6;
+  color: black;
+}
+
+.light-mode-navbar-background {
+  background-color:	#89A897;
+  color: black;
+}
+
+.light-mode-container-background {
+  background-color:	#FAF9F6;
+  color: black;
+}
+
+.light-mode-text {
+  color: black
+}
+
+.light-mode-text .dropdown-toggle {
+  color: black !important;
+}
+
+.light-mode-navbar-link {
+  color: #323231;
+}
+
+.light-mode-navbar-dropdown .dropdown-toggle {
+  color: #323231 !important;
+}
+
+.light-mode-navbar-link.active {
+  color: black !important;
+}
+
+.light-mode-navbar-link:hover {
+  color: black
+}
+
+.light-mode-navbar-link:active {
+  color: #323231;
+}
+
+.Main-navbar {  
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+}
+
+/**************************************************
+CUSTOMIZE PRODUCT CONTAINER
+**************************************************/
+/* NOTE: CHANGE THIS BACK TO ORIGINAL FOOTER CSS */
+.Customize-products-container-all {
+  height: 93%;
+  width: 60%;
+  margin: 20px;
+  border-radius: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 75px;
+  z-index: 1000;
+  /* max-height: 100vh; */
+}
+
+.Customize-products-container {
+  padding: 5px 25px 20px 25px;
+}
+
+.Customize-products-container-min {
+  padding: 10px 0px 10px 0px;
+}
+
+
+.icon-flipped {
+  transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+}
+
+.Customize-products-container-sidebar-all {
+  height: 100%;
+  /* TODO: uncomment when granule footprints are being retrieved to display on map */
+  width: 50%;
+  /* width: 100%; */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding-top: 125px;
+  padding-bottom: 58px
+}
+
+.sidebar-resize {
+  margin: 0;
+  position: absolute;
+  background-color: #1A2535;
+  border-width: 1px;
+  top: 50%;
+  right: 0;
+  margin-right: -14px;
+  height: 60px;
+  width: 30px;
+  cursor: col-resize;
+}
+
+.sidebar-resize-icon {
+  position: relative;
+  top: 15%;
+  height: 60%;
+  cursor: col-resize;
+}
+
+.heading-row {
+ padding-top: 30px;
+ padding-bottom: 10px;
+}
+
+.normal-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.dark-mode-sidebar-section-title {
+  background-color: #1A2535;
+}
+/* .dark-mode-sidebar-section-body {
+  background-color: #26384F;
+} */
+
+.light-mode-sidebar-section-title {
+  background-color: #1A2535;
+}
+/* .light-mode-sidebar-section-body {
+  background-color: #26384F;
+} */
+
+/**************************************************
+PRODUCT TABLE
+**************************************************/
+
+.dark-mode-table tr:hover td {
+  /* background-color: pink; */
+}
+
+thead {
+  position: sticky;
+  top: -1px;
+}
+
+tfoot {
+  position: sticky;
+  bottom: 0;
+}
+
+.table {
+  --bs-table-color: none;
+  --bs-table-bg: none;
+}
+
+.table-responsive-granuleSelection {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.table-responsive-productCustomization {
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+.table-responsive-generatedProducts {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.dark-mode-table {
+  color: #FAF9F6;
+  border: #FAF9F6 solid 1px;
+  /* margin-right: '50px';
+  margin-left: '50px' */
+}
+
+.dark-mode-table tr {
+  color: #FAF9F6;
+  border-bottom: #FAF9F6 solid 1px;
+}
+
+.light-mode-table {
+  color: black;
+  border: black solid 1px;
+}
+
+.dark-mode-table tr.add-granules {
+  border-bottom: none;
+  /* background-color: #314a68; */
+  background-color: #1A2535;
+}
+
+.dark-mode-table thead {
+  /* border: #FAF9F6 solid 1px; */
+  /* background-color: #314a68; */
+  background-color: #1A2535;
+}
+
+.light-mode-table tr.add-granules {
+  border-bottom: none;
+  background-color:#c8c7c5;
+}
+
+.light-mode-table thead {
+  /* border: #FAF9F6 solid 1px; */
+  background-color: #c8c7c5;
+}
+
+tr.add-granules td {
+  border: 0
+}
+
+.table-mode-switch .form-check-input {
+  height: 20px;
+  width: 48px;
+  margin-right: 10px;
+}
+.table-mode-switch .form-check-input:focus {
+  border-color: rgba(0, 0, 0, 0.25);
+  outline: 0;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
+  cursor: 'pointer';
+}
+.table-mode-switch .form-check-input:checked {
+  background-color: #5C946E;
+  border-color: #2ab464ff;
+  border: none;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
+  cursor: 'pointer';
+}
+
+.remove-checkbox .form-check-input:checked {
+  background-color: crimson;
+  border: none;
+  cursor: 'pointer';
+}
+
+.hoverable-row {
+  background-color: #314a68;
+}
+
+.hoverable-row:hover td{
+  background-color: blue;
+  color: white !important
+}
+
+/**************************************************
+ABOUT PAGE
+**************************************************/
+
+.about-page {
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.about-card {
+  background-color: #1A2535;
+  color: white;
+  margin-right: '10%'; 
+  margin-left: '10%';
+  margin-bottom: '40px'
+}
+
+.howToListItem {
+  background-color: #1A2535;
+  /* border: solid 1px #FAF9F6; */
+  color: white;
+  padding-left: '10%';
+  padding-right: '10%';
+}
+
+/**************************************************
+WELCOME PAGE
+**************************************************/
+
+.welcome-page-container {
+  height: 100%;
+  padding-top: 0px !important;
+  /* background-color: #3d5d82; */
+  background-color: #25325c;
+}
+
+.welcome-page-text {
+  color: #FAF9F6
+}
+
+.right-side-image {
+  border-radius: '70px 0px 0px 70px';
+  height: '100%'; 
+  width: '100%';
+}
+
+.button-style {
+  background-color: #5C946E;
+  border-color: #5C946E;
+}
+
+.loginButtonCard {
+  background-color: #1A2535;
+}
+
+/**************************************************
+PODAAC HEADER FOOTER
+**************************************************/
+
+.jpl-icon {
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/modules/custom/podaac_helper/images/jpl-sprite@x1.png');
+	background-repeat: no-repeat;
+	-webkit-background-size: 170px 80px;
+	-moz-background-size: 170px 80px;
+	-o-background-size: 170px 80px;
+	background-size: 170px 80px;
+}
+
+#podaac-header-banner {
+	position: absolute;
+	z-index: 5;
+	bottom: 0;
+	width: 1500px;
+	height: 195px;
+	min-width: 1500px;
+	max-width: none;
+	left: 50%;
+	margin-left: -750px;
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/header-banner@x1.jpg');
+	background-repeat: no-repeat;
+	-webkit-background-size: 1500px 195px;
+	-moz-background-size: 1500px 195px;
+	-o-background-size: 1500px 195px;
+	background-size: 1500px 195px;
+}
+
+#podaac-header-satellite {
+	position: absolute;
+	z-index: 5;
+	bottom: 10px;
+	right: 10px;
+	width: 420px;
+	height: 84px;
+	background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/satellite@x1.png');
+	background-repeat: no-repeat;
+	-webkit-background-size: 420px 84px;
+	-moz-background-size: 420px 84px;
+	-o-background-size: 420px 84px;
+	background-size: 420px 84px;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+	filter: alpha(opacity=70);
+	opacity: 0.7;
+}
+
+.Podaac-navbar {
+  background-color: #1A2535;
+  color: #FAF9F6;
+  background-image: url('https://podaac.jpl.nasa.gov/sites/all/themes/podaac/images/header-banner@x1.jpg');
+  height: '60';
+  background-size: 100% 100%;
+  /* margin-right: 12px; */
+}
+#JPL-home {
+	position: relative;
+	float: left;
+	width: 300px;
+}
+#JPL-home-link,
+#JPL-caltech-link {
+	float: left;
+	padding-left: 80px;
+}
+#JPL-home-link {
+	font-size: 18px;
+	margin-top: 20px;
+}
+#JPL-caltech-link {
+	font-size: 14px;
+}
+/**************************************************
+TABS
+**************************************************/
+
+.prouct-tab {
+  min-height: '100px';
+  width: '200px';
+  border-radius: 15px 15px 0px 0px;
+}
+
+/* dark mode active */
+
+.dark-mode-active-tab {
+  background-color: #1A2535;
+  border-color: #1A2535;
+  height: '100px';
+  width: '200px';
+  border-radius: 15px 15px 0px 0px;
+}
+
+.dark-mode-active-tab:hover {
+  background-color: #293E57;
+  border-color: #293E57;
+}
+
+.dark-mode-active-tab:active {
+  background-color: #223146 !important;
+  border-color: #223146 !important;
+}
+
+/* dark mode inactive */
+
+.dark-mode-inactive-tab {
+  background-color: #314a68;
+  border-color: #314a68;
+  height: '100px';
+  width: '200px';
+  border-radius: 15px 15px 0px 0px;
+}
+
+.dark-mode-inactive-tab:hover {
+  background-color: #293E57;
+  border-color: #293E57;
+}
+
+.dark-mode-inactive-tab:active {
+  background-color: #223146 !important;
+  border-color: #223146 !important;
+}
+
+/* light mode active */
+
+.light-mode-active-tab {
+  background-color: #89A897;
+  border-color: #89A897;
+  height: '100px';
+  width: '200px';
+  border-radius: 15px 15px 0px 0px;
+  color: black;
+}
+
+.light-mode-active-tab:hover {
+  background-color: #B3BDB6;
+  border-color: #B3BDB6;
+  color: black
+}
+
+.light-mode-active-tab:active {
+  background-color: #9EB2A6 !important;
+  border-color: #9EB2A6 !important;
+  color: black
+}
+
+/* light mode inactive */
+
+.light-mode-inactive-tab {
+  background-color: #C8C7C5;
+  border-color: #C8C7C5;
+  height: '100px';
+  width: '200px';
+  border-radius: 15px 15px 0px 0px;
+  color: black
+}
+
+.light-mode-inactive-tab:hover {
+  background-color: #B3BDB6;
+  border-color: #B3BDB6;
+  color: black
+}
+
+.light-mode-inactive-tab:active {
+  background-color: #9EB2A6 !important;
+  border-color: #9EB2A6 !important;
+  color: black !important
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  /* content: ">" !important; */
+}
+
+.sidebar-breadcrumb-item a{
+  color: '#1a2535' !important;
+  font-size: '24px' !important;
+}
+
+.sidebar-breadcrumb-item:active {
+  color: 'black' !important;
+  font-size: '24px' !important;
+}
+
+/**************************************************
+WALKTHROUGH
+**************************************************/

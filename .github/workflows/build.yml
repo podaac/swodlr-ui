@@ -1,0 +1,299 @@
+# This is the main build pipeline that verifies and publishes the software
+name: Build
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+      - 'feature/**'
+      - 'issue/**'
+      - 'issues/**'
+      - 'dependabot/**'
+    tags-ignore:
+      - '*'
+    paths-ignore:
+      - 'package.json'
+      - 'package-lock.json'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      venue:
+        type: choice
+        description: Venue to deploy to
+        options:
+          - SIT
+          - UAT
+      commit:
+        type: string
+        description: Custom commit hash
+    
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TERRAFORM_VERSION: "1.3.10"
+
+jobs:
+  # First job in the workflow installs and verifies the software
+  build:
+    name: Build, Test
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_env: ${{ steps.set-env.outputs.deploy_env }}
+      deploy_env_lower: ${{ steps.set-env.outputs.deploy_env_lower }}
+      github_sha: ${{ steps.update-sha.outputs.github_sha }}
+      software_version: ${{ steps.update-sha.outputs.software_version }}
+    steps:
+      - uses: getsentry/action-github-app-token@v2
+        name: my-app-install token
+        id: podaac-cicd
+        with:
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+      - name: Initial checkout ${{ github.ref }}
+        if: github.event.inputs.commit == ''
+        uses: actions/checkout@v4
+      - name: Adjust to proper commit hash ${{ github.event.inputs.commit }}
+        if: github.event.inputs.commit != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit }}
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+      - name: Manual execution means no version bump
+        # If triggered by workflow dispatch, no version bump
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "TARGET_ENV=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
+          TARGET_ENV=${{ github.event.inputs.venue }}
+      ## NPM Tagging
+      - name: Bump pre-alpha version
+        # If triggered by push to a non-tracked branch
+        if: |
+          github.event_name != 'workflow_dispatch' &&
+          github.ref != 'refs/heads/develop' &&
+          github.ref != 'refs/heads/main'    &&
+          !startsWith(github.ref, 'refs/heads/release')
+        run: |
+          echo "software_version=$(npm --no-git-tag-version --allow-same-version version ${{ steps.package-version.outputs.current-version }}-${GITHUB_SHA})" >> $GITHUB_ENV
+          echo "TARGET_ENV=SIT" >> $GITHUB_ENV
+      - name: Bump alpha version
+        # If triggered by push to the develop branch
+        if: github.ref == 'refs/heads/develop' && github.event_name != 'workflow_dispatch'
+        id: alpha
+        run: |
+          echo "software_version=$(npm --no-git-tag-version version prerelease)" >> $GITHUB_ENV
+          echo "TARGET_ENV=SIT" >> $GITHUB_ENV
+      - name: Bump rc version
+        # If triggered by push to a release branch
+        if: startsWith(github.ref, 'refs/heads/release/') && github.event_name != 'workflow_dispatch'
+        id: rc
+        env:
+          # True if the version already has a 'rc' pre-release identifier
+          BUMP_RC: ${{ contains(steps.package-version.outputs.current-version, 'rc') }}
+          RELEASE_VERSION: ${THE_BRANCH//*\/}
+        run: |
+          if [ "$BUMP_RC" == true ]; then
+            echo "software_version=$(npm --no-git-tag-version version prerelease --preid rc)" >> $GITHUB_ENV
+          else
+            echo "software_version=$(npm --no-git-tag-version version ${GITHUB_REF#refs/heads/release/}-rc.1)" >> $GITHUB_ENV
+          fi
+          echo "TARGET_ENV=UAT" >> $GITHUB_ENV
+      - name: Release version
+        # If triggered by push to the main branch
+        if: github.ref == 'refs/heads/main' && github.event_name != 'workflow_dispatch'
+        id: release
+        run: |
+          echo "Modifying version number ${{ steps.package-version.outputs.current-version}}"
+          THE_VERSION=${{ steps.package-version.outputs.current-version}}
+          echo "software_version=${THE_VERSION//-*}" >> $GITHUB_ENV
+          npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
+      - name: Set the target environment to ${{ env.TARGET_ENV }}
+        id: set-env
+        run: |
+          echo "deploy_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
+          echo "deploy_env_lower=$VENUE" >> $GITHUB_OUTPUT
+      ## Build      
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - name: Validate Terraform
+        working-directory: terraform
+        run: |
+          terraform init -backend=false
+          terraform validate -no-color
+      - name: Run Snyk as a blocking step
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
+            --severity-threshold=high
+            --fail-on=all
+      - name: Run Snyk on Node
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: NPM install & NPM Lint
+        id: npm-build
+        run: |
+          VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
+          source terraform/environments/$VENUE.env
+          npm install
+          npm run build
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/*
+      - name: Commit Version Bump
+        # If building an alpha, release candidate, or release then we commit the version bump back to the repo
+        if: |
+          steps.alpha.conclusion == 'success'   ||
+          steps.rc.conclusion == 'success'      ||
+          steps.release.conclusion == 'success'
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit -am "/version ${{ env.software_version }}"
+          git push
+      - name: Push Tag
+        if: |
+          steps.alpha.conclusion == 'success'   ||
+          steps.rc.conclusion == 'success'      ||
+          steps.release.conclusion == 'success'
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
+          git push origin "${{ env.software_version }}"
+      - name: Create GH release
+        if: |
+          steps.alpha.conclusion == 'success'   ||
+          steps.rc.conclusion == 'success'      ||
+          steps.release.conclusion == 'success'
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          name: ${{ env.software_version }}
+          prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
+          tag: ${{ env.software_version }}
+      - name: Set github SHA for deployment
+        id: update-sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "github_sha=${SHA}" >> $GITHUB_OUTPUT      
+          echo "software_version=${{ steps.package-version.outputs.current-version}}" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy
+    needs: build
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.outputs.deploy_env }}
+    env:
+      THE_ENV: ${{ needs.build.outputs.deploy_env_lower }}
+      TARGET_ENV_UPPERCASE: ${{ needs.build.outputs.deploy_env }}
+      THE_VERSION: ${{ needs.build.outputs.version }}
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/main'    ||
+      startsWith(github.ref, 'refs/heads/release') ||
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository for Deployment ${{ needs.build.outputs.github_sha }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.github_sha }}
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-session-name: GitHubActions
+          aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
+          aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
+          mask-aws-account-id: true
+      - name: Deploy to venue ${{ needs.build.outputs.deploy_env }}
+        id: terraform-deploy
+        working-directory: terraform/
+        env:
+          AWS_DEFAULT_REGION: us-west-2
+        run: |
+          VENUE=$(echo "${{ needs.build.outputs.deploy_env }}" | tr '[:upper:]' '[:lower:]')
+          export TF_VAR_cloudfront_distribution_id=${{ secrets.CF_DISTRIBUTION_ID }}
+          export TF_VAR_cloudfront_allow_vpcs=${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
+          ./bin/deploy.sh --app-version ${{ needs.build.outputs.software_version }} --tf-venue $VENUE
+          echo "SWODLR_UI_BUCKET=$(terraform output -raw swodlr-bucket-name)" >> $GITHUB_ENV
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: build
+          path: build/
+      - name: Sync S3
+        run:
+          aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete
+      - name: Publish UMM-T with new version
+        uses: podaac/cmr-umm-updater@0.6.0
+        if: |
+          needs.build.outputs.deploy_env == 'UAT' ||
+          needs.build.outputs.deploy_env == 'OPS'
+        with:
+          umm-json: 'cmr/${{ needs.build.outputs.deploy_env_lower }}_swodlr_cmr_umm_t.json'
+          provider: 'POCLOUD'
+          env: ${{ needs.build.outputs.deploy_env_lower }}
+          version: ${{ needs.build.outputs.software_version }}
+          timeout: 60
+          disable_removal: 'true'
+          umm_type: 'umm-t'
+          use_associations: 'false'
+          umm_version: '1.2.0'
+        env:
+          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
+          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
+          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+      - name: Retrieve version number for notifications
+        run: |
+          VERSION=${{ needs.build.outputs.software_version }}
+          echo "SUBMODULE_VERSION=$VERSION">>$GITHUB_ENV
+      - name: Send notifications to slack
+        uses: slackapi/slack-github-action@v1.25.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK_SWODLR }}
+        with:
+          payload: |
+            {
+              "message": "${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has been deployed to the ${{ needs.build.outputs.deploy_env }} environment"
+            }
+      - name: Send failure notifications to slack
+        if: failure()
+        uses: slackapi/slack-github-action@v1.25.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK_SWODLR }}
+        with:
+          payload: |
+            {
+              "message": "ERROR: ${{ github.repository }} [version ${{ needs.build.outputs.software_version }}] has encountered an error while trying to deploy to the ${{ needs.build.outputs.deploy_env }} environment"
+            }
