@@ -113,6 +113,7 @@ jobs:
           THE_VERSION=${{ steps.package-version.outputs.current-version}}
           echo "software_version=${THE_VERSION//-*}" >> $GITHUB_ENV
           npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
+          echo "TARGET_ENV=OPS" >> $GITHUB_ENV
       - name: Set the target environment to ${{ env.TARGET_ENV }}
         id: set-env
         run: |
