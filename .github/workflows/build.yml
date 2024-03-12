@@ -27,6 +27,7 @@ on:
         options:
           - SIT
           - UAT
+          - OPS
       commit:
         type: string
         description: Custom commit hash
