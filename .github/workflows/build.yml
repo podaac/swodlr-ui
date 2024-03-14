@@ -190,8 +190,9 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
-          git push origin "${{ env.software_version }}"
+                    
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}" --force
+          git push origin "${{ env.software_version }}" --force
       - name: Create GH release
         if: |
           steps.alpha.conclusion == 'success'   ||
@@ -203,6 +204,7 @@ jobs:
           name: ${{ env.software_version }}
           prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
           tag: ${{ env.software_version }}
+          allowUpdates: true
       - name: Set github SHA for deployment
         id: update-sha
         run: |
