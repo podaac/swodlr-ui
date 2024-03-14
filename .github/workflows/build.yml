@@ -191,11 +191,8 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           
-          if git ls-remote --tags origin "${{ env.software_version }}" | grep -q "${{ env.software_version }}"; then
-            git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}" --force
-          else          
-            git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
-          fi          
+          git tag -d "${{ env.software_version }}" || true
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
           git push origin "${{ env.software_version }}"
       - name: Create GH release
         if: |
