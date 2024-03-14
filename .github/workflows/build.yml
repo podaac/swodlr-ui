@@ -204,6 +204,7 @@ jobs:
           name: ${{ env.software_version }}
           prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
           tag: ${{ env.software_version }}
+          allowUpdates: true
       - name: Set github SHA for deployment
         id: update-sha
         run: |
