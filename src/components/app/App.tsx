@@ -59,9 +59,11 @@ const App = () => {
       navigate(`/customizeProduct/configureOptions${search}`)
     } else if (stepTarget === '#configure-options-breadcrumb' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/selectScenes${search}`)
-    } else if (stepTarget === '#my-data-page' && action === 'prev') {
+    }
+     else if (stepTarget === '#my-data-page' && action === 'prev' && lifecycle === 'complete') {
       navigate(`/customizeProduct/configureOptions${search}`)
-    } else if (stepTarget === '#added-scenes' && action === 'update') {
+    }
+     else if (stepTarget === '#added-scenes' && action === 'update') {
       navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')

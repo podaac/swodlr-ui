@@ -145,7 +145,12 @@ const GeneratedProductHistory = () => {
     }
 
     const renderProductHistoryViews = () => {
-        return userProducts.length === 0  ? productHistoryAlert() : renderHistoryTable()
+        return (
+            <Col>
+                <Row>{renderHistoryTable()}</Row>
+                {userProducts.length === 0 ? <Row>{productHistoryAlert()}</Row> : null}
+            </Col>
+        )
     }
 
     return (
