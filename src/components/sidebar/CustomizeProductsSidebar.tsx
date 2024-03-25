@@ -47,6 +47,7 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
         setLocalSidebarWidth(sidebarWidthNumber)
         setSidebarWidth(sidebarWidthNumber)
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resizeEndLocation])
 
   return (
@@ -57,8 +58,6 @@ const CustomizeProductsSidebar = (props: CustomizeProductSidebarProps) => {
             {renderSidebarContents()}
             </div>
         </Col>
-
-        {/* TODO: uncomment when granule footprints are being retrieved to display on map */}
         <div className='sidebar-resize shadow'  onMouseDown={(event) => handleResizeClickDown(event)}>
             <ArrowsExpand className="sidebar-resize-icon icon-flipped" color="white" size={24} onMouseDown={(event) => handleResizeClickDown(event)}/>
         </div>

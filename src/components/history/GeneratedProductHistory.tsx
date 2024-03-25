@@ -1,4 +1,4 @@
-import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner } from "react-bootstrap";
 import { useAppSelector } from "../../redux/hooks";
 import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
@@ -12,10 +12,14 @@ const GeneratedProductHistory = () => {
     const { search } = useLocation();
     const navigate = useNavigate()
     const [userProducts, setUserProducts] = useState<Product[]>([])
+    const [waitingForProductsToLoad, setWaitingForProductsToLoad] = useState(true)
     
     useEffect(() => {
         const fetchData = async () => {
-            const userProductsResponse: getUserProductsResponse = await getUserProducts()
+            const userProductsResponse: getUserProductsResponse = await getUserProducts().then((response) => {
+                setWaitingForProductsToLoad(false)
+                return response
+            })
             if (userProductsResponse.status === 'success') setUserProducts(userProductsResponse.products as Product[])
         }
         fetchData()
@@ -40,6 +44,32 @@ const GeneratedProductHistory = () => {
             }
         >
            <InfoCircle/>
+        </OverlayTrigger>
+    )
+
+    const renderCopyDownloadButton = (downloadUrlString: string) => (
+        <OverlayTrigger
+            placement="bottom"
+            overlay={
+                <Tooltip id="button-tooltip">
+                    Copy
+                </Tooltip>
+            }
+        >
+            <Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button>
+        </OverlayTrigger>
+    )
+
+    const renderDownloadButton = (downloadUrlString: string) => (
+        <OverlayTrigger
+            placement="bottom"
+            overlay={
+                <Tooltip id="button-tooltip">
+                    Download
+                </Tooltip>
+            }
+        >
+            <Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button>
         </OverlayTrigger>
     )
     
@@ -78,10 +108,10 @@ const GeneratedProductHistory = () => {
                                 if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
                                     const downloadUrlString = granules[0].uri
                                     cellContents = 
-                                    <Row>
+                                    <Row className='normal-row'>
                                         <Col>{entry[1]}</Col>
-                                        <Col><Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button></Col>
-                                        <Col><Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button></Col>
+                                        <Col>{(renderCopyDownloadButton(downloadUrlString))}</Col>
+                                        <Col>{renderDownloadButton(downloadUrlString)}</Col>
                                     </Row>
                                 } else {
                                     cellContents = entry[1]
@@ -103,20 +133,33 @@ const GeneratedProductHistory = () => {
         return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/generatedProductHistory${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
+    const waitingForProductsToLoadSpinner = () => {
+        return (
+            <div>
+                <h5>Loading Data Table...</h5>
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner> 
+            </div>
+        )
+    }
+
     const renderProductHistoryViews = () => {
         return (
-            <Col style={{marginRight: '50px', marginLeft: '50px', marginTop: '70px', height: '100%', width: '100%'}}>
-                <Row className='normal-row' style={{marginRight: '0px'}}><h4>Generated Products Data</h4></Row>
-                <Row className='normal-row' style={{marginRight: '0px'}}>{renderHistoryTable()}</Row>
-                {userProducts.length === 0 ? <Row className='normal-row' style={{marginRight: '0px'}}>{productHistoryAlert()}</Row> : null}
+            <Col>
+                <Row>{renderHistoryTable()}</Row>
+                {userProducts.length === 0 ? <Row>{productHistoryAlert()}</Row> : null}
             </Col>
         )
     }
 
     return (
-        <Row className='about-page' style={{marginRight: '0%'}}>
-            {renderProductHistoryViews()}
-        </Row>
+        <>
+        <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
+        <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
+            <Row className='normal-row'>{waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
+        </Col>
+        </>
     );
 }
 

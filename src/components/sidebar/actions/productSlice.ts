@@ -18,15 +18,12 @@ interface GranuleState {
     showUTMAdvancedOptions: boolean,
     spatialSearchResults: SpatialSearchResult[],
     waitingForSpatialSearch: boolean,
-    waitingForFootprintSearch: boolean,
     spatialSearchStartDate: string,
     spatialSearchEndDate: string,
     mapFocus: MapFocusObject
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
-
-const date = new Date()
 
 // Define the initial state using that type
 const initialState: GranuleState = {
@@ -36,7 +33,7 @@ const initialState: GranuleState = {
     sampleGranuleDataArray: [],
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093],
-    mapFocus: {center: [33.854457, -118.709093], zoom: 7},
+    mapFocus: {center: [33.854457, -118.709093], zoom: 6},
     generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
@@ -44,7 +41,6 @@ const initialState: GranuleState = {
     showUTMAdvancedOptions: false,
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
-    waitingForFootprintSearch: false,
     spatialSearchStartDate: (new Date(2022, 11, 16)).toISOString(),
     spatialSearchEndDate: (new Date()).toISOString()
 }
@@ -137,9 +133,6 @@ export const productSlice = createSlice({
     setWaitingForSpatialSearch: (state, action: PayloadAction<boolean>) => {
       state.waitingForSpatialSearch = action.payload
     },
-    setWaitingForFootprintSearch: (state, action: PayloadAction<boolean>) => {
-      state.waitingForFootprintSearch = action.payload
-    },
     setSpatialSearchStartDate: (state, action: PayloadAction<string>) => {
       state.spatialSearchStartDate = action.payload
     },
@@ -162,7 +155,6 @@ export const {
     setShowUTMAdvancedOptions,
     addSpatialSearchResults,
     setWaitingForSpatialSearch,
-    setWaitingForFootprintSearch,
     setSpatialSearchStartDate,
     setSpatialSearchEndDate,
     setMapFocus,
