@@ -15,7 +15,12 @@ const GenerateProductsModal = () => {
     const removeCPSFromUrl = (cpsCombosToRemove: string[]) => {
         const cyclePassSceneParameters = searchParams.get('cyclePassScene')?.split('-')
         if (cyclePassSceneParameters) {
-            const cyclePassSceneParametersToKeep = cyclePassSceneParameters.filter(cpsCombo => !cpsCombosToRemove.includes(cpsCombo)).join('-')
+            const cyclePassSceneParametersToKeep = cyclePassSceneParameters.filter(cpsCombo => {
+                const urlCPSSplit = cpsCombo.split('_')
+                const reconstructedUrlCPS = `${urlCPSSplit[0]}_${urlCPSSplit[1]}_${urlCPSSplit[2]}`
+                const keepCPSCombo = !cpsCombosToRemove.includes(reconstructedUrlCPS)
+                return keepCPSCombo
+            }).join('-')
             const currentUrlParameters = Object.fromEntries(searchParams.entries())
             if (cyclePassSceneParametersToKeep.length === 0) {
                 const {cyclePassScene, ...restOfCurrentUrlParameters} = currentUrlParameters

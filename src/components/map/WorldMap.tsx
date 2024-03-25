@@ -12,7 +12,8 @@ import booleanClockwise from '@turf/boolean-clockwise';
 import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -20,29 +21,63 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-function UpdateMapCenter() {
+const UpdateMapCenter = () => {
   const dispatch = useAppDispatch()
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  // search parameters
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // put the current center and zoom into the url parameters
+  const handleMapFocus = (center: number[], zoom: number) => {
+    const currentSearchParams = Object.fromEntries(searchParams.entries())
+    currentSearchParams.center = `${center[0]},${center[1]}`
+    currentSearchParams.zoom = String(zoom)
+    setSearchParams(currentSearchParams)
+    dispatch(setMapFocus({center, zoom}))
+  }
 
   const map = useMapEvent('moveend', () => {
     const center = [map.getCenter().lat, map.getCenter().lng]
     const zoom = map.getZoom()
-    if ((mapFocus.center[0] !== center[0] && mapFocus.center[1] !== center[1]) || mapFocus.zoom !== zoom) dispatch(setMapFocus({center, zoom}))
+    if ((mapFocus.center[0] !== center[0] && mapFocus.center[1] !== center[1]) || mapFocus.zoom !== zoom) handleMapFocus(center, zoom)
   })
+  return null
+}
+
+const ChangeView = () => {
+  const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  const map = useMap()
+  map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom)
   return null
 }
 
 const WorldMap = () => {
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
   const mapFocus = useAppSelector((state) => state.product.mapFocus)
+  const userHasCorrectEdlPermissions = useAppSelector((state) => state.app.userHasCorrectEdlPermissions)
   const dispatch = useAppDispatch()
   const footprintStyleOptions = { color: 'limegreen' }
+    // search parameters
+    const [searchParams, setSearchParams] = useSearchParams()
 
-  const ChangeView = () => {
-    const map = useMap()
-    map.setView(mapFocus.center as LatLngExpression, mapFocus.zoom)
-    return null
-  }
+  useEffect(() => {
+    // if center and zoom are in url params, set the current center to them
+    const center = searchParams.get('center')
+    const zoom = searchParams.get('zoom')
+    if (center && zoom) {
+      const centerParamSplit = center.split(',')
+      const centerToUse: number[] = [parseFloat(centerParamSplit[0]), parseFloat(centerParamSplit[1])]
+      const zoomToUse = parseInt(zoom)
+      if (centerToUse !== mapFocus.center || zoomToUse !== mapFocus.zoom) {
+        dispatch(setMapFocus({center: centerToUse, zoom: zoomToUse}))
+      }
+    }
+
+    // TODO: implement search polygon search param
+    // const searchPolygon = searchParams.get('searchPolygon')
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getScenesWithinCoordinates = async (coordinatesToSearch: {lat: number, lng: number}[][]) => {
     try {
@@ -55,7 +90,6 @@ const WorldMap = () => {
       if (authToken === null) {
         throw new Error('Failed to get authentication token');
       }
-
       dispatch(setWaitingForSpatialSearch(true))
 
       const polygonUrlString = coordinatesToSearch.map((polygon) => {
@@ -84,9 +118,12 @@ const WorldMap = () => {
         headers: {
           Authorization: `Bearer ${authToken}`
         }
-      }).then(response => response.text()).then(data => {
+      }).then(async data => {
+        const responseText = await data.text()
+        // TODO: make subsequent calls to get granules in spatial search area till everything is found.
+        // current issue is that 1000 (2000 total divided by 2) is limited by the cmr api.
         const parser = new DOMParser();
-        const xml = parser.parseFromString(data, "application/xml");
+        const xml = parser.parseFromString(responseText, "application/xml");
         const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
           return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
         }))).map(foundIdString => {
@@ -98,9 +135,7 @@ const WorldMap = () => {
         return references
       })
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
-      dispatch(setWaitingForSpatialSearch(false))
     } catch (err) {
-      dispatch(setWaitingForSpatialSearch(false))
       if (err instanceof Error) {
           return err
         } else {
@@ -110,9 +145,17 @@ const WorldMap = () => {
   }
 
   const onCreate = async (createEvent: any) => {
-      await getScenesWithinCoordinates([createEvent.layer.getLatLngs()[0]])
-      // set the new map focus location to what it was when polygon created so it will stay the same after map reload
-      dispatch(setMapFocus({center: [createEvent.layer._renderer._center.lat, createEvent.layer._renderer._center.lng], zoom: createEvent.target._zoom}))
+    const searchPolygonLatLngs = createEvent.layer.getLatLngs()[0]
+    
+    // TODO: implement search polygon search param
+    // const currentSearchParams = Object.fromEntries(searchParams.entries())
+    // const searchPolygonLatLngsString = searchPolygonLatLngs.map((latLngObject: {lat: number, lng: number}) => `${latLngObject.lat},${latLngObject.lng}`).join('_')
+    // currentSearchParams.searchPolygon = searchPolygonLatLngsString
+    // setSearchParams(currentSearchParams)
+
+    await getScenesWithinCoordinates([searchPolygonLatLngs])
+    // set the new map focus location to what it was when polygon created so it will stay the same after map reload
+    dispatch(setMapFocus({center: [createEvent.layer._renderer._center.lat, createEvent.layer._renderer._center.lng], zoom: createEvent.target._zoom}))
   }
 
   const onEdit = async (editEvent: any) => {
@@ -128,7 +171,7 @@ const WorldMap = () => {
         id='spatial-search-map'  
         zoom={7} scrollWheelZoom={true} zoomControl={false} 
       >
-          {useLocation().pathname.includes('selectScenes') ? (
+          {(useLocation().pathname.includes('selectScenes') && userHasCorrectEdlPermissions) ? (
             <FeatureGroup>
               <EditControl 
                 position="topright" 
@@ -150,13 +193,20 @@ const WorldMap = () => {
             url='https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
             maxZoom = {18}
+            noWrap
+            bounds={
+              [
+                [-89.9999, -179.9999],
+                [89.9999, 179.9999]
+              ]
+            }
           />
           <UpdateMapCenter />
           <ChangeView />
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip sticky>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
+            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>
