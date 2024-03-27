@@ -34,7 +34,6 @@ export const tutorialSteps = [
       }
     },
     {
-    //   target: "#spatial-search-map",
     target: '#map-tutorial-target',
       content: "This map allows you to search for scenes by drawing a search area and will display the footprints of scenes once they have been added to your Added Scenes list.",
       disableBeacon: true,
@@ -43,7 +42,6 @@ export const tutorialSteps = [
           options: {
               zIndex: 1000,
               primaryColor: '#0d6efd',
-            //   offset: 40,
           }
       }
     },
@@ -117,17 +115,6 @@ export const tutorialSteps = [
       }
     },
     {
-      target: "#configure-products-button",
-      content: "Click the Configure Products button to proceed to the Configure Options page where you can select options for how your selected scenes can be made into custom products.",
-      disableBeacon: true,
-      styles: {
-          options: {
-              zIndex: 1000,
-              primaryColor: '#0d6efd',
-          }
-      }
-    },
-    {
       target: "#configure-options-breadcrumb",
       content: "You can also click on the Configure Options tab to proceed to the Configure Options view.",
       disableBeacon: true,
@@ -151,7 +138,7 @@ export const tutorialSteps = [
     },
     {
       target: "#scenes-to-customize",
-      content: "This is this table showing the scenes you can customize. Also shown are the options which are scene specific which are not applied to all the scenes in the list.",
+      content: "This is the table showing the scenes you can customize. Also shown are the options which are scene specific which are not applied to all the scenes in the list.",
       disableBeacon: true,
       styles: {
           options: {

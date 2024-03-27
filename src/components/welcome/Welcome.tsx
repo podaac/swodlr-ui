@@ -29,7 +29,7 @@ const Welcome = () => {
 
   return (
       <Row style={{backgroundColor: '#3d5d82', width: '100%'}}>
-        <Row style={{marginTop: '6%', marginBottom: '0%'}}><h2 className='welcome-page-text'>SWOT Level-2 On-demand Raster Generator</h2></Row>
+        <Row style={{marginTop: '6%', marginBottom: '0%'}}><h2 className='welcome-page-text'>SWOT On-Demand Level-2 Raster Generator</h2></Row>
         <Row style={{marginTop: '5%', height: '100%'}}>
           <Col sm={6} style={{borderRight: 'solid'}}>
             <Row style={{marginTop: '10%'}}>
@@ -73,8 +73,8 @@ const Welcome = () => {
               <ListGroup.Item className='howToListItem'>
                 <Row style={{marginTop: '20px', marginBottom: '20px'}}>
                   <Col md={{ span: 1, offset: 1 }}><h5>4.</h5></Col>
-                  <Col md={{ span: 3, offset: 0 }}><h5>Download</h5></Col>
-                  <Col md={{ span: 5, offset: 1 }}><h6>Download generated products once processing is complete.</h6></Col>
+                  <Col md={{ span: 4, offset: 0 }}><h5>Download</h5></Col>
+                  <Col md={{ span: 5, offset: 0 }}><h6>Download generated products once processing is complete.</h6></Col>
                 </Row>
               </ListGroup.Item>
             </ListGroup>

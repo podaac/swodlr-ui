@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { allProductParameters } from '../../../types/constantTypes'
 
 // Define a type for the slice state
 interface AddCustomProductModalState {
@@ -7,11 +6,11 @@ interface AddCustomProductModalState {
     showEditProductModal: boolean,
     showDeleteProductModal: boolean,
     showGenerateProductModal: boolean,
-    addedProducts: allProductParameters[],
     sampleGranuleDataArray: number[],
     selectedGranules: string[],
     showTutorialModal: boolean,
     skipTutorial: boolean,
+    showCloseTutorialModal: boolean
 }
 
 // Define the initial state using that type
@@ -20,13 +19,13 @@ const initialState: AddCustomProductModalState = {
     showEditProductModal: false,
     showDeleteProductModal: false,
     showGenerateProductModal: false,
-    showTutorialModal: true,
-    skipTutorial: true,
+    showTutorialModal: false,
+    skipTutorial: false,
     // allProducts: this will be like a 'database' for the local state of all the products added
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
-    addedProducts: [],
     sampleGranuleDataArray: [],
-    selectedGranules: []
+    selectedGranules: [],
+    showCloseTutorialModal: false
 }
 
 export const modalSlice = createSlice({
@@ -73,6 +72,12 @@ export const modalSlice = createSlice({
     },
     setSkipTutorialTrue: (state) => {
         state.skipTutorial = true
+    },
+    setShowCloseTutorialFalse: (state) => {
+        state.showCloseTutorialModal = false
+    },
+    setShowCloseTutorialTrue: (state) => {
+        state.showCloseTutorialModal = true
     }
   },
 })
@@ -90,7 +95,9 @@ export const {
     setShowTutorialModalFalse,
     setShowTutorialModalTrue,
     setSkipTutorialFalse,
-    setSkipTutorialTrue
+    setSkipTutorialTrue,
+    setShowCloseTutorialFalse,
+    setShowCloseTutorialTrue,
 } = modalSlice.actions
 
 export default modalSlice.reducer

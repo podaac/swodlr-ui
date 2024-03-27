@@ -81,20 +81,8 @@ const SpatialSearchOptions = () => {
           />
         </Col>
       </Row>
-      {/* <Row>
-        <Col>
-          <Button variant='primary' size='sm' onClick={() => console.log('run spatial search')}>
-            <Search size={10}/> Find Scenes on Map
-          </Button>
-        </Col>
-      </Row> */}
       <Row style={{marginLeft: '0px', marginRight: '0px'}}>
         <Col style={{}}>
-          {/* <Alert variant="secondary" style={{marginLeft: '20px', marginRight:'20px'}}>
-            <p>
-              Draw areas to search spatially on the map by using the controls on the top right
-            </p>
-          </Alert> */}
           <p>
             Draw areas to <b>search spatially</b> on the map by using the controls on the <b>top right</b>. The scene search will start once you finish drawing the search area shape.
           </p>

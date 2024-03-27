@@ -100,7 +100,6 @@ export interface AlertMessageObject {
   type: string,
   message: string,
   variant: "danger" | "success" | "warning",
-  // timeoutId: ReturnType<typeof setTimeout>,
   tableType: TableTypes
 }
 
@@ -138,7 +137,7 @@ export interface validScene {
   [key: string]: boolean
 }
 
-export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound'
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge'
 
 export interface SpatialSearchResult {
   cycle: string,
@@ -153,3 +152,8 @@ export interface MapFocusObject {
 }
 
 export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'
+
+export interface handleSaveResult {
+  result: string, 
+  savedScenes?: allProductParameters[]
+}

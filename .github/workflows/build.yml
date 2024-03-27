@@ -27,6 +27,7 @@ on:
         options:
           - SIT
           - UAT
+          - OPS
       commit:
         type: string
         description: Custom commit hash
@@ -113,6 +114,7 @@ jobs:
           THE_VERSION=${{ steps.package-version.outputs.current-version}}
           echo "software_version=${THE_VERSION//-*}" >> $GITHUB_ENV
           npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
+          echo "TARGET_ENV=OPS" >> $GITHUB_ENV
       - name: Set the target environment to ${{ env.TARGET_ENV }}
         id: set-env
         run: |
@@ -172,10 +174,14 @@ jobs:
           steps.rc.conclusion == 'success'      ||
           steps.release.conclusion == 'success'
         run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "/version ${{ env.software_version }}"
-          git push
+          if ! git diff --cached --exit-code; then
+            git config user.name "${GITHUB_ACTOR}"
+            git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+            git commit -am "/version ${{ env.software_version }}"
+            git push
+          else
+            echo "No staged changes"
+          fi
       - name: Push Tag
         if: |
           steps.alpha.conclusion == 'success'   ||
@@ -184,8 +190,9 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
-          git push origin "${{ env.software_version }}"
+                    
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}" --force
+          git push origin "${{ env.software_version }}" --force
       - name: Create GH release
         if: |
           steps.alpha.conclusion == 'success'   ||
@@ -197,6 +204,7 @@ jobs:
           name: ${{ env.software_version }}
           prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
           tag: ${{ env.software_version }}
+          allowUpdates: true
       - name: Set github SHA for deployment
         id: update-sha
         run: |
@@ -256,7 +264,7 @@ jobs:
         run:
           aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete
       - name: Publish UMM-T with new version
-        uses: podaac/cmr-umm-updater@0.5.0
+        uses: podaac/cmr-umm-updater@0.6.0
         if: |
           needs.build.outputs.deploy_env == 'UAT' ||
           needs.build.outputs.deploy_env == 'OPS'
@@ -269,6 +277,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-t'
           use_associations: 'false'
+          umm_version: '1.2.0'
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
