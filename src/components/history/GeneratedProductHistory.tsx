@@ -1,6 +1,6 @@
 import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
+import { Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
 import { InfoCircle, Clipboard, Download } from "react-bootstrap-icons";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp, productsPerPage } from "../../constants/rasterParameterConstants";

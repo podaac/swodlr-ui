@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, RetrievedDataHistory, SpatialSearchResult } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, SpatialSearchResult } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
-import { PaginationCommand, Product } from '../../../types/graphqlTypes';
+import { Product } from '../../../types/graphqlTypes';
 
 // Define a type for the slice state
 interface GranuleState {

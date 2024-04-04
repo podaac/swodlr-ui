@@ -1,5 +1,3 @@
-import { UserProductQueryVariables } from "../types/graphqlTypes"
-
 export const userQuery = `
     {
         currentUser {
