@@ -325,6 +325,11 @@ tfoot {
   border-color: #1A2535;
 }
 
+.pagination-link-item:active {
+  background-color: #1A2535;
+  border-color: #1A2535;
+}
+
 .dark-mode-table {
   color: #FAF9F6;
   border: #FAF9F6 solid 1px;
