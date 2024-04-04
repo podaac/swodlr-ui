@@ -27,6 +27,7 @@ on:
         options:
           - SIT
           - UAT
+          - OPS
       commit:
         type: string
         description: Custom commit hash
@@ -113,6 +114,7 @@ jobs:
           THE_VERSION=${{ steps.package-version.outputs.current-version}}
           echo "software_version=${THE_VERSION//-*}" >> $GITHUB_ENV
           npm --no-git-tag-version version --allow-same-version ${THE_VERSION//-*}
+          echo "TARGET_ENV=OPS" >> $GITHUB_ENV
       - name: Set the target environment to ${{ env.TARGET_ENV }}
         id: set-env
         run: |
@@ -184,8 +186,9 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
-          git push origin "${{ env.software_version }}"
+                    
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}" --force
+          git push origin "${{ env.software_version }}" --force
       - name: Create GH release
         if: |
           steps.alpha.conclusion == 'success'   ||
@@ -197,6 +200,7 @@ jobs:
           name: ${{ env.software_version }}
           prerelease: ${{ steps.alpha.conclusion == 'success' || steps.rc.conclusion == 'success'}}
           tag: ${{ env.software_version }}
+          allowUpdates: true
       - name: Set github SHA for deployment
         id: update-sha
         run: |

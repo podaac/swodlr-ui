@@ -95,6 +95,8 @@ export const parameterOptionDefaults = {
     mgrsBandAdjust: '0',
 }
 
+export const granuleTableLimit = 10
+
 export const parameterHelp: ParameterHelp = {
     outputGranuleExtentFlag: `There are two sizing options for raster granules: nonoverlapping square (128 km x 128 km) or overlapping rectangular (256 km x 128 km). The rectangular granule extent is 64 km longer in along-track on both sides of the granule and can be useful for observing areas of interest near the along-track edges of the nonoverlapping granules without the need to stitch sequential granules together.`,
     outputSamplingGridType: `Specifies the type of the raster sampling grid. It can be either a Universal Transverse Mercator (UTM) grid or a geodetic latitude-longitude grid.`,
@@ -104,7 +106,8 @@ export const parameterHelp: ParameterHelp = {
     cycle: `The repeat orbit cycle number of the observation. SWOT’s orbit is 21 days and thus observations in the same 21-day orbit period would have the same cycle number.`,
     pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
     scene: `Predefined 128 x 128 km squares of the SWOT observations.`,
-    status: `The processing status of your custom product. The status types are as follows: NEW, UNAVAILABLE, GENERATING, ERROR, READY, AVAILABLE`
+    status: `The processing status of your custom product. The status types are as follows: NEW, UNAVAILABLE, GENERATING, ERROR, READY, AVAILABLE`,
+    granuleTableLimit: `There is a limit of ${granuleTableLimit} scenes allowed to be added to the scene table at a time. This is to ensure our scene processing pipeline can handle the demand of all of SWODLR's users.`
 }
 
 export interface InputBounds {
@@ -128,8 +131,6 @@ scene: {
     max: 154
 }
 }
-
-export const granuleTableLimit = 10
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     success: {
@@ -177,12 +178,24 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
         variant: 'danger',
     },
     granuleLimit: {
-        message: `You can only process ${granuleTableLimit} scenes at a time.`,
+        message: `You can only process ${granuleTableLimit} scenes at a time so some scenes could not be added.`,
         variant: 'danger'
     },
     notInTimeRange: {
         message: `Some scenes were not within the specified spatial search time range.`,
         variant: 'danger'
+    },
+    someSuccess: {
+        message: `Successfully added some scenes.`,
+        variant: 'success'
+    },
+    successfullyGenerated: {
+        message: `Successfully started product generation! Go to the 'My Data' page to track progress.`,
+        variant: 'success'
+    },
+    spatialSearchAreaTooLarge: {
+        message: `The search area you've selected on the map is too large. Please choose a smaller area to search.`,
+        variant: 'warning'
     }
   }
 
@@ -224,4 +237,4 @@ export const afterCPSL = 'F_'
 export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
 export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
 
-export const userProductQueryLimit = 1000
+export const productsPerPage = '20'
