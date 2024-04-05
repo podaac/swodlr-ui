@@ -112,7 +112,6 @@ export const generateL2RasterProduct = async (
 
 export const getUserProducts = async (userProductsQueryVariables?: UserProductQueryVariables) => {
   try {
-    // const userProductQueryVariables: UserProductQueryInputs = {limit: 10}
     const userProductResponse = await graphQLClient.request(userProductsQuery, userProductsQueryVariables).then(result => {
       const userProductsResult = (result as UserResponse).currentUser.products
       return {status: 'success', products: userProductsResult} as getUserProductsResponse
