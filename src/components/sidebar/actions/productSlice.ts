@@ -161,6 +161,9 @@ export const productSlice = createSlice({
       }
       state.historyPageIndex += 1
     },
+    setHistoryPageState: (state, action: PayloadAction<number>) => {
+      state.historyPageIndex = action.payload
+    },
     setFirstHistoryPageData: (state, action: PayloadAction<Product[]>) => {
       state.firstHistoryPageData = action.payload
     },
@@ -191,7 +194,8 @@ export const {
     setHistoryPageStateStart,
     setHistoryPageStatePrevious,
     setHistoryPageStateNext,
-    setFirstHistoryPageData
+    setFirstHistoryPageData,
+    setHistoryPageState
 } = productSlice.actions
 
 export default productSlice.reducer
