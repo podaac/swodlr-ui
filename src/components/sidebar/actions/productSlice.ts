@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, SpatialSearchResult } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, RetrievedDataHistory, SpatialSearchResult } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
 import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
+import { PaginationCommand, Product } from '../../../types/graphqlTypes';
 
 // Define a type for the slice state
 interface GranuleState {
@@ -20,7 +21,11 @@ interface GranuleState {
     waitingForSpatialSearch: boolean,
     spatialSearchStartDate: string,
     spatialSearchEndDate: string,
-    mapFocus: MapFocusObject
+    mapFocus: MapFocusObject,
+    historyPageState: string[],
+    historyPageIndex: number,
+    firstHistoryPageData: Product[],
+    userProducts: Product[],
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -42,7 +47,11 @@ const initialState: GranuleState = {
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
     spatialSearchStartDate: (new Date(2022, 11, 16)).toISOString(),
-    spatialSearchEndDate: (new Date()).toISOString()
+    spatialSearchEndDate: (new Date()).toISOString(),
+    userProducts: [],
+    historyPageState: [],
+    firstHistoryPageData: [],
+    historyPageIndex: 0
 }
 
 
@@ -139,6 +148,25 @@ export const productSlice = createSlice({
     setSpatialSearchEndDate: (state, action: PayloadAction<string>) => {
       state.spatialSearchEndDate = action.payload
     },
+    setHistoryPageStateStart: (state) => {
+      state.historyPageIndex = 1
+    },
+    setHistoryPageStatePrevious: (state) => {
+      state.historyPageIndex -= 1
+    },
+    setHistoryPageStateNext: (state, action: PayloadAction<string>) => {
+      const idInHistory = state.historyPageState.includes(action.payload)
+      if (!idInHistory) {
+        state.historyPageState = [...state.historyPageState, action.payload]
+      }
+      state.historyPageIndex += 1
+    },
+    setFirstHistoryPageData: (state, action: PayloadAction<Product[]>) => {
+      state.firstHistoryPageData = action.payload
+    },
+    setUserProducts: (state, action: PayloadAction<Product[]>) => {
+      state.userProducts = action.payload
+    },
   },
 })
 
@@ -158,7 +186,12 @@ export const {
     setSpatialSearchStartDate,
     setSpatialSearchEndDate,
     setMapFocus,
-    clearGranuleTableAlerts
+    clearGranuleTableAlerts,
+    setUserProducts,
+    setHistoryPageStateStart,
+    setHistoryPageStatePrevious,
+    setHistoryPageStateNext,
+    setFirstHistoryPageData
 } = productSlice.actions
 
 export default productSlice.reducer

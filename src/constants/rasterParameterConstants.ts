@@ -237,4 +237,4 @@ export const afterCPSL = 'F_'
 export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
 export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
 
-export const userProductQueryLimit = 1000
+export const productsPerPage = '20'

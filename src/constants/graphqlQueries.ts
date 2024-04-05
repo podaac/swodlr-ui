@@ -1,4 +1,4 @@
-import { userProductQueryLimit } from "./rasterParameterConstants"
+import { UserProductQueryVariables } from "../types/graphqlTypes"
 
 export const userQuery = `
     {
@@ -27,9 +27,10 @@ export const generateL2RasterProductQuery = `
 `
 
 export const userProductsQuery = `
+    query getUserProducts($limit: Int, $after: ID) 
     {
         currentUser {
-            products (limit: ${userProductQueryLimit}) {
+            products (limit: $limit, after: $after) {
                 id
                 timestamp
                 cycle

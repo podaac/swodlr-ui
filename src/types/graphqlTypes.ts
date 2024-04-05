@@ -71,3 +71,10 @@ export interface getUserProductsResponse {
     error?: Error | string,
   }
   
+export interface UserProductQueryVariables {
+    [key: string]: string
+    // after?: string,
+    // limit?: string
+}
+
+export type PaginationCommand = 'start' | 'previous' | 'next' | 'end'

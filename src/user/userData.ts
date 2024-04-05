@@ -1,6 +1,6 @@
 import { gql, GraphQLClient, RequestMiddleware } from 'graphql-request'
 import { generateL2RasterProductQuery, userProductsQuery, userQuery } from '../constants/graphqlQueries';
-import { CurrentUser, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
+import { CurrentUser, UserProductQueryVariables, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
 import { Session } from '../authentication/session';
 
 const userIdQuery = gql`${userQuery}`
@@ -110,13 +110,14 @@ export const generateL2RasterProduct = async (
   }
 }
 
-export const getUserProducts = async () => {
+export const getUserProducts = async (userProductsQueryVariables?: UserProductQueryVariables) => {
   try {
-      const userProductResponse = await graphQLClient.request(userProductsQuery).then(result => {
-        const userProductsResult = (result as UserResponse).currentUser.products
-        return {status: 'success', products: userProductsResult} as getUserProductsResponse
-      })
-      return userProductResponse
+    // const userProductQueryVariables: UserProductQueryInputs = {limit: 10}
+    const userProductResponse = await graphQLClient.request(userProductsQuery, userProductsQueryVariables).then(result => {
+      const userProductsResult = (result as UserResponse).currentUser.products
+      return {status: 'success', products: userProductsResult} as getUserProductsResponse
+    })
+    return userProductResponse
   } catch (err) {
       console.log (err)
       if (err instanceof Error) {
