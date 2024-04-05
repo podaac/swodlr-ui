@@ -29,7 +29,7 @@ const Welcome = () => {
 
   return (
       <Row style={{backgroundColor: '#3d5d82', width: '100%'}}>
-        <Row style={{marginTop: '6%', marginBottom: '0%'}}><h2 className='welcome-page-text'>SWOT Level-2 On-demand Raster Generator</h2></Row>
+        <Row style={{marginTop: '6%', marginBottom: '0%'}}><h2 className='welcome-page-text'>SWOT On-Demand Level-2 Raster Generator</h2></Row>
         <Row style={{marginTop: '5%', height: '100%'}}>
           <Col sm={6} style={{borderRight: 'solid'}}>
             <Row style={{marginTop: '10%'}}>

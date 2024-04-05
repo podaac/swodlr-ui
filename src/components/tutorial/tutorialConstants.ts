@@ -138,7 +138,7 @@ export const tutorialSteps = [
     },
     {
       target: "#scenes-to-customize",
-      content: "This is this table showing the scenes you can customize. Also shown are the options which are scene specific which are not applied to all the scenes in the list.",
+      content: "This is the table showing the scenes you can customize. Also shown are the options which are scene specific which are not applied to all the scenes in the list.",
       disableBeacon: true,
       styles: {
           options: {
