@@ -7,7 +7,7 @@ import { generatedProductsLabels, infoIconsToRender, parameterHelp, productsPerP
 import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
 import DataPagination from "./DataPagination";
-import { setFirstHistoryPageData, setHistoryPageStateNext, setUserProducts } from "../sidebar/actions/productSlice";
+import { addPageToHistoryPageState, setFirstHistoryPageData, setUserProducts } from "../sidebar/actions/productSlice";
 
 const GeneratedProductHistory = () => {
     const dispatch = useAppDispatch()
@@ -15,23 +15,23 @@ const GeneratedProductHistory = () => {
     const userProducts = useAppSelector((state) => state.product.userProducts)
     const { search } = useLocation();
     const navigate = useNavigate()
-    // const [userProducts, setUserProducts] = useState<Product[]>([])
-    const [waitingForProductsToLoad, setWaitingForProductsToLoad] = useState(true)
     
     useEffect(() => {
+        // get the data for the first page
+        // go through all the user product data to get the id of each one so that 
         const fetchData = async () => {
-            await getUserProducts({limit: productsPerPage}).then((response) => {
-                setWaitingForProductsToLoad(false)
-                if (response.status === 'success'){
-                    const productResults = response.products as Product[]
-                    dispatch(setHistoryPageStateNext(productResults[productResults.length-1].id))
-                    dispatch(setFirstHistoryPageData(productResults))
-                    dispatch(setUserProducts(productResults))
+            await getUserProducts({limit: productsPerPage}).then(response => {
+                const currentPageProducts = response.products as Product[]
+                if(response.status === 'success' && currentPageProducts.length !== 0) {
+                    const idToUse = currentPageProducts[currentPageProducts.length-1].id
+                    dispatch(setUserProducts(currentPageProducts))
+                    dispatch(setFirstHistoryPageData(currentPageProducts))
+                    dispatch(addPageToHistoryPageState(idToUse))
                 }
             })
         }
-        fetchData()
-        .catch(console.error);
+        
+        if(userProducts.length === 0) fetchData().catch(console.error)
       }, []);
 
     // TODO: implement download link copy button
@@ -81,13 +81,13 @@ const GeneratedProductHistory = () => {
         </OverlayTrigger>
     )
     
-      const renderColTitle = (labelEntry: string[], index: number) => {
+    const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
         let labelId = (labelEntry[0] === 'downloadUrl') ? 'download-url' : ''
         return (
-          <th key={`${labelEntry[0]}-${index}`} id={labelId}>{labelEntry[1]} {infoIcon}</th>
+            <th key={`${labelEntry[0]}-${index}`} id={labelId}>{labelEntry[1]} {infoIcon}</th>
         )
-      }
+    }
 
     const renderHistoryTable = () => {
         return (
@@ -166,7 +166,7 @@ const GeneratedProductHistory = () => {
         <>
         <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
         <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
-            <Row className='normal-row'>{waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
+            <Row className='normal-row'>{userProducts.length === 0 ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
         </Col>
         </>
     );

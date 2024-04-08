@@ -25,7 +25,7 @@ interface GranuleState {
     historyPageState: string[],
     historyPageIndex: number,
     firstHistoryPageData: Product[],
-    userProducts: Product[],
+    userProducts: Product[]
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -148,18 +148,11 @@ export const productSlice = createSlice({
     setSpatialSearchEndDate: (state, action: PayloadAction<string>) => {
       state.spatialSearchEndDate = action.payload
     },
-    setHistoryPageStateStart: (state) => {
-      state.historyPageIndex = 1
-    },
-    setHistoryPageStatePrevious: (state) => {
-      state.historyPageIndex -= 1
-    },
-    setHistoryPageStateNext: (state, action: PayloadAction<string>) => {
+    addPageToHistoryPageState: (state, action: PayloadAction<string>) => {
       const idInHistory = state.historyPageState.includes(action.payload)
       if (!idInHistory) {
         state.historyPageState = [...state.historyPageState, action.payload]
       }
-      state.historyPageIndex += 1
     },
     setHistoryPageState: (state, action: PayloadAction<number>) => {
       state.historyPageIndex = action.payload
@@ -169,7 +162,7 @@ export const productSlice = createSlice({
     },
     setUserProducts: (state, action: PayloadAction<Product[]>) => {
       state.userProducts = action.payload
-    },
+    }
   },
 })
 
@@ -191,11 +184,9 @@ export const {
     setMapFocus,
     clearGranuleTableAlerts,
     setUserProducts,
-    setHistoryPageStateStart,
-    setHistoryPageStatePrevious,
-    setHistoryPageStateNext,
     setFirstHistoryPageData,
-    setHistoryPageState
+    setHistoryPageState,
+    addPageToHistoryPageState,
 } = productSlice.actions
 
 export default productSlice.reducer

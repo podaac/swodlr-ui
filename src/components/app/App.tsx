@@ -64,7 +64,7 @@ const App = () => {
       navigate(`/customizeProduct/configureOptions${search}`)
     }
      else if (stepTarget === '#added-scenes' && action === 'update') {
-      navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
+      navigate(`/customizeProduct/selectScenes?cyclePassScene=12_468_45&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
     } else if (action === 'next' && stepTarget === '#my-data-page') {

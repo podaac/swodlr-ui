@@ -414,7 +414,7 @@ ABOUT PAGE
 
 .about-page {
   max-height: 82vh;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .about-card {
