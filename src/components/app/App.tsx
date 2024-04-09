@@ -123,6 +123,9 @@ const App = () => {
         showProgress
         continuous
         scrollToFirstStep
+        locale={{
+          last:"Exit Tutorial",
+        }}
       />
       <Routes>
         <Route path="/" element={ getPageWithFormatting(<Welcome />, false) } />
