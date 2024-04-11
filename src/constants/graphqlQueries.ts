@@ -1,4 +1,4 @@
-import { userProductQueryLimit } from "./rasterParameterConstants"
+import { spatialSearchCollectionConceptId, userProductQueryLimit } from "./rasterParameterConstants"
 
 export const userQuery = `
     {
@@ -57,3 +57,31 @@ export const userProductsQuery = `
         }
     }
 `
+
+export const getGranules = `
+    query($tileParams: GranulesInput) {
+        tiles: granules(params: $tileParams) {
+            items {
+                conceptId
+            }
+        }
+    }
+`
+
+export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[], ) => {
+    const tileIds = sceneIds.map(scene => [`${String(Math.floor(scene*2))}L`, `${String(Math.floor(scene*2))}R`])
+    const variables = {
+        'tileParams': {
+            'collectionConceptIds': [spatialSearchCollectionConceptId],
+            'cycle': cycle,
+            'passes': {
+                '0': {
+                    'pass': pass,
+                    'tiles': tileIds.join(',')
+                }
+            },
+            'limit': 100
+        },
+    }
+    return variables
+}

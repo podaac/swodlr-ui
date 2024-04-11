@@ -9,10 +9,12 @@ import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, Inp
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, clearGranuleTableAlerts, setWaitingForSpatialSearch } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
-import { graphQLClient } from '../../user/userData';
+import { cmrGraphQLClient, graphQLClient } from '../../user/userData';
 import { useSearchParams } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { LatLngExpression } from 'leaflet';
+import { getGranuleVariables, getGranules } from '../../constants/graphqlQueries';
+import { cpsValidationResponse } from '../../types/graphqlTypes';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -52,31 +54,35 @@ const GranuleTable = (props: GranuleTableProps) => {
   
   const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], cpsList?: {cycle: string, pass: string, scene: string}[]): Promise<validScene> => {
     try {
-      // build graphql availableScene query with all cycle/pass/scene combos requested
-      let queryAliasString = ``
-      // if there is a list of cycle pass and scenes go through them (spatial search) and if not, use first 3 function params (manual search)
-      if (cpsList) {
-        for(const specificCPS of cpsList) {
-          const {cycle, pass, scene} = specificCPS
-          const comboId = `${cycle}_${pass}_${scene}`
-          queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycle}, pass: ${pass}, scene: ${scene}) `
-        }
-      } else {
-        for(const specificScene of sceneToUse) {
-          const comboId = `${cycleToUse}_${passToUse}_${specificScene}`
-          queryAliasString += ` s_${comboId}: availableScene(cycle: ${cycleToUse}, pass: ${passToUse}, scene: ${specificScene}) `
-        }
+      const session = await Session.getCurrent();
+      if (session === null) {
+        throw new Error('No current session');
       }
-      const queryAliasObject = `{${queryAliasString}}`
-      const res: {availableScene: boolean} = await graphQLClient.request(queryAliasObject).then(response => {
-        const responseToReturn = Object.fromEntries(Object.entries(response as {availableScene: boolean}).map(responseObj => [responseObj[0].replace('s_', ''), responseObj[1]]))
-        return responseToReturn as {availableScene: boolean}
+      const authToken = await session.getAccessToken();
+      if (authToken === null) {
+        throw new Error('Failed to get authentication token');
+      }
+
+      const resCMR = await fetch('https://graphql.earthdata.nasa.gov/api', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ query: getGranules, variables: getGranuleVariables(cycleToUse, passToUse, sceneToUse) })
       })
-      return res
-      
-    } catch (err) {
-        console.log (err)
-        return {}
+      .then(async data => {
+        const responseJson = await data.json()
+        const responseTiles = responseJson.data.tiles.items as string[]
+        const cpsString = `${cycleToUse}_${passToUse}_${sceneToUse[0]}`
+        const objToReturn = {} as validScene
+        objToReturn[cpsString] = responseTiles.length !== 0
+        return objToReturn as {availableScene: boolean}
+      })
+      return resCMR
+    } catch(err) {
+      console.log(err)
+      return {}
     }
   }
 

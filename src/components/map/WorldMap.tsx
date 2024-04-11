@@ -120,6 +120,7 @@ const WorldMap = () => {
         }
       }).then(async data => {
         const responseText = await data.text()
+        console.log(responseText)
         // TODO: make subsequent calls to get granules in spatial search area till everything is found.
         // current issue is that 1000 (2000 total divided by 2) is limited by the cmr api.
         const parser = new DOMParser();
