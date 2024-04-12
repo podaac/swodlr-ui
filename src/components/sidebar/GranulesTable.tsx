@@ -17,6 +17,17 @@ import { Session } from '../../authentication/session';
 import { LatLngExpression } from 'leaflet';
 import { getGranuleVariables, getGranules } from '../../constants/graphqlQueries';
 
+export const padCPSForCmrQuery = (cpsString: string): string => {
+  let cpsValueToReturn = cpsString
+  if (cpsString.length < 3) {
+    // add 0's to beginning of string
+    while(cpsValueToReturn.length < 3) {
+      cpsValueToReturn = '0' + cpsValueToReturn
+    }
+  }
+  return cpsValueToReturn
+}
+
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
   const addedProducts = useAppSelector((state) => state.product.addedProducts)
@@ -95,7 +106,7 @@ const GranuleTable = (props: GranuleTableProps) => {
       if(saveType !== 'spatialSearch') {
         return validateCPS(cycleToUse, passToUse, sceneToUse)
       } else {
-        // add all scenes to be valid
+        // add all scenes to be valid because spatial search granules don't need to be validated (already in cmr)
         return Object.fromEntries(sceneToUse.map(sceneValue => [`${cycleToUse}_${passToUse}_${sceneValue}`, true]))
       }
     } catch(err) {
@@ -107,13 +118,10 @@ const GranuleTable = (props: GranuleTableProps) => {
   // Spatial search use effect
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
-      let scenesFoundArray: string[] = []
-      let addedScenes: string[] = []
-
       const fetchData = async () => {
-        if(spatialSearchResults.length === 0) {
-          scenesFoundArray.push('noScenesFound')
-        } else if (spatialSearchResults.length < 1000) {
+        let scenesFoundArray: string[] = []
+        let addedScenes: string[] = []
+        if (spatialSearchResults.length < 1000) {
           for(let i=0; i<spatialSearchResults.length; i++) {
             if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
               // don't let more than 10 be added
@@ -145,7 +153,7 @@ const GranuleTable = (props: GranuleTableProps) => {
       // call the function
       fetchData()
         .then((noScenesFoundResults) => {
-          if(noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something')) setSaveGranulesAlert('noScenesFound')
+          if((noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something'))) setSaveGranulesAlert('noScenesFound')
           if(noScenesFoundResults.includes('hit granule limit')) setSaveGranulesAlert('granuleLimit')
           if(noScenesFoundResults.includes('spatialSearchAreaTooLarge')) setSaveGranulesAlert('spatialSearchAreaTooLarge')
         })
@@ -340,17 +348,6 @@ const GranuleTable = (props: GranuleTableProps) => {
           return 'something happened'
         }
     }
-  }
-
-  const padCPSForCmrQuery = (cpsString: string): string => {
-    let cpsValueToReturn = cpsString
-    if (cpsString.length < 3) {
-      // add 0's to beginning of string
-      while(cpsValueToReturn.length < 3) {
-        cpsValueToReturn = '0' + cpsValueToReturn
-      }
-    }
-    return cpsValueToReturn
   }
 
   const handleSave = async (saveType: SaveType, totalRuns: number, index: number, cycleParam?: string, passParam?: string, sceneParam?: string): Promise<handleSaveResult> => {

@@ -1,3 +1,4 @@
+import { padCPSForCmrQuery } from "../components/sidebar/GranulesTable"
 import { spatialSearchCollectionConceptId, userProductQueryLimit } from "./rasterParameterConstants"
 
 export const userQuery = `
@@ -69,19 +70,20 @@ export const getGranules = `
 `
 
 export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
-    const tileIds = sceneIds.map(scene => [`${String(Math.floor(scene*2))}L`, `${String(Math.floor(scene*2))}R`])
+    const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
     const variables = {
-        'tileParams': {
-            'collectionConceptIds': [spatialSearchCollectionConceptId],
-            'cycle': cycle,
-            'passes': {
-                '0': {
-                    'pass': pass,
-                    'tiles': tileIds.join(',')
-                }
-            },
-            'limit': 100
-        },
-    }
+        "tileParams": {
+          'collectionConceptIds': [spatialSearchCollectionConceptId],
+          "limit": 100,
+          "cycle": cycle,
+          "passes": {"0": {"pass": pass}},
+          "readableGranuleName": sceneIdsForGranuleName,
+          "options": {
+            "readableGranuleName": {
+              "pattern": true
+            }
+          }
+        }
+      }
     return variables
 }
