@@ -77,4 +77,10 @@ export interface cpsValidationResponse {
 
 export interface validScene {
     [key: string]: boolean
-  }
+}
+
+export type cycleGroup = {cycle: string, pass: string, scene: string}[]
+
+export interface cycleGroups {
+    [key: string]: {cycle: string, pass: string, scene: string}[]
+}

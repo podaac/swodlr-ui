@@ -2,19 +2,20 @@ import { ReactElement, useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks'
 import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizationLabelsUTM, productCustomizationLabelsGEO, parameterOptionValues, parameterHelp, infoIconsToRender, inputBounds, sampleFootprint, granuleTableLimit,
-   footprintSearchCollectionConceptId } from '../../constants/rasterParameterConstants';
+   beforeCPS,
+   afterCPSL,
+   afterCPSR,
+   spatialSearchCollectionConceptId} from '../../constants/rasterParameterConstants';
 import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, handleSaveResult, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, clearGranuleTableAlerts, setWaitingForSpatialSearch } from './actions/productSlice';
 import { setShowDeleteProductModalTrue } from './actions/modalSlice';
 import DeleteGranulesModal from './DeleteGranulesModal';
-import { cmrGraphQLClient, graphQLClient } from '../../user/userData';
 import { useSearchParams } from 'react-router-dom';
 import { Session } from '../../authentication/session';
 import { LatLngExpression } from 'leaflet';
 import { getGranuleVariables, getGranules } from '../../constants/graphqlQueries';
-import { cpsValidationResponse } from '../../types/graphqlTypes';
 
 const GranuleTable = (props: GranuleTableProps) => {
   const { tableType } = props
@@ -51,35 +52,52 @@ const GranuleTable = (props: GranuleTableProps) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableType === 'granuleSelection' ? null : addedProducts, startTutorial ? searchParams : null])
-  
-  const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], cpsList?: {cycle: string, pass: string, scene: string}[]): Promise<validScene> => {
-    try {
-      const session = await Session.getCurrent();
-      if (session === null) {
-        throw new Error('No current session');
-      }
-      const authToken = await session.getAccessToken();
-      if (authToken === null) {
-        throw new Error('Failed to get authentication token');
-      }
 
-      const resCMR = await fetch('https://graphql.earthdata.nasa.gov/api', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query: getGranules, variables: getGranuleVariables(cycleToUse, passToUse, sceneToUse) })
-      })
-      .then(async data => {
-        const responseJson = await data.json()
-        const responseTiles = responseJson.data.tiles.items as string[]
-        const cpsString = `${cycleToUse}_${passToUse}_${sceneToUse[0]}`
-        const objToReturn = {} as validScene
-        objToReturn[cpsString] = responseTiles.length !== 0
-        return objToReturn as {availableScene: boolean}
-      })
-      return resCMR
+  const validateCPS = async (cycleToUse: number, passToUse: number, sceneToUse: number[]) => {
+    const session = await Session.getCurrent();
+    if (session === null) {
+      throw new Error('No current session');
+    }
+    const authToken = await session.getAccessToken();
+    if (authToken === null) {
+      throw new Error('Failed to get authentication token');
+    }
+    const validationObjectToReturn = await fetch('https://graphql.earthdata.nasa.gov/api', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query: getGranules, variables: getGranuleVariables(cycleToUse, passToUse, sceneToUse)})
+        })
+        .then(async data => {
+          const responseJson = await data.json()
+          let responseTiles: string[] = []
+          if(responseJson.data) {
+            responseTiles = (responseJson.data.tiles.items.map((item: {granuleUr: string}) => item.granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1].split('_').map(item2 => parseInt(item2)).join('_')) as string[])
+          }
+          const validationObject = {} as validScene
+
+          // go through each cycle pass scene combo and see if it is in the return results TODO
+          sceneToUse.forEach(sceneInput => {
+            const sceneInputId = `${cycleToUse}_${passToUse}_${sceneInput}`
+            const validityBool = responseTiles.includes(sceneInputId)
+            validationObject[sceneInputId] = validityBool
+          })
+
+          return validationObject
+        })
+      return validationObjectToReturn
+  }
+  
+  const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], saveType: SaveType): Promise<validScene> => {
+    try {
+      if(saveType !== 'spatialSearch') {
+        return validateCPS(cycleToUse, passToUse, sceneToUse)
+      } else {
+        // add all scenes to be valid
+        return Object.fromEntries(sceneToUse.map(sceneValue => [`${cycleToUse}_${passToUse}_${sceneValue}`, true]))
+      }
     } catch(err) {
       console.log(err)
       return {}
@@ -89,39 +107,29 @@ const GranuleTable = (props: GranuleTableProps) => {
   // Spatial search use effect
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
-    if (spatialSearchResults.length > 0) {
       let scenesFoundArray: string[] = []
       let addedScenes: string[] = []
 
       const fetchData = async () => {
-        if (spatialSearchResults.length < 1000) {
-          // check validity before saving
-          const validationResult = await validateSceneAvailability(0,0,[0],spatialSearchResults).then(result => Object.entries(result).filter(resultEntry => resultEntry[1]).map(valuePair => {
-            const cpsSplit = valuePair[0].split('_')
-            return {cycle: cpsSplit[0], pass: cpsSplit[1], scene: cpsSplit[2]}
-          }))
-
-          if (validationResult.length > 0) {
-            for(let i=0; i<validationResult.length; i++) {
-              if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
-                // don't let more than 10 be added
-                scenesFoundArray.push('hit granule limit')
-              } else {
-                await handleSave('spatialSearch', validationResult.length, i, validationResult[i].cycle, validationResult[i].pass, validationResult[i].scene).then(result => {
-                  if(result.savedScenes) {
-                    addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
-                  }
-                  scenesFoundArray.push(result.result)
-                })
-              }
-
+        if(spatialSearchResults.length === 0) {
+          scenesFoundArray.push('noScenesFound')
+        } else if (spatialSearchResults.length < 1000) {
+          for(let i=0; i<spatialSearchResults.length; i++) {
+            if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
+              // don't let more than 10 be added
+              scenesFoundArray.push('hit granule limit')
+            } else {
+              await handleSave('spatialSearch', spatialSearchResults.length, i, spatialSearchResults[i].cycle, spatialSearchResults[i].pass, spatialSearchResults[i].scene).then(result => {
+                if(result.savedScenes) {
+                  addedScenes.push(...(result.savedScenes).map(productObject => productObject.granuleId))
+                }
+                scenesFoundArray.push(result.result)
+              })
             }
-            if(addedScenes.length > 0) {
-              // add parameters
-              addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
-            }
-          } else {
-            scenesFoundArray.push('noScenesFound')
+          }
+          if(addedScenes.length > 0) {
+            // add parameters
+            addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
           }
         } else {
           // If too many spatial search results, the search doesn't work because there too many granules and a limit was reached.
@@ -146,7 +154,6 @@ const GranuleTable = (props: GranuleTableProps) => {
 
       // clear spatial results out of redux after use
       if(spatialSearchResults.length !== 0) dispatch(addSpatialSearchResults([] as SpatialSearchResult[]))
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spatialSearchResults])
 
@@ -372,7 +379,10 @@ const GranuleTable = (props: GranuleTableProps) => {
       const sceneArray = getScenesArray(sceneToUse)
       let validScenesThatCouldNotBeAdded: string[] = []
       // check scenes availability
-      const validationResult = await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneId => parseInt(sceneId))).then(scenesAvailable => {
+      if(saveType !== 'spatialSearch') {
+
+      }
+      const validationResult = await validateSceneAvailability(parseInt(cycleToUse), parseInt(passToUse), sceneArray.map(sceneValue => parseInt(sceneValue)), saveType).then(scenesAvailable => {
         // return response
         setWaitingForScenesToBeAdded(false)
         const someScenesNotAvailable = Object.entries(scenesAvailable).some(sceneObjectValidityEntry => {
@@ -435,7 +445,7 @@ const GranuleTable = (props: GranuleTableProps) => {
           await Promise.all(granulesToAdd.map(async granule => {
             const granuleIdForFootprint = `*${padCPSForCmrQuery(cycleToUse)}_${padCPSForCmrQuery(passToUse)}_${padCPSForCmrQuery(String(Math.floor(parseInt(granule.scene)*2)))}*`
             //TODO: change back to spatialSearchCollectionConceptId
-            return Promise.resolve(await getSceneFootprint(footprintSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
+            return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
 
               const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
               const footprintResult = validFootprintResultArray[0]

@@ -62,13 +62,13 @@ export const getGranules = `
     query($tileParams: GranulesInput) {
         tiles: granules(params: $tileParams) {
             items {
-                conceptId
+                granuleUr
             }
         }
     }
 `
 
-export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[], ) => {
+export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const tileIds = sceneIds.map(scene => [`${String(Math.floor(scene*2))}L`, `${String(Math.floor(scene*2))}R`])
     const variables = {
         'tileParams': {
