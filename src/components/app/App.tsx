@@ -75,6 +75,7 @@ const App = () => {
       dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
       navigate(`/customizeProduct/selectScenes`)
     }
+    // TODO: Make condition to load previous page when clicking previous before trying to target component to highlight. Use conditions "stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init'"
   };
 
   useEffect(() => {

@@ -69,5 +69,18 @@ export interface getUserProductsResponse {
     status: GraphqlResponseStatus,
     products?: Product[],
     error?: Error | string,
-  }
-  
+}
+
+export interface cpsValidationResponse {
+    items: string[]
+}
+
+export interface validScene {
+    [key: string]: boolean
+}
+
+export type cycleGroup = {cycle: string, pass: string, scene: string}[]
+
+export interface cycleGroups {
+    [key: string]: {cycle: string, pass: string, scene: string}[]
+}
