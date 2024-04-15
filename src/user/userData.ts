@@ -5,6 +5,7 @@ import { Session } from '../authentication/session';
 
 const userIdQuery = gql`${userQuery}`
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
+const cmrGraphqlUri = 'https://cmr.earthdata.nasa.gov/graphql'
 const graphqlUri = baseUri + '/graphql'
 
 const requestMiddleware: RequestMiddleware = async (request) => {
@@ -31,6 +32,13 @@ export const graphQLClient = new GraphQLClient(graphqlUri, {
     credentials: `include`,
     mode: `cors`,
     requestMiddleware
+})
+
+export const cmrGraphQLClient = new GraphQLClient(cmrGraphqlUri, {
+  credentials: `include`,
+  mode: `cors`,
+  requestMiddleware,
+  
 })
 
 export const getUserDataResponse = async () => {

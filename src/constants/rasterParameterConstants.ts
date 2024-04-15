@@ -235,6 +235,6 @@ export const beforeCPS = '_x_x_x_'
 export const afterCPSR = 'F_'
 export const afterCPSL = 'F_'
 export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
-export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
+// export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
 
 export const productsPerPage = '20'

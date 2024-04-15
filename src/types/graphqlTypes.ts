@@ -73,8 +73,18 @@ export interface getUserProductsResponse {
   
 export interface UserProductQueryVariables {
     [key: string]: string
-    // after?: string,
-    // limit?: string
 }
 
-export type PaginationCommand = 'start' | 'previous' | 'next' | 'end'
+export interface cpsValidationResponse {
+    items: string[]
+}
+
+export interface validScene {
+    [key: string]: boolean
+}
+
+export type cycleGroup = {cycle: string, pass: string, scene: string}[]
+
+export interface cycleGroups {
+    [key: string]: {cycle: string, pass: string, scene: string}[]
+}
