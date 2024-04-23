@@ -69,6 +69,10 @@ export interface getUserProductsResponse {
     status: GraphqlResponseStatus,
     products?: Product[],
     error?: Error | string,
+  }
+  
+export interface UserProductQueryVariables {
+    [key: string]: string
 }
 
 export interface cpsValidationResponse {

@@ -1,5 +1,5 @@
 import { padCPSForCmrQuery } from "../components/sidebar/GranulesTable"
-import { spatialSearchCollectionConceptId, userProductQueryLimit } from "./rasterParameterConstants"
+import { spatialSearchCollectionConceptId } from "./rasterParameterConstants"
 
 export const userQuery = `
     {
@@ -28,9 +28,10 @@ export const generateL2RasterProductQuery = `
 `
 
 export const userProductsQuery = `
+    query getUserProducts($limit: Int, $after: ID) 
     {
         currentUser {
-            products (limit: ${userProductQueryLimit}) {
+            products (limit: $limit, after: $after) {
                 id
                 timestamp
                 cycle
