@@ -1,12 +1,10 @@
-import { Button, ButtonGroup, Col, Pagination, Row, Spinner } from "react-bootstrap";
+import { Col, Pagination, Row, Spinner } from "react-bootstrap";
 import { Product } from "../../types/graphqlTypes";
 import { getUserProducts } from "../../user/userData";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { addPageToHistoryPageState, setHistoryPageState, setUserProducts } from "../sidebar/actions/productSlice";
+import { addPageToHistoryPageState, setUserProducts } from "../sidebar/actions/productSlice";
 import { productsPerPage } from "../../constants/rasterParameterConstants";
 import { useEffect, useState } from "react";
-import { ChevronBarLeft, ChevronBarRight, ChevronCompactLeft, ChevronCompactRight } from "react-bootstrap-icons";
-import { current } from "immer";
 
 
 const DataPagination = () => {
@@ -43,13 +41,6 @@ const DataPagination = () => {
         fetchData()
         .catch(console.error);
       }, []);
-
-    const handleStart = () => {
-        if(noNextPage) setNoNextPage(false)
-        setNoPreviousPage(true)
-        dispatch(setUserProducts(firstHistoryPageData))
-        setCurrentPageNumber(1)
-    }
     
     const handlePrevious = async () => {
         if(noNextPage) setNoNextPage(false)
@@ -76,19 +67,6 @@ const DataPagination = () => {
             } else if (response.status === 'error') {
                 setNoNextPage(true)
             }
-        })
-    }
-    
-    const handleEnd = async () => {
-        await getUserProducts({limit: productsPerPage, after: historyPageState[historyPageState.length-2]}).then(response => {
-            const currentPageProducts = response.products as Product[]
-            if(response.status === 'success' && currentPageProducts.length !== 0) {
-                if(noPreviousPage) setNoNextPage(false)
-                setNoPreviousPage(false)
-                dispatch(setUserProducts(currentPageProducts))
-                setCurrentPageNumber(historyPageState.length)
-            }
-            return response
         })
     }
 
@@ -165,13 +143,11 @@ const DataPagination = () => {
             <Col xs={2} style={{padding: '15px'}}><h5><b>{totalNumberOfProducts}</b> Total Products</h5></Col>
             <Col xs={8}>
                 <Pagination data-bs-theme='dark' style={{padding: '15px'}} className="center">
-                    <Pagination.First  onClick={() => handleStart()} disabled={noPreviousPage} />
                     <Pagination.Prev onClick={() => handlePrevious()} disabled={noPreviousPage} />
                     <Pagination.Item active={currentPageNumber === 1} onClick={() => handleSelectPage(1)}>1</Pagination.Item>
                     {getPaginationItemsWithEllipsis()}
                     <Pagination.Item active={currentPageNumber === historyPageState.length} onClick={() => handleSelectPage(historyPageState.length)}>{historyPageState.length}</Pagination.Item>
                     <Pagination.Next onClick={() => handleNext()} disabled={userProducts.length < parseInt(productsPerPage) || noNextPage} />
-                    <Pagination.Last onClick={() => handleEnd()} disabled={userProducts.length < parseInt(productsPerPage) || noNextPage} />
                 </Pagination>
             </Col>
             <Col xs={2}></Col>
