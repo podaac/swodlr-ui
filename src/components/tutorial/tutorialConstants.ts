@@ -47,7 +47,7 @@ export const tutorialSteps = [
     },
     {
       target: ".leaflet-draw-draw-polygon",
-      content: "Click here to start the action of drawing a polygon around the area you wish to search for scenes. Note: the scene search within the search area will begin when after completed a closed polygon shape.",
+      content: "Click to create a bounding box to specify scenes to customize. Scenes will be searched for after closing the bounding box.",
       disableBeacon: true,
       placement: 'left' as const,
       styles: {
@@ -59,7 +59,7 @@ export const tutorialSteps = [
     },
     {
       target: ".leaflet-draw-edit-edit",
-      content: "Click here to edit any existing scene search areas you have already drawn on the map. Note: the area of the polygon you are editing will be re-searched when editing the shape is saved.",
+      content: "Click here to edit any existing scene search areas you have already drawn on the map. Note: after editing, the scenes will be searched again within the new bounding box.",
       disableBeacon: true,
       placement: 'left' as const,
       styles: {
@@ -138,7 +138,7 @@ export const tutorialSteps = [
     },
     {
       target: "#scenes-to-customize",
-      content: "This is the table showing the scenes you can customize. Also shown are the options which are scene specific which are not applied to all the scenes in the list.",
+      content: "This is the table showing the scenes you can customize. Scene specific options are also shown when applicable.",
       disableBeacon: true,
       styles: {
           options: {
@@ -160,7 +160,7 @@ export const tutorialSteps = [
     },
     {
       target: "#my-data-page",
-      content: "This page shows you the statuses of products being generated and that have finished generating.",
+      content: "This page shows you the statuses of products once they have been created, as they are generating, when they are complete, and if an error occured.",
       disableBeacon: true,
       styles: {
           options: {
@@ -182,8 +182,9 @@ export const tutorialSteps = [
     },
     {
       target: "#download-url",
-      content: "Visit urls in this column to download your finished product. If it says N/A, check the status because this indicates that the product is not finished generating yet.",
+      content: "Once the status is 'READY', look in the 'Download URL' section t either download your product using the download button or copy and paste the link into your browser to download.",
       disableBeacon: true,
+      placement: 'left' as const,
       styles: {
           options: {
               zIndex: 1000,

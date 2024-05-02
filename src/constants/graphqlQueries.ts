@@ -1,4 +1,5 @@
-import { userProductQueryLimit } from "./rasterParameterConstants"
+import { padCPSForCmrQuery } from "../components/sidebar/GranulesTable"
+import { spatialSearchCollectionConceptId } from "./rasterParameterConstants"
 
 export const userQuery = `
     {
@@ -27,9 +28,10 @@ export const generateL2RasterProductQuery = `
 `
 
 export const userProductsQuery = `
+    query getUserProducts($limit: Int, $after: ID) 
     {
         currentUser {
-            products (limit: ${userProductQueryLimit}) {
+            products (limit: $limit, after: $after) {
                 id
                 timestamp
                 cycle
@@ -57,3 +59,32 @@ export const userProductsQuery = `
         }
     }
 `
+
+export const getGranules = `
+    query($tileParams: GranulesInput) {
+        tiles: granules(params: $tileParams) {
+            items {
+                granuleUr
+            }
+        }
+    }
+`
+
+export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
+    const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
+    const variables = {
+        "tileParams": {
+          'collectionConceptIds': [spatialSearchCollectionConceptId],
+          "limit": 100,
+          "cycle": cycle,
+          "passes": {"0": {"pass": pass}},
+          "readableGranuleName": sceneIdsForGranuleName,
+          "options": {
+            "readableGranuleName": {
+              "pattern": true
+            }
+          }
+        }
+      }
+    return variables
+}

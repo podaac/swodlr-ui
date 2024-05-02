@@ -1,29 +1,37 @@
 import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner } from "react-bootstrap";
-import { useAppSelector } from "../../redux/hooks";
-import { getUserProductsResponse, Product } from "../../types/graphqlTypes";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
 import { InfoCircle, Clipboard, Download } from "react-bootstrap-icons";
-import { generatedProductsLabels, infoIconsToRender, parameterHelp } from "../../constants/rasterParameterConstants";
+import { generatedProductsLabels, infoIconsToRender, parameterHelp, productsPerPage } from "../../constants/rasterParameterConstants";
 import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
+import DataPagination from "./DataPagination";
+import { addPageToHistoryPageState, setFirstHistoryPageData, setUserProducts } from "../sidebar/actions/productSlice";
 
 const GeneratedProductHistory = () => {
+    const dispatch = useAppDispatch()
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
+    const userProducts = useAppSelector((state) => state.product.userProducts)
     const { search } = useLocation();
     const navigate = useNavigate()
-    const [userProducts, setUserProducts] = useState<Product[]>([])
-    const [waitingForProductsToLoad, setWaitingForProductsToLoad] = useState(true)
     
     useEffect(() => {
+        // get the data for the first page
+        // go through all the user product data to get the id of each one so that 
         const fetchData = async () => {
-            const userProductsResponse: getUserProductsResponse = await getUserProducts().then((response) => {
-                setWaitingForProductsToLoad(false)
-                return response
+            await getUserProducts({limit: productsPerPage}).then(response => {
+                const currentPageProducts = response.products as Product[]
+                if(response.status === 'success' && currentPageProducts.length !== 0) {
+                    const idToUse = currentPageProducts[currentPageProducts.length-1].id
+                    dispatch(setUserProducts(currentPageProducts))
+                    dispatch(setFirstHistoryPageData(currentPageProducts))
+                    dispatch(addPageToHistoryPageState(idToUse))
+                }
             })
-            if (userProductsResponse.status === 'success') setUserProducts(userProductsResponse.products as Product[])
         }
-        fetchData()
-        .catch(console.error);
+        
+        if(userProducts.length === 0) fetchData().catch(console.error)
       }, []);
 
     // TODO: implement download link copy button
@@ -73,57 +81,58 @@ const GeneratedProductHistory = () => {
         </OverlayTrigger>
     )
     
-      const renderColTitle = (labelEntry: string[], index: number) => {
+    const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
         let labelId = (labelEntry[0] === 'downloadUrl') ? 'download-url' : ''
         return (
-          <th key={`${labelEntry[0]}-${index}`} id={labelId}>{labelEntry[1]} {infoIcon}</th>
+            <th key={`${labelEntry[0]}-${index}`} id={labelId}>{labelEntry[1]} {infoIcon}</th>
         )
-      }
+    }
 
     const renderHistoryTable = () => {
         return (
             <div style={{padding: '0px 20px 20px 20px'}} id='history-table'>
                 <div className={`table-responsive-generatedProducts table-responsive`}>
-                    <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
-                    <thead>
-                    <tr>
-                        {Object.entries(generatedProductsLabels).map((labelEntry, index) => renderColTitle(labelEntry, index))}
-                    </tr>
-                    </thead>
-                    <tbody>
-                        {userProducts.map((generatedProductObject, index) => {
-                            const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
-                            const statusToUse = status[0].state
-                            const downloadUrl = granules && granules.length !== 0 ? granules[0].uri.split('/').pop() : 'N/A'
-                            const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
-                            const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
-                            const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
-                            const outputGranuleExtentFlagToUse = outputGranuleExtentFlag ? '256 x 128 km' : '128 x 128 km'
-                            const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlagToUse, outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
-                            return (
-                            <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
-                            {Object.entries(productRowValues).map((entry, index2) => {
-                                let cellContents = null
-                                if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
-                                    const downloadUrlString = granules[0].uri
-                                    cellContents = 
-                                    <Row className='normal-row'>
-                                        <Col>{entry[1]}</Col>
-                                        <Col>{(renderCopyDownloadButton(downloadUrlString))}</Col>
-                                        <Col>{renderDownloadButton(downloadUrlString)}</Col>
-                                    </Row>
-                                } else {
-                                    cellContents = entry[1]
-                                }
-                                return <td style={{}} key={`${index}-${index2}`}>{cellContents}</td>
-                            } )}
-                            </tr>
-                        )})}
-                    </tbody>
-                </Table>
+                    <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0'}}>
+                        <thead>
+                        <tr>
+                            {Object.entries(generatedProductsLabels).map((labelEntry, index) => renderColTitle(labelEntry, index))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {userProducts.map((generatedProductObject, index) => {
+                                const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = generatedProductObject
+                                const statusToUse = status[0].state
+                                const downloadUrl = granules && granules.length !== 0 ? granules[0].uri.split('/').pop() : 'N/A'
+                                const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
+                                const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
+                                const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
+                                const outputGranuleExtentFlagToUse = outputGranuleExtentFlag ? '256 x 128 km' : '128 x 128 km'
+                                const productRowValues = {cycle, pass, scene, status: statusToUse, outputGranuleExtentFlag: outputGranuleExtentFlagToUse, outputSamplingGridType: outputSamplingGridTypeToUse, rasterResolution, utmZoneAdjust: utmZoneAdjustToUse, mgrsBandAdjust: mgrsBandAdjustToUse, downloadUrl, dateGenerated}
+                                return (
+                                <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
+                                {Object.entries(productRowValues).map((entry, index2) => {
+                                    let cellContents = null
+                                    if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
+                                        const downloadUrlString = granules[0].uri
+                                        cellContents = 
+                                        <Row className='normal-row'>
+                                            <Col>{entry[1]}</Col>
+                                            <Col>{(renderCopyDownloadButton(downloadUrlString))}</Col>
+                                            <Col>{renderDownloadButton(downloadUrlString)}</Col>
+                                        </Row>
+                                    } else {
+                                        cellContents = entry[1]
+                                    }
+                                    return <td style={{}} key={`${index}-${index2}`}>{cellContents}</td>
+                                } )}
+                                </tr>
+                            )})}
+                        </tbody>
+                    </Table>
+                </div>
+                <DataPagination />
             </div>
-          </div>
         )
     }
     
@@ -157,7 +166,7 @@ const GeneratedProductHistory = () => {
         <>
         <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
         <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
-            <Row className='normal-row'>{waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
+            <Row className='normal-row'>{userProducts.length === 0 ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
         </Col>
         </>
     );

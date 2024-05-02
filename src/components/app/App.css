@@ -310,8 +310,24 @@ tfoot {
 }
 
 .table-responsive-generatedProducts {
-  max-height: 75vh;
+  max-height: 65vh;
   overflow-y: auto;
+}
+
+.center {
+  width:100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-link-item {
+  background-color: #1A2535;
+  border-color: #1A2535;
+}
+
+.pagination-link-item:active {
+  background-color: #1A2535;
+  border-color: #1A2535;
 }
 
 .dark-mode-table {
@@ -398,7 +414,7 @@ ABOUT PAGE
 
 .about-page {
   max-height: 82vh;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .about-card {

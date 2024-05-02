@@ -157,3 +157,8 @@ export interface handleSaveResult {
   result: string, 
   savedScenes?: allProductParameters[]
 }
+
+// key is the page number and the value is the product ID of the last element on a page
+export interface RetrievedDataHistory {
+  [key: string]: string
+}
