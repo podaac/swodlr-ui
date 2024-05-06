@@ -325,14 +325,15 @@ const GranuleTable = (props: GranuleTableProps) => {
           const spatialSearchEndDateToUse = new Date(spatialSearchEndDate)
           const granuleInTimeRange: boolean = timeStart > spatialSearchStartDateToUse && timeStart < spatialSearchEndDateToUse && timeEnd > spatialSearchStartDateToUse && timeEnd < spatialSearchEndDateToUse
           const footprintCoordinatesSingleArray = (data.feed.entry[0].polygons[0][0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
+          const granuleFilename = data.feed.entry[0].producer_granule_id
           let footprintLatLongArray: LatLngExpression[] = []
           for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
             if(i%2 === 0) {
               //pair up current latitude and adjacent latitude
-              footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1]])
+              footprintLatLongArray.push([footprintCoordinatesSingleArray[i], footprintCoordinatesSingleArray[i+1],])
             }
           }
-          return [footprintLatLongArray,granuleInTimeRange]
+          return [footprintLatLongArray, granuleInTimeRange, granuleFilename]
         } else {
           return [[], true]
         }
@@ -444,10 +445,11 @@ const GranuleTable = (props: GranuleTableProps) => {
             //TODO: change back to spatialSearchCollectionConceptId
             return Promise.resolve(await getSceneFootprint(spatialSearchCollectionConceptId as string, granuleIdForFootprint).then(retrievedFootprint => {
 
-              const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[])[]
+              const validFootprintResultArray = retrievedFootprint as (boolean | LatLngExpression[] | string)[]
               const footprintResult = validFootprintResultArray[0]
               const isInTimeRange = validFootprintResultArray[1]
-              return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange} as allProductParameters
+              const granuleFilename = validFootprintResultArray[2]
+              return {...granule, footprint: footprintResult, inTimeRange: isInTimeRange, fileName: granuleFilename} as allProductParameters
             }))
           })).then(async productsWithFootprints => {
             // don't run time range check if granule was manually entered
