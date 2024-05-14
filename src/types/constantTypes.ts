@@ -25,7 +25,8 @@ export interface allProductParameters {
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
   footprint: LatLngExpression[],
-  inTimeRange?: boolean
+  inTimeRange?: boolean,
+  fileName?: string
 }
 
 export interface GranuleForTable {

@@ -116,20 +116,36 @@ export interface InputBounds {
         max: number
     }
 }
+// TODO: differentiate scientific and calibration orbits
+// below is the scientific orbit
+// export const inputBounds: inputValuesDictionary = {
+//     cycle: {
+//         min: 0,
+//         max: 399
+//     },
+//     pass: {
+//         min: 1,
+//         max: 584
+//     },
+//     scene: {
+//         min: 1,
+//         max: 154
+//     }
+// }
 
 export const inputBounds: inputValuesDictionary = {
-cycle: {
-    min: 0,
-    max: 399
-},
-pass: {
-    min: 1,
-    max: 584
-},
-scene: {
-    min: 1,
-    max: 154
-}
+    cycle: {
+        min: 0,
+        max: 578
+    },
+    pass: {
+        min: 1,
+        max: 584
+    },
+    scene: {
+        min: 1,
+        max: 154
+    }
 }
 
 export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
