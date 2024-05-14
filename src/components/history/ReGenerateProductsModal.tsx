@@ -19,28 +19,27 @@ const ReGenerateProductsModal = () => {
 
     const handleGenerate = () => {
         // unselect select-all box
-        console.log(granulesToReGenerate.map(granule => granule.id))
-        dispatch(addGeneratedProducts(granulesToReGenerate.map(granule => granule.id)))
+        dispatch(addGeneratedProducts({granuleIds: granulesToReGenerate.map(granule => granule.id), typeOfGenerate: 're-generate'}))
         dispatch(setShowReGenerateProductModalFalse())
         setSaveGranulesAlert('successfullyReGenerated')
     }
 
   return (
-    <Modal show={showReGenerateProductModal} onHide={() => dispatch(setShowReGenerateProductModalFalse())} id='generate-products-modal'>
+    <Modal show={showReGenerateProductModal} onHide={() => dispatch(setShowReGenerateProductModalFalse())} id='re-generate-products-modal'>
     <Modal.Header className="modal-style" closeButton>
         <Modal.Title>Re-Generate Product</Modal.Title>
     </Modal.Header>
 
     <Modal.Body className="modal-style">
         <Row>
-            <h5>Are you sure you would like to generate products with the following granules:</h5>
+            <h5>Are you sure you would like to re-generate products with the following granules:</h5>
             <h6>{granulesToReGenerate.map((granuleObject, index) => index === granulesToReGenerate.length-1 ? `${granuleObject.cycle}_${granuleObject.pass}_${granuleObject.scene} ` : `${granuleObject.cycle}_${granuleObject.pass}_${granuleObject.scene}, `)}</h6>
         </Row>
     </Modal.Body>
 
     <Modal.Footer>
         <Button variant="secondary" onClick={() => dispatch(setShowReGenerateProductModalFalse())}>Close</Button>
-        <Button variant="Warning" type="submit" onClick={() => handleGenerate()}>Generate</Button>
+        <Button variant="warning" type="submit" onClick={() => handleGenerate()}>Re-Generate</Button>
     </Modal.Footer>
     </Modal>
   );

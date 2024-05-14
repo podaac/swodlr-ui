@@ -19,13 +19,25 @@ const HistoryFilters = () => {
         const currentFiltersToModify: FilterParameters = structuredClone(currentFilters)
         switch(filter) {
           case 'cycle':
-            currentFiltersToModify[filter] = value 
+            if(value === '') {
+                currentFiltersToModify[filter] = 'none'
+            } else {
+                currentFiltersToModify[filter] = value
+            }
             break;
           case 'pass':
-            currentFiltersToModify[filter] = value 
+            if(value === '') {
+                currentFiltersToModify[filter] = 'none'
+            } else {
+                currentFiltersToModify[filter] = value
+            }
             break;
           case 'scene':
-            currentFiltersToModify[filter] = value
+            if(value === '') {
+                currentFiltersToModify[filter] = 'none'
+            } else {
+                currentFiltersToModify[filter] = value
+            }
             break;
           case 'status':
             if(currentFiltersToModify[filter].includes(value as ProductState)) {

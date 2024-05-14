@@ -13,7 +13,6 @@ interface GranuleState {
     addedProducts: allProductParameters[],
     selectedGranules: string[],
     granuleFocus: number[],
-    generatedProducts: GeneratedProduct[],
     generateProductParameters: GenerateProductParameters,
     granuleTableAlerts: AlertMessageObject[],
     productCustomizationTableAlerts: AlertMessageObject[],
@@ -43,7 +42,6 @@ const initialState: GranuleState = {
     selectedGranules: [],
     granuleFocus: [33.854457, -118.709093],
     mapFocus: {center: [33.854457, -118.709093], zoom: 6},
-    generatedProducts: [],
     generateProductParameters: generateProductParametersFiltered,
     granuleTableAlerts: [],
     productCustomizationTableAlerts: [],
@@ -93,41 +91,34 @@ export const productSlice = createSlice({
     setMapFocus: (state, action: PayloadAction<MapFocusObject>) => {
       state.mapFocus = action.payload
     },
-    addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
-      const newGeneratedProducts: GeneratedProduct[] = action.payload.map((granuleId, index) => {
-        // const arrayToSearch = (state.addedProducts).concat(state.granulesToReGenerate)
-        console.log('addedProducts: ',state.addedProducts)
-        const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
-        ?? state.granulesToReGenerate.find(productObj => productObj.id === granuleId)
-        console.log(relevantAddedProduct)
-        const { cycle, pass, scene} = relevantAddedProduct
-        const utmZoneAdjust = relevantAddedProduct.utmZoneAdjust ?? parameterOptionValues.utmZoneAdjust.default
-        const mgrsBandAdjust = relevantAddedProduct.mgrsBandAdjust ?? parameterOptionValues.mgrsBandAdjust.default
-        const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolutionUTM, rasterResolutionGEO} = state.generateProductParameters
-        const rasterResolution = outputSamplingGridType === "utm" ? rasterResolutionUTM : rasterResolutionGEO
-        const fetchData = async () => {
-          await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
-        }
-        
-        fetchData().catch(console.error);
+    addGeneratedProducts: (state, action: PayloadAction<{granuleIds: string[], typeOfGenerate: 'generate' | 're-generate'}>) => {
+      action.payload.granuleIds.forEach(granuleId => {
+        if(action.payload.typeOfGenerate === 'generate') {
+          const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
+          const { cycle, pass, scene} = relevantAddedProduct
+          const utmZoneAdjust = relevantAddedProduct.utmZoneAdjust ?? parameterOptionValues.utmZoneAdjust.default
+          const mgrsBandAdjust = relevantAddedProduct.mgrsBandAdjust ?? parameterOptionValues.mgrsBandAdjust.default
+          const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolutionUTM, rasterResolutionGEO} = state.generateProductParameters
+          const rasterResolution = outputSamplingGridType === "utm" ? rasterResolutionUTM : rasterResolutionGEO
+          const fetchData = async () => {
+            await generateL2RasterProduct(cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
+          }
+          fetchData().catch(console.error);
+        } else if(action.payload.typeOfGenerate === 're-generate') {
+          const relevantAddedProduct = state.granulesToReGenerate.find(productObj => productObj.id === granuleId) as Product
+          const {cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjust, mgrsBandAdjust} = relevantAddedProduct
 
-        return ({
-          productId: uuidv4(),
-          granuleId: granuleId, 
-          status: index % 2 === 0 ? "In Progress" : "Complete", 
-          cycle,
-          pass,
-          scene,
-          parametersUsedToGenerate: {
-            batchGenerateProductParameters: state.generateProductParameters,
-            utmZoneAdjust: utmZoneAdjust,
-            mgrsBandAdjust: mgrsBandAdjust
-          },
-          downloadUrl: `https://test-download-url-${granuleId}.zip`,
-          dateGenerated: new Date(),
-        })
+          let utmZoneAdjustToUse = String(utmZoneAdjust ?? parameterOptionValues.utmZoneAdjust.default)
+          if(utmZoneAdjustToUse === '1') utmZoneAdjustToUse = "+1"
+          let mgrsBandAdjustToUse = String(mgrsBandAdjust ?? parameterOptionValues.mgrsBandAdjust.default)
+          if(mgrsBandAdjustToUse === '1') mgrsBandAdjustToUse = "+1"
+
+          const fetchData = async () => {
+            await generateL2RasterProduct(String(cycle), String(pass), String(scene), +outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, utmZoneAdjustToUse, mgrsBandAdjustToUse)
+          }
+          fetchData().catch(console.error);
+        }
       })
-      state.generatedProducts = [...state.generatedProducts, ...newGeneratedProducts]
     },
     setGenerateProductParameters: (state, action: PayloadAction<GenerateProductParameters>) => {
       state.generateProductParameters = action.payload
@@ -181,7 +172,6 @@ export const productSlice = createSlice({
       state.currentFilters = action.payload
     },
     setGranulesToReGenerate: (state, action: PayloadAction<Product[]>) => {
-      console.log(action.payload)
       state.granulesToReGenerate = action.payload
     }
   },

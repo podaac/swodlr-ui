@@ -156,10 +156,11 @@ const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilt
         //     }
         // })
         pagesAllowed.unshift(...pagesAllowedToLeftOfCurrent.reverse())
+        const pagesAllowedFiltered = pagesAllowed.filter(value => value > 1)
         const pagesToShow = []
         for(let pageIndex = 1; pageIndex < numberOfTotalPages-1; pageIndex++) {
             const pageNumberOfIndex = pageIndex + 1
-            if(pagesAllowed.includes(pageNumberOfIndex)) {
+            if(pagesAllowedFiltered.includes(pageNumberOfIndex)) {
                 pagesToShow.push( <Pagination.Item key={`${pageNumberOfIndex}-pagination-item`} active={currentPageNumber === pageNumberOfIndex} onClick={() => handleSelectPage(pageNumberOfIndex)}>{pageNumberOfIndex}</Pagination.Item>)
             }
         }
@@ -178,21 +179,21 @@ const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilt
 
     return waitingForPagination ? waitingForPaginationSpinner() : (
         <Row>
-            <Col xs={2} style={{paddingTop: '15px'}}><h5><b>{totalNumberOfProducts}</b> Total Products</h5></Col>
-            <Col xs={8}>
+            <Col xs={2}></Col>
+            <Col xs={7}>
                 {
                     totalNumberOfFilteredProducts !== 0 ?
                     <Pagination data-bs-theme='dark' style={{paddingTop: '15px'}} className="center">
                         <Pagination.Prev onClick={() => handleSelectPage(currentPageNumber-1)} disabled={noPreviousPage} />
                         <Pagination.Item active={currentPageNumber === 1} onClick={() => handleSelectPage(1)}>1</Pagination.Item>
                         {getPaginationItemsWithEllipsis()}
-                        <Pagination.Item active={currentPageNumber === numberOfTotalPages} onClick={() => handleSelectPage(numberOfTotalPages)}>{numberOfTotalPages}</Pagination.Item>
+                        {numberOfTotalPages > 1 ? <Pagination.Item active={currentPageNumber === numberOfTotalPages} onClick={() => handleSelectPage(numberOfTotalPages)}>{numberOfTotalPages}</Pagination.Item> : null}
                         <Pagination.Next onClick={() => handleSelectPage(currentPageNumber+1)} disabled={userProducts.length < parseInt(productsPerPage) || noNextPage} />
                     </Pagination>
                     : null
                 }
             </Col>
-            <Col xs={2}></Col>
+            <Col xs={3} style={{paddingTop: '15px'}}><h6><b>{totalNumberOfProducts}</b> Total Generated Products</h6></Col>
         </Row>
     )
 }
