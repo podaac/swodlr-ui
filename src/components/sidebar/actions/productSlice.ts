@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, RetrievedDataHistory, SpatialSearchResult } from '../../../types/constantTypes'
+import { AlertMessageObject, allProductParameters, GeneratedProduct, GenerateProductParameters, MapFocusObject, SpatialSearchResult } from '../../../types/constantTypes'
 import L, { LatLngExpression } from 'leaflet'
-import { parameterOptionDefaults } from '../../../constants/rasterParameterConstants'
+import { defaultFilterParameters, defaultSpatialSearchEndDate, defaultSpatialSearchStartDate, parameterOptionDefaults, parameterOptionValues } from '../../../constants/rasterParameterConstants'
 import { v4 as uuidv4 } from 'uuid';
 import { generateL2RasterProduct } from '../../../user/userData';
 import { Product } from '../../../types/graphqlTypes';
+import { FilterParameters} from '../../../types/historyPageTypes';
 
 // Define a type for the slice state
 interface GranuleState {
@@ -25,7 +26,10 @@ interface GranuleState {
     historyPageState: string[],
     historyPageIndex: number,
     firstHistoryPageData: Product[],
-    userProducts: Product[]
+    userProducts: Product[],
+    allUserProducts: Product[],
+    currentFilters: FilterParameters,
+    granulesToReGenerate: Product[],
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -46,12 +50,15 @@ const initialState: GranuleState = {
     showUTMAdvancedOptions: false,
     spatialSearchResults: [],
     waitingForSpatialSearch: false,
-    spatialSearchStartDate: (new Date(2022, 11, 16)).toISOString(),
-    spatialSearchEndDate: (new Date()).toISOString(),
+    spatialSearchStartDate: defaultSpatialSearchStartDate.toISOString(),
+    spatialSearchEndDate: defaultSpatialSearchEndDate.toISOString(),
     userProducts: [],
+    allUserProducts: [],
     historyPageState: [],
     firstHistoryPageData: [],
-    historyPageIndex: 0
+    historyPageIndex: 0,
+    currentFilters: defaultFilterParameters,
+    granulesToReGenerate: [],
 }
 
 
@@ -87,11 +94,15 @@ export const productSlice = createSlice({
       state.mapFocus = action.payload
     },
     addGeneratedProducts: (state, action: PayloadAction<string[]>) => {
-      const productsToBeGeneratedCopy = [...action.payload]
-
-      const newGeneratedProducts: GeneratedProduct[] = productsToBeGeneratedCopy.map((granuleId, index) => {
+      const newGeneratedProducts: GeneratedProduct[] = action.payload.map((granuleId, index) => {
+        // const arrayToSearch = (state.addedProducts).concat(state.granulesToReGenerate)
+        console.log('addedProducts: ',state.addedProducts)
         const relevantAddedProduct = state.addedProducts.find(productObj => productObj.granuleId === granuleId) as allProductParameters
-        const {utmZoneAdjust, mgrsBandAdjust, cycle, pass, scene} = relevantAddedProduct
+        ?? state.granulesToReGenerate.find(productObj => productObj.id === granuleId)
+        console.log(relevantAddedProduct)
+        const { cycle, pass, scene} = relevantAddedProduct
+        const utmZoneAdjust = relevantAddedProduct.utmZoneAdjust ?? parameterOptionValues.utmZoneAdjust.default
+        const mgrsBandAdjust = relevantAddedProduct.mgrsBandAdjust ?? parameterOptionValues.mgrsBandAdjust.default
         const {outputGranuleExtentFlag, outputSamplingGridType, rasterResolutionUTM, rasterResolutionGEO} = state.generateProductParameters
         const rasterResolution = outputSamplingGridType === "utm" ? rasterResolutionUTM : rasterResolutionGEO
         const fetchData = async () => {
@@ -162,6 +173,16 @@ export const productSlice = createSlice({
     },
     setUserProducts: (state, action: PayloadAction<Product[]>) => {
       state.userProducts = action.payload
+    },
+    setAllUserProducts: (state, action: PayloadAction<Product[]>) => {
+      state.allUserProducts = action.payload
+    },
+    setCurrentFilter: (state, action: PayloadAction<FilterParameters>) => {
+      state.currentFilters = action.payload
+    },
+    setGranulesToReGenerate: (state, action: PayloadAction<Product[]>) => {
+      console.log(action.payload)
+      state.granulesToReGenerate = action.payload
     }
   },
 })
@@ -173,6 +194,7 @@ export const {
     setSelectedGranules,
     setGranuleFocus,
     addGeneratedProducts,
+    setGranulesToReGenerate,
     setGenerateProductParameters,
     addGranuleTableAlerts,
     removeGranuleTableAlerts,
@@ -184,9 +206,11 @@ export const {
     setMapFocus,
     clearGranuleTableAlerts,
     setUserProducts,
+    setAllUserProducts,
     setFirstHistoryPageData,
     setHistoryPageState,
     addPageToHistoryPageState,
+    setCurrentFilter
 } = productSlice.actions
 
 export default productSlice.reducer

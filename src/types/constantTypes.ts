@@ -25,7 +25,8 @@ export interface allProductParameters {
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
   footprint: LatLngExpression[],
-  inTimeRange?: boolean
+  inTimeRange?: boolean,
+  fileName?: string
 }
 
 export interface GranuleForTable {
@@ -137,7 +138,7 @@ export interface validScene {
   [key: string]: boolean
 }
 
-export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge'
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge' | 'successfullyReGenerated'
 
 export interface SpatialSearchResult {
   cycle: string,

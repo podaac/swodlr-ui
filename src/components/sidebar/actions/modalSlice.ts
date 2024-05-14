@@ -1,4 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { allProductParameters } from '../../../types/constantTypes'
+import { Product } from '../../../types/graphqlTypes'
 
 // Define a type for the slice state
 interface AddCustomProductModalState {
@@ -10,7 +12,8 @@ interface AddCustomProductModalState {
     selectedGranules: string[],
     showTutorialModal: boolean,
     skipTutorial: boolean,
-    showCloseTutorialModal: boolean
+    showCloseTutorialModal: boolean,
+    showReGenerateProductModal: boolean,
 }
 
 // Define the initial state using that type
@@ -25,7 +28,8 @@ const initialState: AddCustomProductModalState = {
     // the key will be cycleId_passId_sceneId and the value will be a 'parameterOptionDefaults' type object
     sampleGranuleDataArray: [],
     selectedGranules: [],
-    showCloseTutorialModal: false
+    showCloseTutorialModal: false,
+    showReGenerateProductModal: false
 }
 
 export const modalSlice = createSlice({
@@ -61,6 +65,12 @@ export const modalSlice = createSlice({
     setShowGenerateProductModalTrue: (state) => {
         state.showGenerateProductModal = true
     },
+    setShowReGenerateProductModalFalse: (state) => {
+        state.showReGenerateProductModal = false
+    },
+    setShowReGenerateProductModalTrue: (state) => {
+        state.showReGenerateProductModal = true
+    },
     setShowTutorialModalFalse: (state) => {
         state.showTutorialModal = false
     },
@@ -92,6 +102,8 @@ export const {
     setShowDeleteProductModalTrue,
     setShowGenerateProductModalFalse,
     setShowGenerateProductModalTrue,
+    setShowReGenerateProductModalFalse,
+    setShowReGenerateProductModalTrue,
     setShowTutorialModalFalse,
     setShowTutorialModalTrue,
     setSkipTutorialFalse,

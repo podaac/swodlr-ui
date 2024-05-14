@@ -1,5 +1,6 @@
 import { LatLngExpression } from "leaflet"
 import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
+import { FilterParameters } from "../types/historyPageTypes"
 
 export const rasterResolutionOptions = {
     UTM: [90, 100, 120, 125, 200, 250, 500, 1000, 2500, 5000, 10000],
@@ -196,7 +197,11 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     spatialSearchAreaTooLarge: {
         message: `The search area you've selected on the map is too large. Please choose a smaller area to search.`,
         variant: 'warning'
-    }
+    },
+    successfullyReGenerated: {
+        message: `Successfully re-submitted product generation! Go to the 'My Data' page to track progress.`,
+        variant: 'success'
+    },
   }
 
   export const parameterOptionHelp = {
@@ -237,4 +242,21 @@ export const afterCPSL = 'F_'
 export const spatialSearchCollectionConceptId = 'C2799438271-POCLOUD'
 // export const footprintSearchCollectionConceptId = 'C2799438271-POCLOUD'
 
-export const productsPerPage = '20'
+export const productsPerPage = '10'
+
+export const defaultFilterParameters: FilterParameters = {
+    cycle: 'none',
+    pass: 'none',
+    scene: 'none',
+    outputGranuleExtentFlag: [],
+    status: [],
+    outputSamplingGridType: [],
+    rasterResolution: [],
+    utmZoneAdjust: [],
+    mgrsBandAdjust: [],
+    startDate: 'none',
+    endDate: 'none'
+}
+
+export const defaultSpatialSearchStartDate = new Date(2022, 11, 16)
+export const defaultSpatialSearchEndDate = new Date()

@@ -206,7 +206,7 @@ const WorldMap = () => {
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>]}</Tooltip>
+            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>, <h6 key={`footprint-filename-tooltip-${index}`}>{`File Name: ${productObject.fileName}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

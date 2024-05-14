@@ -314,6 +314,11 @@ tfoot {
   overflow-y: auto;
 }
 
+.table-filter {
+  background-color: #324a68;
+  border: solid white 1px
+}
+
 .center {
   width:100%;
   display: flex;
