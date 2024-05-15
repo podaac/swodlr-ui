@@ -1,4 +1,4 @@
-import { Accordion, Button, Col, Form, Row } from "react-bootstrap";
+import { Accordion, Button, Col, Form, Row, Spinner } from "react-bootstrap";
 import { ProductState } from "../../types/graphqlTypes";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { setCurrentFilter } from "../sidebar/actions/productSlice";
@@ -14,6 +14,7 @@ const HistoryFilters = () => {
     const [currentFilters, setCurrentFilters] = useState<FilterParameters>(defaultFilterParameters)
     const [endDateToUse, setEndDateToUse] = useState<Date>(defaultSpatialSearchEndDate)
     const [startDateToUse, setStartDateToUse] = useState<Date>(defaultSpatialSearchStartDate)
+    const waitingForMyDataFiltering = useAppSelector((state) => state.product.waitingForMyDataFiltering)
 
     const handleChangeFilters = (filter: FilterAction, value: string) => {        
         const currentFiltersToModify: FilterParameters = structuredClone(currentFilters)
@@ -255,8 +256,9 @@ const HistoryFilters = () => {
                             <Form>
                                 <div key={`default-checkbox`} className="mb-3">
                                     {zoneAdjustOptions.map(valueString => {
+                                        const strippedValueString = valueString.replace('+', '')
                                         return (
-                                            <Form.Check type='checkbox' key={`${valueString}-mgrsBandAdjust-checkbox`} id={`${valueString}-mgrsBandAdjust-checkbox`} label={valueString} checked={currentFilters.mgrsBandAdjust.includes(valueString as Adjust)} onChange={() => handleChangeFilters('mgrsBandAdjust', valueString)}/>
+                                            <Form.Check type='checkbox' key={`${strippedValueString}-mgrsBandAdjust-checkbox`} id={`${strippedValueString}-mgrsBandAdjust-checkbox`} label={valueString} checked={currentFilters.mgrsBandAdjust.includes(strippedValueString as Adjust)} onChange={() => handleChangeFilters('mgrsBandAdjust', strippedValueString)}/>
                                         )
                                     })}
                                 </div>
@@ -292,7 +294,11 @@ const HistoryFilters = () => {
                     </Accordion.Item>
                 </Accordion>
             </Row>
-            <Row style={{paddingRight: '20px', paddingLeft: '20px', paddingTop: '7px', paddingBottom: '7px'}}><Button onClick={() => dispatch(setCurrentFilter(currentFilters))}>Apply</Button></Row>
+            <Row style={{paddingRight: '20px', paddingLeft: '20px', paddingTop: '7px', paddingBottom: '7px'}}><Button onClick={() => dispatch(setCurrentFilter(currentFilters))}>{waitingForMyDataFiltering ? 
+                            <Spinner size="sm" animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner> 
+            : 'Apply'}</Button></Row>
         </Col>
     )
 }

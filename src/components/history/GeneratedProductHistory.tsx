@@ -1,18 +1,17 @@
-import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner, Form, DropdownButton, Dropdown, Badge } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { Product, ProductState } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
-import { InfoCircle, Clipboard, Download, ArrowClockwise } from "react-bootstrap-icons";
+import { InfoCircle } from "react-bootstrap-icons";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp, productsPerPage } from "../../constants/rasterParameterConstants";
 import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
 import DataPagination from "./DataPagination";
 import HistoryFilters from "./HistoryFilters";
 import { Adjust, FilterParameters, OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution } from "../../types/historyPageTypes";
-import { setShowGenerateProductModalTrue, setShowReGenerateProductModalTrue } from "../sidebar/actions/modalSlice";
+import { setShowReGenerateProductModalTrue } from "../sidebar/actions/modalSlice";
 import ReGenerateProductsModal from "./ReGenerateProductsModal";
-import { allProductParameters } from "../../types/constantTypes";
-import { setAllUserProducts, setGranulesToReGenerate, setUserProducts } from "../sidebar/actions/productSlice";
+import { setAllUserProducts, setGranulesToReGenerate, setUserProducts, setWaitingForMyDataFiltering } from "../sidebar/actions/productSlice";
 
 export const productPassesFilterCheck = (currentFilters: FilterParameters, cycle: number, pass: number, scene: number, outputGranuleExtentFlag: boolean, status: string, outputSamplingGridType: string, rasterResolution: number, dateGenerated: string, utmZoneAdjust?: number, mgrsBandAdjust?: number): boolean => {
     let productPassesFilter = true
@@ -58,16 +57,17 @@ const GeneratedProductHistory = () => {
     const dispatch = useAppDispatch()
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const userProducts = useAppSelector((state) => state.product.userProducts)
-    const allUserProducts = useAppSelector((state) => state.product.allUserProducts)
     const currentFilters = useAppSelector((state) => state.product.currentFilters)
     const { search } = useLocation()
     const navigate = useNavigate()
-    const [waitingForDataTableToLoad, setWaitingForDataTableToLoad] = useState<boolean>(false)
+    // const [waitingForDataTableToLoad, setWaitingForDataTableToLoad] = useState<boolean>(false)
     const [totalNumberOfProducts, setTotalNumberOfProducts] = useState<number>(0)
     const [totalNumberOfFilteredProducts, setTotalNumberOfFilteredProducts] = useState<number>(0)
+    const [checkedProducts, setCheckedProducts] = useState<Product[]>([])
+    const [allChecked, setAllChecked] = useState<boolean>(false)
     
     useEffect(() => {
-        setWaitingForDataTableToLoad(true)
+        dispatch(setWaitingForMyDataFiltering(true))
         // get the data for the first page
         // go through all the user product data to get the id of each one so that 
         const fetchData = async () => {
@@ -78,8 +78,6 @@ const GeneratedProductHistory = () => {
                 const filteredProducts = allProducts.filter(product => {
                     const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = product
                     const statusToUse = status[0].state
-                    const utmZoneAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : utmZoneAdjust
-                    const mgrsBandAdjustToUse = outputSamplingGridType === 'GEO' ? 'N/A' : mgrsBandAdjust
                     const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
                     const productPassesFilter = productPassesFilterCheck(currentFilters, cycle, pass, scene, outputGranuleExtentFlag, statusToUse, outputSamplingGridTypeToUse, rasterResolution, dateGenerated, utmZoneAdjust, mgrsBandAdjust)
                     if(productPassesFilter) {
@@ -92,12 +90,17 @@ const GeneratedProductHistory = () => {
                 dispatch(setAllUserProducts(filteredProducts))
                 const productsPerPageToInt = parseInt(productsPerPage)
                 dispatch(setUserProducts(filteredProducts.slice(0, productsPerPageToInt)))
-                setWaitingForDataTableToLoad(false)
+                dispatch(setWaitingForMyDataFiltering(false))
             })
         }
         fetchData().catch(console.error)
         // if(userProducts.length === 0) fetchData().catch(console.error)
       }, [currentFilters]);
+
+      // reset all checked checkbox when going to next page
+      useEffect(() => {
+        setAllChecked(false)
+      }, [userProducts]);
     
     // useEffect(() => {
     //     // get the data for the first page
@@ -117,12 +120,8 @@ const GeneratedProductHistory = () => {
     //     if(userProducts.length === 0) fetchData().catch(console.error)
     //   }, []);
 
-    // TODO: implement download link copy button
-    const [copyTooltipText, setCopyTooltipText] = useState('Click to Copy URL')
-
-    const handleCopyClick = (downloadUrl: string) => {
-        navigator.clipboard.writeText(downloadUrl)
-        setCopyTooltipText('Copied!')
+    const handleCopyClick = (downloadUrls: string[]) => {
+        navigator.clipboard.writeText(downloadUrls.join('\n'))
     }
 
     const renderInfoIcon = (parameterId: string) => (
@@ -138,49 +137,16 @@ const GeneratedProductHistory = () => {
         </OverlayTrigger>
     )
 
-    const renderCopyDownloadButton = (downloadUrlString: string) => (
-        <OverlayTrigger
-            placement="bottom"
-            overlay={
-                <Tooltip id="button-tooltip">
-                    Copy
-                </Tooltip>
-            }
-        >
-            <Button onClick={() => handleCopyClick(downloadUrlString as string)}><Clipboard color="white" size={18}/></Button>
-        </OverlayTrigger>
-    )
-
-    const renderDownloadButton = (downloadUrlString: string) => (
-        <OverlayTrigger
-            placement="bottom"
-            overlay={
-                <Tooltip id="button-tooltip">
-                    Download
-                </Tooltip>
-            }
-        >
-            <Button onClick={() => window.open(downloadUrlString, '_blank', 'noreferrer')}><Download color="white" size={18}/></Button>
-        </OverlayTrigger>
-    )
+    const handleDownloadProduct = (downloadUrlStrings: string[]) => {
+        downloadUrlStrings.forEach((downloadUrl, index) => {
+            window.open(downloadUrl, String(index))
+        })
+    }
 
     const handleOnReGenerateClick = (granuleObjects: Product[]) => {
         dispatch(setGranulesToReGenerate(granuleObjects))
         dispatch(setShowReGenerateProductModalTrue())
     }
-
-    const renderReGenerateSceneButton = (granuleObject: Product) => (
-        <OverlayTrigger
-            placement="bottom"
-            overlay={
-                <Tooltip id="button-tooltip">
-                    Re-Generate Scene
-                </Tooltip>
-            }
-        >
-            <Button onClick={() => handleOnReGenerateClick([granuleObject])}><ArrowClockwise color="white" size={18}/></Button>
-        </OverlayTrigger>
-    )
     
     const renderColTitle = (labelEntry: string[], index: number) => {
         let infoIcon = infoIconsToRender.includes(labelEntry[0]) ? renderInfoIcon(labelEntry[0]) : null
@@ -190,7 +156,29 @@ const GeneratedProductHistory = () => {
         )
     }
 
+    // select product or remove if already selected
+    const handleProductChecked = (selectedProducts: Product[], checkType: 'single' | 'all') => {
+        let checkedProductsClone = [...checkedProducts]
+        
+        selectedProducts.forEach(selectedProduct => {
+            const productAlreadySelected: boolean = checkedProductsClone.map(product => product.id).includes(selectedProduct.id)
+            const productShouldBeRemoved: boolean = checkType === 'all' ? allChecked : productAlreadySelected
+
+            if(productShouldBeRemoved) {
+                // remove product from checked list
+                checkedProductsClone = checkedProductsClone.filter(product => product.id !== selectedProduct.id)
+            } else {
+                // add product to checked list
+                if(!productAlreadySelected) checkedProductsClone.push(selectedProduct)
+            }
+        })
+        if(checkType === 'all') setAllChecked(!allChecked)
+        setCheckedProducts(checkedProductsClone)
+    }
+
     const renderHistoryTable = () => {
+        const downloadButtonDisabled = checkedProducts.length === 0 || checkedProducts.every(product => product.granules.length === 0)
+        const downloadUrlList = checkedProducts.map(product => product.granules.map(granule => granule.uri)).flat()
         return (
             <Row>
                 {<Col xs={2} style={{height: '100%'}}><HistoryFilters /></Col>}
@@ -202,9 +190,27 @@ const GeneratedProductHistory = () => {
                     {
                     totalNumberOfProducts === 0 ?
                     <Row>{productHistoryAlert()}</Row>
-                    :<Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
+                    :<>
+                    <Row>
+                        <Col xs={1}>
+                        <DropdownButton data-bs-theme='dark' style={{}} id="dropdown-basic-button" title={<><Badge bg="secondary">{checkedProducts.length}</Badge> Actions</>}>
+                            <Dropdown.Item disabled={downloadButtonDisabled} onClick={() => handleDownloadProduct(downloadUrlList)}>Download</Dropdown.Item>
+                            <Dropdown.Item disabled={downloadButtonDisabled} onClick={() => handleCopyClick(downloadUrlList)}>Copy Download Url</Dropdown.Item>
+                            <Dropdown.Item disabled={checkedProducts.length === 0} onClick={() => handleOnReGenerateClick(checkedProducts)}>Re-Generate</Dropdown.Item>
+                            <ReGenerateProductsModal />
+                        </DropdownButton>
+                        </Col>
+                    </Row>
+                    <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>
                     <tr>
+                        <th key='select-action' id='select-action'>
+                            <Form>
+                                <div className="mb-3">
+                                    <Form.Check type='checkbox' checked={allChecked} id='select-all-products-checkbox' label='' onChange={() => handleProductChecked(userProducts, 'all')}/>
+                                </div>
+                            </Form>
+                        </th>
                         {Object.entries(generatedProductsLabels).map((labelEntry, index) => renderColTitle(labelEntry, index))}
                     </tr>
                     </thead>
@@ -221,33 +227,20 @@ const GeneratedProductHistory = () => {
 
                             return (
                                 <tr className={`${colorModeClass}-table hoverable-row`} key={`generated-products-data-row-${index}`}>
-                                {Object.entries(productRowValues).map((entry, index2) => {
-                                    let cellContents = null
-                                    if (entry[0] === 'downloadUrl' && entry[1] !== 'N/A') {
-                                        const downloadUrlString = granules[0].uri
-                                        cellContents = 
-                                        <Row className='normal-row'>
-                                            <Col>{entry[1]}</Col>
-                                            <Col>{(renderCopyDownloadButton(downloadUrlString))}</Col>
-                                            <Col>{renderDownloadButton(downloadUrlString)}</Col>
-                                        </Row>
-                                    } else if (entry[0] === 'status' && entry[1] === 'ERROR') {
-                                        cellContents = 
-                                        <Row className='normal-row'>
-                                            <Col>{entry[1]}</Col>
-                                            <Col>{renderReGenerateSceneButton(generatedProductObject)}</Col>
-                                            <ReGenerateProductsModal />
-                                        </Row>
-                                    } else {
-                                        cellContents = entry[1]
-                                    }
-                                    return <td style={{}} key={`${index}-${index2}`}>{cellContents}</td>
-                                } )}
+                                <td>
+                                    <Form>
+                                        <div className="mb-3">
+                                            <Form.Check type='checkbox' checked={checkedProducts.map(product => product.id).includes(id)} id='select-all-products-checkbox' label='' onChange={() => handleProductChecked([generatedProductObject], 'single')}/>
+                                        </div>
+                                    </Form>
+                                </td>
+                                {Object.entries(productRowValues).map((entry, index2) => <td key={`${index}-${index2}`}>{entry[1]}</td>)}
                                 </tr>
                             )    
                         })}
                     </tbody>
                 </Table>
+                </>
                     }
                     </div>
                     {<DataPagination totalNumberOfProducts={totalNumberOfProducts} totalNumberOfFilteredProducts={totalNumberOfFilteredProducts} />}
@@ -285,7 +278,7 @@ const GeneratedProductHistory = () => {
     return (
         <>
         <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
-        <Col className='about-page' style={{marginRight: '50px', marginLeft: '50px'}}>
+        <Col className='about-page' style={{marginRight: '20px', marginLeft: '20px'}}>
             <Row className='normal-row'>{totalNumberOfProducts === 0 ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
         </Col>
         </>
