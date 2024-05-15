@@ -315,7 +315,8 @@ tfoot {
 }
 
 .table-filter {
-  background-color: #324a68;
+  /* background-color: #324a68; */
+  background-color:#1a2535;
   border: solid white 1px
 }
 
