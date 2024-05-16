@@ -2,11 +2,12 @@ import { Accordion, Button, Col, Form, Row, Spinner } from "react-bootstrap";
 import { ProductState } from "../../types/graphqlTypes";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { setCurrentFilter } from "../sidebar/actions/productSlice";
-import { defaultFilterParameters, defaultSpatialSearchEndDate, defaultSpatialSearchStartDate, parameterOptionValues, rasterResolutionOptions } from "../../constants/rasterParameterConstants";
+import { defaultFilterParameters, defaultSpatialSearchEndDate, defaultSpatialSearchStartDate, inputBounds, parameterOptionValues, rasterResolutionOptions } from "../../constants/rasterParameterConstants";
 import { useState } from "react";
 import { OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution, Adjust, FilterParameters, FilterAction } from "../../types/historyPageTypes";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Formik } from "formik";
 
 
 const HistoryFilters = () => {
@@ -15,8 +16,11 @@ const HistoryFilters = () => {
     const [endDateToUse, setEndDateToUse] = useState<Date>(defaultSpatialSearchEndDate)
     const [startDateToUse, setStartDateToUse] = useState<Date>(defaultSpatialSearchStartDate)
     const waitingForMyDataFiltering = useAppSelector((state) => state.product.waitingForMyDataFiltering)
+    const [cycleIsValid, setCycleIsValid] = useState<boolean>(true)
+    const [passIsValid, setPassIsValid] = useState<boolean>(true)
+    const [sceneIsValid, setSceneIsValid] = useState<boolean>(true)
 
-    const handleChangeFilters = (filter: FilterAction, value: string) => {        
+    const handleChangeFilters = (filter: FilterAction, value: string, valueValidity?: boolean) => {      
         const currentFiltersToModify: FilterParameters = structuredClone(currentFilters)
         switch(filter) {
           case 'cycle':
@@ -25,6 +29,9 @@ const HistoryFilters = () => {
             } else {
                 currentFiltersToModify[filter] = value
             }
+
+            const checkCycleIsValid = (parseInt(value) >= inputBounds.cycle.min && parseInt(value) <= inputBounds.cycle.max) || isNaN(parseInt(value))
+            setCycleIsValid(checkCycleIsValid)
             break;
           case 'pass':
             if(value === '') {
@@ -32,6 +39,9 @@ const HistoryFilters = () => {
             } else {
                 currentFiltersToModify[filter] = value
             }
+
+            const checkPassIsValid = (parseInt(value) >= inputBounds.pass.min && parseInt(value) <= inputBounds.pass.max) || isNaN(parseInt(value))
+            setPassIsValid(checkPassIsValid)
             break;
           case 'scene':
             if(value === '') {
@@ -39,6 +49,9 @@ const HistoryFilters = () => {
             } else {
                 currentFiltersToModify[filter] = value
             }
+
+            const checkSceneIsValid = (parseInt(value) >= inputBounds.scene.min && parseInt(value) <= inputBounds.scene.max) || isNaN(parseInt(value))
+            setSceneIsValid(checkSceneIsValid)
             break;
           case 'status':
             if(currentFiltersToModify[filter].includes(value as ProductState)) {
@@ -107,7 +120,6 @@ const HistoryFilters = () => {
             }
             break;
           default:
-            // code block
         }
         setCurrentFilters(currentFiltersToModify)
     }
@@ -120,20 +132,26 @@ const HistoryFilters = () => {
     const rasterResolutionOptionsUTMOptions = rasterResolutionOptions.UTM.map(value => value.toString())
     const rasterResolutionOptionsGEOOptions = rasterResolutionOptions.GEO.map(value => value.toString())
     const zoneAdjustOptions = ['+1', '0', '-1']
-
+    const cycleIsInvalid = parseInt(currentFilters['cycle']) < inputBounds.cycle.min || parseInt(currentFilters['cycle']) > inputBounds.cycle.max
+    const passIsInvalid = parseInt(currentFilters['pass']) < inputBounds.pass.min || parseInt(currentFilters['pass']) > inputBounds.pass.max
+    const sceneIsInvalid = parseInt(currentFilters['scene']) < inputBounds.scene.min || parseInt(currentFilters['scene']) > inputBounds.scene.max
+    const applyFilterErrorMessage = `Not Valid: ${cycleIsValid ? '' : 'cycle'}${(!passIsValid || !sceneIsValid) && !cycleIsValid ? ',' : ''} ${passIsValid ? '' : 'pass'}${!sceneIsValid && !passIsValid ? ',' : ''} ${sceneIsValid ? '' : 'scene'}`
     return (
         <Col className="table-filter">
             <Row style={{paddingTop: '5px'}}><h5><b>Filters</b></h5></Row>
-            <Row style={{overflowY: 'auto', maxHeight: '59vh'}}>
+            <Row style={{overflowY: 'auto', maxHeight: '55vh'}}>
                 <Accordion data-bs-theme='dark'>
                     <Accordion.Item eventKey="0">
                         <Accordion.Header>Cycle</Accordion.Header>
                         <Accordion.Body>
-                            <Form>
-                                <Form.Group className="mb-3" controlId="cycle-filter-input">
-                                    <Form.Control type="number" placeholder="cycle_id" onChange={(e) => handleChangeFilters('cycle', String(e.target.value))}/>
-                                </Form.Group>
-                            </Form>
+                            <Formik onSubmit={console.log} initialValues={{}}>
+                                <Form>
+                                    <Form.Group className="mb-3" controlId="cycle-filter-input">
+                                        <Form.Control type="number" isInvalid={cycleIsInvalid} placeholder="cycle_id" onChange={(e) => handleChangeFilters('cycle', String(e.target.value), !cycleIsInvalid)}/>
+                                        <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.cycle.min} - ${inputBounds.cycle.max}`}</h6>
+                                    </Form.Group>
+                                </Form>
+                            </Formik>
                         </Accordion.Body>
                     </Accordion.Item>
                 </Accordion>
@@ -143,7 +161,8 @@ const HistoryFilters = () => {
                         <Accordion.Body>
                             <Form>
                                 <Form.Group className="mb-3" controlId="pass-filter-input">
-                                    <Form.Control type="number" placeholder="pass_id" onChange={(e) => handleChangeFilters('pass', String(e.target.value))}/>
+                                    <Form.Control type="number" isInvalid={passIsInvalid} placeholder="pass_id" onChange={(e) => handleChangeFilters('pass', String(e.target.value), !passIsInvalid)}/>
+                                    <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.pass.min} - ${inputBounds.pass.max}`}</h6>
                                 </Form.Group>
                             </Form>
                         </Accordion.Body>
@@ -155,7 +174,8 @@ const HistoryFilters = () => {
                         <Accordion.Body>
                             <Form>
                                 <Form.Group className="mb-3" controlId="scene-filter-input">
-                                    <Form.Control type="number" placeholder="scene_id" onChange={(e) => handleChangeFilters('scene', String(e.target.value))}/>
+                                    <Form.Control type="number" isInvalid={sceneIsInvalid} placeholder="scene_id" onChange={(e) => handleChangeFilters('scene', String(e.target.value), !sceneIsInvalid)}/>
+                                    <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.scene.min} - ${inputBounds.scene.max}`}</h6>
                                 </Form.Group>
                             </Form>
                         </Accordion.Body>
@@ -294,11 +314,12 @@ const HistoryFilters = () => {
                     </Accordion.Item>
                 </Accordion>
             </Row>
-            <Row style={{paddingRight: '20px', paddingLeft: '20px', paddingTop: '7px', paddingBottom: '7px'}}><Button onClick={() => dispatch(setCurrentFilter(currentFilters))}>{waitingForMyDataFiltering ? 
+                <Button style={{marginTop: '10px', marginBottom: '10px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} onClick={() => dispatch(setCurrentFilter(currentFilters))}>{waitingForMyDataFiltering ? 
                             <Spinner size="sm" animation="border" role="status">
                             <span className="visually-hidden">Loading...</span>
                         </Spinner> 
-            : 'Apply'}</Button></Row>
+                : 'Apply'}</Button>
+                {!cycleIsValid || !passIsValid || !sceneIsValid ? <h6 style={{color: 'red'}}>{applyFilterErrorMessage}</h6> : null}
         </Col>
     )
 }
