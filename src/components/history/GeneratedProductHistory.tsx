@@ -186,7 +186,8 @@ const GeneratedProductHistory = () => {
                 
                 <Col xs={10}>
                     <div style={{padding: '0px 20px 20px 20px'}} id='history-table'>
-                    <div className={`table-responsive-generatedProducts table-responsive`}>
+                    {/* <div className={`table-responsive-generatedProducts table-responsive`}> */}
+                    <div>
                     {
                     totalNumberOfProducts === 0 ?
                     <Row>{productHistoryAlert()}</Row>
@@ -201,6 +202,7 @@ const GeneratedProductHistory = () => {
                         </DropdownButton>
                         </Col>
                     </Row>
+                    <div className="table-responsive-generatedProducts table-responsive">
                     <Table bordered hover className={`${colorModeClass}-table`} style={{marginBottom: '0px'}}>
                     <thead>
                     <tr>
@@ -240,6 +242,7 @@ const GeneratedProductHistory = () => {
                         })}
                     </tbody>
                 </Table>
+                </div>
                 </>
                     }
                     </div>
@@ -277,7 +280,7 @@ const GeneratedProductHistory = () => {
 
     return (
         <>
-        <h4 className='normal-row' style={{marginTop: '70px'}}>Generated Products Data</h4>
+        <h4 style={{marginTop: '80px', paddingBottom: '0px', marginBottom: '0px'}}>Generated Products Data</h4>
         <Col className='about-page' style={{marginRight: '20px', marginLeft: '20px'}}>
             <Row className='normal-row'>{totalNumberOfProducts === 0 ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
         </Col>
