@@ -1,4 +1,4 @@
-import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Button, Spinner, Form, DropdownButton, Dropdown, Badge } from "react-bootstrap";
+import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Spinner, Form, DropdownButton, Dropdown, Badge } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { Product, ProductState } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
@@ -60,7 +60,6 @@ const GeneratedProductHistory = () => {
     const currentFilters = useAppSelector((state) => state.product.currentFilters)
     const { search } = useLocation()
     const navigate = useNavigate()
-    // const [waitingForDataTableToLoad, setWaitingForDataTableToLoad] = useState<boolean>(false)
     const [totalNumberOfProducts, setTotalNumberOfProducts] = useState<number>(0)
     const [totalNumberOfFilteredProducts, setTotalNumberOfFilteredProducts] = useState<number>(0)
     const [checkedProducts, setCheckedProducts] = useState<Product[]>([])
@@ -94,31 +93,12 @@ const GeneratedProductHistory = () => {
             })
         }
         fetchData().catch(console.error)
-        // if(userProducts.length === 0) fetchData().catch(console.error)
       }, [currentFilters]);
 
       // reset all checked checkbox when going to next page
       useEffect(() => {
         setAllChecked(false)
       }, [userProducts]);
-    
-    // useEffect(() => {
-    //     // get the data for the first page
-    //     // go through all the user product data to get the id of each one so that 
-    //     const fetchData = async () => {
-    //         await getUserProducts({limit: productsPerPage}).then(response => {
-    //             const currentPageProducts = response.products as Product[]
-    //             if(response.status === 'success' && currentPageProducts.length !== 0) {
-    //                 const idToUse = currentPageProducts[currentPageProducts.length-1].id
-    //                 dispatch(setUserProducts(currentPageProducts))
-    //                 dispatch(setFirstHistoryPageData(currentPageProducts))
-    //                 dispatch(addPageToHistoryPageState(idToUse))
-    //             }
-    //         })
-    //     }
-        
-    //     if(userProducts.length === 0) fetchData().catch(console.error)
-    //   }, []);
 
     const handleCopyClick = (downloadUrls: string[]) => {
         navigator.clipboard.writeText(downloadUrls.join('\n'))
@@ -186,7 +166,6 @@ const GeneratedProductHistory = () => {
                 
                 <Col xs={10}>
                     <div style={{padding: '0px 20px 20px 20px'}} id='history-table'>
-                    {/* <div className={`table-responsive-generatedProducts table-responsive`}> */}
                     <div>
                     {
                     totalNumberOfProducts === 0 ?
@@ -273,7 +252,6 @@ const GeneratedProductHistory = () => {
         return (
             <Col>
                 <Row>{renderHistoryTable()}</Row>
-                {/* {allUserProducts.length === 0 ? <Row>{productHistoryAlert()}</Row> : null} */}
             </Col>
         )
     }
