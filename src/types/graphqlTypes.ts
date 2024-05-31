@@ -60,7 +60,7 @@ export interface UserResponse {
     currentUser: CurrentUser
 }
 
-export type ProductState = 'NEW' | 'UNAVAILABLE' | 'GENERATING' | 'ERROR' | 'READY' | 'AVAILABLE;'
+export type ProductState = 'NEW' | 'UNAVAILABLE' | 'GENERATING' | 'ERROR' | 'READY' | 'AVAILABLE'
 
 export type GraphqlResponseStatus = 'success' | 'error' | 'unknown'
 
