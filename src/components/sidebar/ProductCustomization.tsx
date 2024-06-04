@@ -8,6 +8,8 @@ import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actio
 import { useSearchParams } from 'react-router-dom';
 import { GenerateProductParameters } from '../../types/constantTypes';
 
+// TODO: revert back after ONLY RESOLUTION SELECTION period is over. Search todos related to disabled and featureNotAvailable
+
 const ProductCustomization = () => {
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const generateProductParameters = useAppSelector((state) => state.product.generateProductParameters)
@@ -151,10 +153,14 @@ const ProductCustomization = () => {
 
     const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
         const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => {
+            // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
+            const featureNotAvailable = value === 'lat/lon'
             const resolutionToUse: number = value === 'utm' ? rasterResolutionUTM : rasterResolutionGEO
             return (
                 <Form.Check 
                     checked={value === generateProductParameters.outputSamplingGridType}
+                    // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
+                    disabled={featureNotAvailable}
                     inline 
                     label={String(value).toUpperCase()} 
                     name="outputSamplingGridTypeGroup" 
@@ -175,7 +181,9 @@ const ProductCustomization = () => {
                     onChange={() => handleShowUTMAdvancedOptions()}
                     label={'advanced options'} 
                     style={{marginTop: '10px'}}
-                    disabled={!(outputSamplingGridType === 'utm')}
+                    // TODO: Switch back to other disabled after ONLY RESOLUTION SELECTION period is over
+                    // disabled={!(outputSamplingGridType === 'utm')}
+                    disabled={true}
                     key={`outputGranuleExtentFlag-switch-key`}
                 />
             )
@@ -198,10 +206,14 @@ const ProductCustomization = () => {
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
                     {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
+                        // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
+                        const featureNotAvailable = Boolean(value)
                         return (
                             <Form.Check 
                                 checked={value === generateProductParameters.outputGranuleExtentFlag}
                                 inline 
+                                // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
+                                disabled={featureNotAvailable}
                                 label={value ? '256 x 128 km' : '128 x 128 km'} 
                                 name="outputGranuleExtentFlagTypeGroup" 
                                 type={'radio'} 
