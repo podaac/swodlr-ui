@@ -424,6 +424,12 @@ ABOUT PAGE
   overflow-y: scroll;
 }
 
+.my-data-page {
+  max-height: 82vh;
+  background-color: #3d5d82;
+  /* overflow-y: scroll; */
+}
+
 .about-card {
   background-color: #1A2535;
   color: white;

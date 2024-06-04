@@ -235,7 +235,7 @@ const GeneratedProductHistory = () => {
     
     const productHistoryAlert = () => {
         const alertMessage = 'No products generated with these filters. Click here or go to the Product Customization page to generate products.'
-        return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/generatedProductHistory${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
+        return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/customizeProduct/configureOptions${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
     const waitingForProductsToLoadSpinner = () => {
@@ -260,7 +260,7 @@ const GeneratedProductHistory = () => {
     return (
         <>
             <h4 style={{marginTop: '80px', paddingBottom: '0px', marginBottom: '0px'}}>Generated Products Data</h4>
-            <Col className='about-page' style={{marginRight: '20px', marginLeft: '20px'}}>
+            <Col className='my-data-page' style={{marginRight: '20px', marginLeft: '20px'}}>
                 <Row className='normal-row'>{renderProductHistoryViews()}</Row>
             </Col>
         </>
