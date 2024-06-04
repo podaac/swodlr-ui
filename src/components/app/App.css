@@ -420,7 +420,8 @@ ABOUT PAGE
 
 .about-page {
   max-height: 82vh;
-  overflow-y: auto;
+  background-color: #3d5d82;
+  overflow-y: scroll;
 }
 
 .about-card {

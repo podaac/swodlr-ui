@@ -11,7 +11,7 @@ import HistoryFilters from "./HistoryFilters";
 import { Adjust, FilterParameters, OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution } from "../../types/historyPageTypes";
 import { setShowReGenerateProductModalTrue } from "../sidebar/actions/modalSlice";
 import ReGenerateProductsModal from "./ReGenerateProductsModal";
-import { setAllUserProducts, setGranulesToReGenerate, setUserProducts, setWaitingForMyDataFiltering } from "../sidebar/actions/productSlice";
+import { setAllUserProducts, setGranulesToReGenerate, setUserProducts, setWaitingForMyDataFiltering, setWaitingForProductsToLoad } from "../sidebar/actions/productSlice";
 
 export const productPassesFilterCheck = (currentFilters: FilterParameters, cycle: number, pass: number, scene: number, outputGranuleExtentFlag: boolean, status: string, outputSamplingGridType: string, rasterResolution: number, dateGenerated: string, utmZoneAdjust?: number, mgrsBandAdjust?: number): boolean => {
     let productPassesFilter = true
@@ -58,6 +58,8 @@ const GeneratedProductHistory = () => {
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
     const userProducts = useAppSelector((state) => state.product.userProducts)
     const currentFilters = useAppSelector((state) => state.product.currentFilters)
+    const waitingForProductsToLoad = useAppSelector((state) => state.product.waitingForProductsToLoad)
+    const waitingForMyDataFiltering = useAppSelector((state) => state.product.waitingForMyDataFiltering)
     const { search } = useLocation()
     const navigate = useNavigate()
     const [totalNumberOfProducts, setTotalNumberOfProducts] = useState<number>(0)
@@ -66,11 +68,12 @@ const GeneratedProductHistory = () => {
     const [allChecked, setAllChecked] = useState<boolean>(false)
     
     useEffect(() => {
-        dispatch(setWaitingForMyDataFiltering(true))
         // get the data for the first page
         // go through all the user product data to get the id of each one so that 
         const fetchData = async () => {
+            if(!waitingForMyDataFiltering) dispatch(setWaitingForProductsToLoad(true))
             await getUserProducts({limit: '1000000'}).then(response => {
+                dispatch(setWaitingForProductsToLoad(false))
                 // filter products for what is in the filter
                 const allProducts = response.products as Product[]
                 setTotalNumberOfProducts(allProducts.length)
@@ -161,16 +164,12 @@ const GeneratedProductHistory = () => {
         const downloadUrlList = checkedProducts.map(product => product.granules.map(granule => granule.uri)).flat()
         return (
             <Row>
-                {<Col xs={2} style={{height: '100%'}}><HistoryFilters /></Col>}
-
-                
+                {<Col xs={2} style={{height: '100%'}}><HistoryFilters /></Col>}                
                 <Col xs={10}>
                     <div style={{padding: '0px 20px 20px 20px'}} id='history-table'>
                     <div>
                     {
-                    totalNumberOfProducts === 0 ?
-                    <Row>{productHistoryAlert()}</Row>
-                    :<>
+                    <>
                     <Row>
                         <Col xs={1}>
                         <DropdownButton data-bs-theme='dark' style={{}} id="dropdown-basic-button" title={<><Badge bg="secondary">{checkedProducts.length}</Badge> Actions</>}>
@@ -226,21 +225,23 @@ const GeneratedProductHistory = () => {
                     }
                     </div>
                     {<DataPagination totalNumberOfProducts={totalNumberOfProducts} totalNumberOfFilteredProducts={totalNumberOfFilteredProducts} />}
+                    {!waitingForProductsToLoad && userProducts.length === 0 ? <Row>{productHistoryAlert()}</Row> : null}
+                    {waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : null}
                 </div>
                 </Col>
             </Row>
         )
-    }
+    } 
     
     const productHistoryAlert = () => {
-        const alertMessage = 'No products have been generated. Go to the Product Customization page to generate products.'
+        const alertMessage = 'No products generated with these filters. Click here or go to the Product Customization page to generate products.'
         return <Col style={{margin: '30px'}}><Alert variant='warning' onClick={() => navigate(`/generatedProductHistory${search}`)} style={{cursor: 'pointer'}}>{alertMessage}</Alert></Col>
     }
 
     const waitingForProductsToLoadSpinner = () => {
         return (
             <div>
-                <h5>Loading Data Table...</h5>
+                <h5>Loading Product Data...</h5>
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </Spinner> 
@@ -258,10 +259,10 @@ const GeneratedProductHistory = () => {
 
     return (
         <>
-        <h4 style={{marginTop: '80px', paddingBottom: '0px', marginBottom: '0px'}}>Generated Products Data</h4>
-        <Col className='about-page' style={{marginRight: '20px', marginLeft: '20px'}}>
-            <Row className='normal-row'>{totalNumberOfProducts === 0 ? waitingForProductsToLoadSpinner() : renderProductHistoryViews()}</Row>
-        </Col>
+            <h4 style={{marginTop: '80px', paddingBottom: '0px', marginBottom: '0px'}}>Generated Products Data</h4>
+            <Col className='about-page' style={{marginRight: '20px', marginLeft: '20px'}}>
+                <Row className='normal-row'>{renderProductHistoryViews()}</Row>
+            </Col>
         </>
     );
 }
