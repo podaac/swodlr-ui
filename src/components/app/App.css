@@ -229,7 +229,8 @@ CUSTOMIZE PRODUCT CONTAINER
   left: 0;
   z-index: 1000;
   padding-top: 125px;
-  padding-bottom: 58px
+  padding-bottom: 58px;
+  /* overflow-y: auto; */
 }
 
 .sidebar-resize {
@@ -419,7 +420,14 @@ ABOUT PAGE
 
 .about-page {
   max-height: 82vh;
-  /* overflow-y: auto; */
+  background-color: #3d5d82;
+  overflow-y: scroll;
+}
+
+.my-data-page {
+  max-height: 82vh;
+  background-color: #3d5d82;
+  /* overflow-y: scroll; */
 }
 
 .about-card {

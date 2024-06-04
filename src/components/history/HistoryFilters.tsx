@@ -1,7 +1,7 @@
 import { Accordion, Button, Col, Form, Row, Spinner } from "react-bootstrap";
 import { ProductState } from "../../types/graphqlTypes";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { setCurrentFilter } from "../sidebar/actions/productSlice";
+import { setCurrentFilter, setWaitingForMyDataFiltering } from "../sidebar/actions/productSlice";
 import { defaultFilterParameters, defaultSpatialSearchEndDate, defaultSpatialSearchStartDate, inputBounds, parameterOptionValues, rasterResolutionOptions } from "../../constants/rasterParameterConstants";
 import { useState } from "react";
 import { OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution, Adjust, FilterParameters, FilterAction } from "../../types/historyPageTypes";
@@ -122,6 +122,11 @@ const HistoryFilters = () => {
           default:
         }
         setCurrentFilters(currentFiltersToModify)
+    }
+
+    const handleApplyFilters = () => {
+        dispatch(setCurrentFilter(currentFilters))
+        dispatch(setWaitingForMyDataFiltering(true))
     }
 
     const statusOptions = ['NEW', 'UNAVAILABLE', 'GENERATING', 'ERROR', 'READY', 'AVAILABLE']
@@ -314,7 +319,7 @@ const HistoryFilters = () => {
                     </Accordion.Item>
                 </Accordion>
             </Row>
-                <Button style={{marginTop: '10px', marginBottom: '10px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} onClick={() => dispatch(setCurrentFilter(currentFilters))}>{waitingForMyDataFiltering ? 
+                <Button style={{marginTop: '10px', marginBottom: '10px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} onClick={() => handleApplyFilters()}>{waitingForMyDataFiltering ? 
                             <Spinner size="sm" animation="border" role="status">
                             <span className="visually-hidden">Loading...</span>
                         </Spinner> 
