@@ -181,9 +181,7 @@ const ProductCustomization = () => {
                     onChange={() => handleShowUTMAdvancedOptions()}
                     label={'advanced options'} 
                     style={{marginTop: '10px'}}
-                    // TODO: Switch back to other disabled after ONLY RESOLUTION SELECTION period is over
-                    // disabled={!(outputSamplingGridType === 'utm')}
-                    disabled={true}
+                    disabled={!(outputSamplingGridType === 'utm')}
                     key={`outputGranuleExtentFlag-switch-key`}
                 />
             )
