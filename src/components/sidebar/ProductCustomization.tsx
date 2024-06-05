@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import Form from 'react-bootstrap/Form';
-import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Alert, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
 import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actions/productSlice";
@@ -247,6 +247,13 @@ const ProductCustomization = () => {
                     {renderRasterResolutionOptions(outputSamplingGridType)}
                 </Col>
                 <Col md={{ span: 2, offset: 0 }} style={{paddingLeft: '0px'}}>{renderRasterResolutionUnits(outputSamplingGridType)}</Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Alert key='alert-features-not-available' variant='info'>
+                        Some options including Output Granule Extent's <b>256 x 128 km</b> option and Output Sampling Grid Type's <b>LAT/LON</b> and <b>advanced options</b> are <b>not available</b> at this time.
+                    </Alert>
+                </Col>
             </Row>
         </div>
     </div>      
