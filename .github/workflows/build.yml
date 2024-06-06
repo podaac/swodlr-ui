@@ -169,15 +169,10 @@ jobs:
           path: build/*
       - name: Generate GitHub App Token
         id: generate_token
-        uses: tibdex/github-app-token@v1
+        uses: actions/create-github-app-token@v1
         with:
-          app_id: ${{ secrets.GH_APP_ID }}
-          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-      - name: Check Token Scopes
-        run: |
-          curl -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/app
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
       - name: Commit Version Bump
         # If building an alpha, release candidate, or release then we commit the version bump back to the repo
         if: |
