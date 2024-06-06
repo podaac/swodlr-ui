@@ -17,19 +17,15 @@ const GranuleSelectionAndConfigurationView = (props: GranuleSelectionAndConfigur
     const fetchData = async () => {
       const userHasCorrectEdlPermissions = await checkUseHasCorrectEdlPermissions()
       dispatch(setUserHasCorrectEdlPermissions(userHasCorrectEdlPermissions))
+      if (!skipTutorial && userAuthenticated) {
+        dispatch(setShowTutorialModalTrue())
+        dispatch(setSkipTutorialTrue())
+      }
     }
 
     // call the function
     fetchData()
   }, [])
-
-  useEffect(() => {
-    if (!skipTutorial && userAuthenticated) {
-      dispatch(setShowTutorialModalTrue())
-      dispatch(setSkipTutorialTrue())
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userAuthenticated])
 
   return (
     <>

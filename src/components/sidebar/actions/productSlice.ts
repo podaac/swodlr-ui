@@ -30,6 +30,7 @@ interface GranuleState {
     currentFilters: FilterParameters,
     granulesToReGenerate: Product[],
     waitingForMyDataFiltering: boolean,
+    waitingForProductsToLoad: boolean
 }
 
 const {name, cycle, pass, scene, ...generateProductParametersFiltered } = parameterOptionDefaults
@@ -59,6 +60,7 @@ const initialState: GranuleState = {
     currentFilters: defaultFilterParameters,
     granulesToReGenerate: [],
     waitingForMyDataFiltering: false,
+    waitingForProductsToLoad: false
 }
 
 
@@ -178,6 +180,9 @@ export const productSlice = createSlice({
     },
     setWaitingForMyDataFiltering: (state, action: PayloadAction<boolean>) => {
       state.waitingForMyDataFiltering = action.payload
+    },
+    setWaitingForProductsToLoad: (state, action: PayloadAction<boolean>) => {
+      state.waitingForProductsToLoad = action.payload
     }
   },
 })
@@ -206,7 +211,8 @@ export const {
     setHistoryPageState,
     addPageToHistoryPageState,
     setCurrentFilter,
-    setWaitingForMyDataFiltering
+    setWaitingForMyDataFiltering,
+    setWaitingForProductsToLoad
 } = productSlice.actions
 
 export default productSlice.reducer
