@@ -167,6 +167,12 @@ jobs:
         with:
           name: build
           path: build/*
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
       - name: Commit Version Bump
         # If building an alpha, release candidate, or release then we commit the version bump back to the repo
         if: |
@@ -174,10 +180,13 @@ jobs:
           steps.rc.conclusion == 'success'      ||
           steps.release.conclusion == 'success'
         run: |
-          git config user.name "${GITHUB_ACTOR}"
+          git config user.name "PODAAC-CICD"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          echo "machine github.com login x-access-token password ${{ steps.generate_token.outputs.token }}" > ~/.netrc
           git commit -am "/version ${{ env.software_version }}"
           git push
+        env:
+          GH_APP_TOKEN: ${{ steps.generate_token.outputs.token }}
       - name: Push Tag
         if: |
           steps.alpha.conclusion == 'success'   ||
