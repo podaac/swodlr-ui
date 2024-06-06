@@ -151,24 +151,40 @@ const ProductCustomization = () => {
         </OverlayTrigger>
     )
 
+    const renderFeatureNotAvailable = (jsxContents: JSX.Element, featureDisabled: boolean) => {
+        return featureDisabled ?
+            <OverlayTrigger
+                placement="right"
+                overlay={
+                    <Tooltip id="feature-not-available-tooltip">Option not currently available.</Tooltip>
+                }
+            >
+                {<span>{jsxContents}</span>}
+            </OverlayTrigger>
+            : jsxContents
+    }
+
     const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
         const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => {
             // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
             const featureNotAvailable = value === 'lat/lon'
             const resolutionToUse: number = value === 'utm' ? rasterResolutionUTM : rasterResolutionGEO
             return (
-                <Form.Check 
-                    checked={value === generateProductParameters.outputSamplingGridType}
-                    // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
-                    disabled={featureNotAvailable}
-                    inline 
-                    label={String(value).toUpperCase()} 
-                    name="outputSamplingGridTypeGroup" 
-                    type={'radio'} 
-                    id={`outputSamplingGridTypeGroup-radio-${index}`} 
-                    onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
-                    key={`outputSamplingGridTypeGroup-radio-key-${index}`}
-                />
+                renderFeatureNotAvailable(               
+                    <Form.Check 
+                        checked={value === generateProductParameters.outputSamplingGridType}
+                        // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
+                        disabled={featureNotAvailable}
+                        inline 
+                        label={String(value).toUpperCase()} 
+                        name="outputSamplingGridTypeGroup" 
+                        type={'radio'} 
+                        id={`outputSamplingGridTypeGroup-radio-${index}`} 
+                        onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
+                        key={`outputSamplingGridTypeGroup-radio-key-${index}`}
+                    />,
+                    featureNotAvailable
+                )
             )}
         )
         inputArray.push(
@@ -205,8 +221,9 @@ const ProductCustomization = () => {
                 <Col md={{ span: 5, offset: 1 }}>
                     {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
                         // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
-                        const featureNotAvailable = Boolean(value)
+                        const featureNotAvailable: boolean = Boolean(value)
                         return (
+                            renderFeatureNotAvailable(
                             <Form.Check 
                                 checked={value === generateProductParameters.outputGranuleExtentFlag}
                                 inline 
@@ -218,7 +235,9 @@ const ProductCustomization = () => {
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
                                 onChange={() => setOutputGranuleExtentFlag(value)}
                                 key={`outputGranuleExtentFlagTypeGroup-radio-key-${index}`}
-                            />
+                            />,
+                            featureNotAvailable
+                            )
                         )
                     })}
                 </Col>
@@ -248,8 +267,8 @@ const ProductCustomization = () => {
             </Row>
             <Row>
                 <Col>
-                    <Alert key='alert-features-not-available' variant='info'>
-                        Some options including Output Granule Extent's <b>256 x 128 km</b> option and Output Sampling Grid Type's <b>LAT/LON</b> and <b>advanced options</b> are <b>not available</b> at this time.
+                    <Alert key='alert-features-not-available' variant='warning'>
+                        Some options are <b>not available</b> until a later date.
                     </Alert>
                 </Col>
             </Row>
