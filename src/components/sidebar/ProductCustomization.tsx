@@ -268,7 +268,7 @@ const ProductCustomization = () => {
             <Row>
                 <Col>
                     <Alert key='alert-features-not-available' variant='warning'>
-                        Some options are <b>not available</b> until a later date.
+                        Some options are not enabled in the current version of SWODLR and will be enabled at a later date
                     </Alert>
                 </Col>
             </Row>
