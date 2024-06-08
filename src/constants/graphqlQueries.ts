@@ -65,6 +65,10 @@ export const getGranules = `
         tiles: granules(params: $tileParams) {
             items {
                 granuleUr
+                timeStart
+                timeEnd
+                polygons
+                producerGranuleId
             }
         }
     }
@@ -84,6 +88,25 @@ export const getGranuleVariables = (cycle: number, pass: number, sceneIds: numbe
               "pattern": true
             }
           }
+        }
+      }
+    return variables
+}
+
+export const getFootprintVariables = (cycle: number, pass: number, sceneIds: number[]) => {
+    const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
+    const variables = {
+        "tileParams": {
+          'collectionConceptIds': [spatialSearchCollectionConceptId],
+          "limit": 100,
+          "cycle": cycle,
+          "passes": {"0": {"pass": pass}},
+          "readableGranuleName": sceneIdsForGranuleName,
+          "options": {
+            "readableGranuleName": {
+              "pattern": true
+            }
+          },
         }
       }
     return variables

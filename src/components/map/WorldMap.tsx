@@ -111,6 +111,7 @@ const WorldMap = () => {
         })
         return polygonString
       }).join()
+      
       const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${spatialSearchCollectionConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
       const spatialSearchResponse = await fetch(spatialSearchUrl, {
         method: 'GET',
