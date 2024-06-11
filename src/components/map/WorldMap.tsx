@@ -141,7 +141,7 @@ const WorldMap = () => {
         })
         const spatialSearchResults = updatedGranulesToUse.map((updatedGranuleObject: any) => {
           const {producerGranuleId, granuleUr, cpsString, polygons, timeStart, timeEnd} = updatedGranuleObject
-          // const utmZone = producerGranuleId
+          console.log(granuleUr)
           const cyclePassSceneStringArray = cpsString.split('_').map((id: string) => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
           const sceneToUse = String(Math.floor(tileValue))
@@ -231,7 +231,13 @@ const WorldMap = () => {
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>, <h6 key={`footprint-filename-tooltip-${index}`}>{`File Name: ${productObject.producerGranuleId}`}</h6>]}</Tooltip>
+            <Tooltip>{[
+              <h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, 
+              <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, 
+              <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>, 
+              <h6 key={`footprint-utm-zone-tooltip-${index}`}>{`UTM Zone: ${productObject.utmZone}`}</h6>,
+              <h6 key={`footprint-filename-tooltip-${index}`}>{`File Name: ${productObject.producerGranuleId}`}</h6>
+              ]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

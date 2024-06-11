@@ -28,6 +28,7 @@ export interface allProductParameters {
   producerGranuleId: string,
   timeEnd: Date,
   timeStart: Date,
+  utmZone: string,
   inTimeRange?: boolean,
 }
 
