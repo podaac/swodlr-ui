@@ -115,7 +115,6 @@ export const getSpatialSearchGranuleVariables = (polygon: string, collectionConc
           limit
         }
       }
-      console.log(variables)
     return variables
 }
 
