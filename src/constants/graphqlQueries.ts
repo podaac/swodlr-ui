@@ -61,23 +61,37 @@ export const userProductsQuery = `
 `
 
 export const getGranules = `
-    query($tileParams: GranulesInput) {
-        tiles: granules(params: $tileParams) {
-            items {
-                granuleUr
-                timeStart
-                timeEnd
-                polygons
-                producerGranuleId
-            }
+query($params: GranulesInput) {
+    granules(params: $params) {
+        items {
+          producerGranuleId
+          granuleUr
+          timeStart
+          timeEnd
+          polygons
         }
     }
+}
 `
+
+// export const getSpatialSearchGranules = `
+// query GetSpatialSearchGranules($params: GranulesInput) {
+//   granules(params: $params) {
+//     items {
+//       producerGranuleId
+//       granuleUr
+//       timeStart
+//       timeEnd
+//       polygons
+//     }
+//   }
+// }
+// `
 
 export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
     const variables = {
-        "tileParams": {
+        "params": {
           'collectionConceptIds': [spatialSearchCollectionConceptId],
           "limit": 100,
           "cycle": cycle,
@@ -93,10 +107,22 @@ export const getGranuleVariables = (cycle: number, pass: number, sceneIds: numbe
     return variables
 }
 
+export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number) => {
+    const variables = {
+        "params": {
+          polygon,
+          collectionConceptId,
+          limit
+        }
+      }
+      console.log(variables)
+    return variables
+}
+
 export const getFootprintVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
     const variables = {
-        "tileParams": {
+        "params": {
           'collectionConceptIds': [spatialSearchCollectionConceptId],
           "limit": 100,
           "cycle": cycle,

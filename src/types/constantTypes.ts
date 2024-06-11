@@ -29,7 +29,6 @@ export interface allProductParameters {
   timeEnd: Date,
   timeStart: Date,
   inTimeRange?: boolean,
-  fileName?: string
 }
 
 export interface GranuleForTable {
@@ -165,7 +164,12 @@ export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvaila
 export interface SpatialSearchResult {
   cycle: string,
   pass: string,
-  scene: string
+  scene: string,
+  timeStart: string,
+  timeEnd: string,
+  producerGranuleId: string,
+  granuleUr: string,
+  polygons: string[]
 }
 export type footprintResponse = LatLngExpression[] | boolean
 

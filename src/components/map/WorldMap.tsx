@@ -14,6 +14,7 @@ import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from
 import { SpatialSearchResult } from '../../types/constantTypes';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { getGranules, getSpatialSearchGranuleVariables } from '../../constants/graphqlQueries';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -105,35 +106,58 @@ const WorldMap = () => {
         }
 
         // create string with polygon array
-        let polygonString = '&polygon[]='
+        // let polygonString = '&polygon[]='
+        let polygonString = ''
         polygonCoordinates.forEach((lngLatPair, index) => {
           polygonString += `${index === 0 ? '' : ',' }${lngLatPair[0]},${lngLatPair[1]}`
         })
         return polygonString
       }).join()
-      
-      const spatialSearchUrl = `https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id=${spatialSearchCollectionConceptId}${polygonUrlString}&page_size=${spatialSearchResultLimit}`
-      const spatialSearchResponse = await fetch(spatialSearchUrl, {
-        method: 'GET',
-        credentials: 'omit',
+
+      const spatialSearchResponse = await fetch('https://graphql.earthdata.nasa.gov/api', {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${authToken}`
-        }
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ query: getGranules, variables: getSpatialSearchGranuleVariables(polygonUrlString, spatialSearchCollectionConceptId, spatialSearchResultLimit) })
       }).then(async data => {
-        const responseText = await data.text()
+        const responseJson = await data.json()
         // TODO: make subsequent calls to get granules in spatial search area till everything is found.
-        // current issue is that 1000 (2000 total divided by 2) is limited by the cmr api.
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(responseText, "application/xml");
-        const references: SpatialSearchResult[] = Array.from(new Set(Array.from(xml.getElementsByTagName("name")).map(nameElement => {
-          return (nameElement.textContent)?.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
-        }))).map(foundIdString => {
-          const cyclePassSceneStringArray = foundIdString?.split('_').map(id => parseInt(id).toString())
+
+        const updatedGranules = responseJson.data.granules.items.map((item: any) => {
+          const itemCopy = structuredClone(item)
+          const cpsString = item.granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
+          itemCopy.cpsString = cpsString
+          return itemCopy
+        })
+        const cpsStringTracker: string[] = []
+        const updatedGranulesToUse = updatedGranules.filter((updatedGranuleObject: any) => {
+          // if cpsString not in tracker, it has not been repeated yet. Add to tracker and return
+          const granuleRepeated = cpsStringTracker.includes(updatedGranuleObject.cpsString)
+          if(!granuleRepeated) cpsStringTracker.push(updatedGranuleObject.cpsString)
+          return !granuleRepeated
+          // if cpsString in tracker, it has been repeated. Do not return
+        })
+        const spatialSearchResults = updatedGranulesToUse.map((updatedGranuleObject: any) => {
+          const {producerGranuleId, granuleUr, cpsString, polygons, timeStart, timeEnd} = updatedGranuleObject
+          // const utmZone = producerGranuleId
+          const cyclePassSceneStringArray = cpsString.split('_').map((id: string) => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
           const sceneToUse = String(Math.floor(tileValue))
-          return {cycle: cyclePassSceneStringArray?.[0], pass: cyclePassSceneStringArray?.[1], scene : sceneToUse} as SpatialSearchResult
+          const returnObject: SpatialSearchResult = {
+            cycle: cyclePassSceneStringArray?.[0],
+            pass: cyclePassSceneStringArray?.[1],
+            scene : sceneToUse,
+            producerGranuleId,
+            granuleUr,
+            timeStart,
+            timeEnd,
+            polygons
+          }
+          return returnObject
         })
-        return references
+        return spatialSearchResults
       })
       dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
     } catch (err) {
@@ -207,7 +231,7 @@ const WorldMap = () => {
           <ZoomControl position='bottomright'/>
           {addedProducts.map((productObject, index) => (
           <Polygon key={`product-on-map-${index}`} positions={productObject.footprint as LatLngExpression[]} pathOptions={footprintStyleOptions}>
-            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>, <h6 key={`footprint-filename-tooltip-${index}`}>{`File Name: ${productObject.fileName}`}</h6>]}</Tooltip>
+            <Tooltip>{[<h6 key={`footprint-cycle-tooltip-${index}`}>{`Cycle: ${productObject.cycle}`}</h6>, <h6 key={`footprint-pass-tooltip-${index}`}>{`Pass: ${productObject.pass}`}</h6>, <h6 key={`footprint-scene-tooltip-${index}`}>{`Scene: ${productObject.scene}`}</h6>, <h6 key={`footprint-filename-tooltip-${index}`}>{`File Name: ${productObject.producerGranuleId}`}</h6>]}</Tooltip>
           </Polygon>
           ))}
       </MapContainer>

@@ -69,57 +69,65 @@ const GranuleTable = (props: GranuleTableProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableType === 'granuleSelection' ? null : addedProducts, startTutorial ? searchParams : null])
 
-  const validateCPS = async (cycleToUse: number, passToUse: number, sceneToUse: number[]) => {
-    const session = await Session.getCurrent();
-    if (session === null) {
-      throw new Error('No current session');
-    }
-    const authToken = await session.getAccessToken();
-    if (authToken === null) {
-      throw new Error('Failed to get authentication token');
-    }
-    const validationObjectToReturn = await fetch('https://graphql.earthdata.nasa.gov/api', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ query: getGranules, variables: getGranuleVariables(cycleToUse, passToUse, sceneToUse)})
-        })
-        .then(async data => {
-          const responseJson = await data.json()
-          const validationObject = {} as validScene
-          if(responseJson.data.tiles.items.length !== 0) {
-            let responseTiles: string[] = []
-            let granuleMetadata: granuleMetadata = {}
-            responseJson.data.tiles.items.forEach((item: {granuleUr: string, polygons: string[], producerGranuleId: string, timeEnd: string, timeStart: string}) => {
-              const {granuleUr, polygons, producerGranuleId, timeEnd, timeStart} = item
-              const responseTileString = granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1].split('_').map(item2 => parseInt(item2)).join('_') as string
-              responseTiles.push(responseTileString)
-              if(polygons[0] === undefined) console.log(false)
-              const polygonToUse = polygons[0] ? getGranuleFootprint(polygons[0]) : []
-   
-              // const polygonToUse = getGranuleFootprint(polygons[0] ?? [])
-              const timeStartToUse = new Date(timeStart)
-              const timeEndToUse = new Date(timeEnd)
-              granuleMetadata[responseTileString] = {polygons: polygonToUse, producerGranuleId, timeStart: timeStartToUse, timeEnd: timeEndToUse}
-            }) as string[]
+  const getValidationObject = (cycleToUse: number, passToUse: number, sceneToUse: number[], granuleJsonData: SpatialSearchResult[]) => {
+    const validationObject = {} as validScene
+    if(granuleJsonData.length !== 0) {
+      let responseTiles: string[] = []
+      let granuleMetadata: granuleMetadata = {}
+      granuleJsonData.forEach((item: SpatialSearchResult) => {
+        const {granuleUr, polygons, producerGranuleId, timeEnd, timeStart} = item
+        const responseTileString = granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1].split('_').map(item2 => parseInt(item2)).join('_') as string
+        responseTiles.push(responseTileString)
+        const polygonToUse = polygons ? getGranuleFootprint(polygons[0]) : []
+        const timeStartToUse = new Date(timeStart)
+        const timeEndToUse = new Date(timeEnd)
+        granuleMetadata[responseTileString] = {polygons: polygonToUse, producerGranuleId, timeStart: timeStartToUse, timeEnd: timeEndToUse}
+      })
 
-            // go through each cycle pass scene combo and see if it is in the return results TODO
-            sceneToUse.forEach(sceneInput => {
-              const sceneInputId = `${cycleToUse}_${passToUse}_${sceneInput}`
-              const validityBool = responseTiles.includes(sceneInputId)
-              validationObject[sceneInputId] = validityBool ? {'valid': validityBool, polygons: granuleMetadata[sceneInputId].polygons, timeEnd: granuleMetadata[sceneInputId].timeEnd, timeStart: granuleMetadata[sceneInputId].timeStart, producerGranuleId: granuleMetadata[sceneInputId].producerGranuleId} : {valid: false}
-            })
-          }
-          return validationObject
-        })
+      // go through each cycle pass scene combo and see if it is in the return results TODO
+      sceneToUse.forEach(sceneInput => {
+        const sceneInputId = `${cycleToUse}_${passToUse}_${sceneInput}`
+        const validityBool = responseTiles.includes(sceneInputId)
+        validationObject[sceneInputId] = validityBool ? {'valid': validityBool, polygons: granuleMetadata[sceneInputId].polygons, timeEnd: granuleMetadata[sceneInputId].timeEnd, timeStart: granuleMetadata[sceneInputId].timeStart, producerGranuleId: granuleMetadata[sceneInputId].producerGranuleId} : {valid: false}
+      })
+    }
+    return validationObject
+  }
+
+  const validateCPS = async (cycleToUse: number, passToUse: number, sceneToUse: number[], saveType: SaveType) => {
+    let validationObjectToReturn = {}
+    if(saveType === 'spatialSearch') {
+      // use spatial search data from redux
+      return getValidationObject(cycleToUse, passToUse, sceneToUse, spatialSearchResults)
+    } else {
+      // make calls to get the data
+      const session = await Session.getCurrent();
+      if (session === null) {
+        throw new Error('No current session');
+      }
+      const authToken = await session.getAccessToken();
+      if (authToken === null) {
+        throw new Error('Failed to get authentication token');
+      }
+      validationObjectToReturn = await fetch('https://graphql.earthdata.nasa.gov/api', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ query: getGranules, variables: getGranuleVariables(cycleToUse, passToUse, sceneToUse)})
+      }).then(async data => {
+        const responseJson = await data.json()
+        return getValidationObject(cycleToUse, passToUse, sceneToUse, responseJson.data.granules.items)
+      })
+    }
+
       return validationObjectToReturn
   }
   
   const validateSceneAvailability = async (cycleToUse: number, passToUse: number, sceneToUse: number[], saveType: SaveType): Promise<validScene> => {
     try {
-      return validateCPS(cycleToUse, passToUse, sceneToUse)
+      return validateCPS(cycleToUse, passToUse, sceneToUse, saveType)
     } catch(err) {
       console.log(err)
       return {}
@@ -130,7 +138,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   useEffect(() => {
     dispatch(clearGranuleTableAlerts())
       const fetchData = async () => {
-        console.log('handling spatial search')
         let scenesFoundArray: string[] = []
         let addedScenes: string[] = []
         if (spatialSearchResults.length < 1000) {
@@ -313,7 +320,6 @@ const GranuleTable = (props: GranuleTableProps) => {
   }
 
   const getGranuleFootprint = (polygons: string): LatLngExpression[] => {
-    console.log(polygons)
     const footprintCoordinatesSingleArray = (polygons[0]).split(' ').map((coordinateString: string) => parseFloat(coordinateString))
     let footprintLatLongArray: LatLngExpression[] = []
     for(let i=0; i<footprintCoordinatesSingleArray.length; i++) {
@@ -342,7 +348,6 @@ const GranuleTable = (props: GranuleTableProps) => {
  * @return {Promise<handleSaveResult[]>} A promise that resolves to an array of handleSaveResult objects.
  */
   const handleSave = async (saveType: SaveType, totalRuns: number, index: number, cpsParams?: cpsParams[]): Promise<handleSaveResult[]> => {
-    console.log('starting save')
     if (saveType === 'manual') dispatch(clearGranuleTableAlerts()) 
     setWaitingForScenesToBeAdded(true)
     const cpsParamsIfUndefined = 
