@@ -57,7 +57,6 @@ const GranuleTable = (props: GranuleTableProps) => {
     if (cyclePassSceneParameters) {
       setWaitingForScenesToBeAdded(true)
       const sceneParamArray = Array.from(new Set(cyclePassSceneParameters.split('-')))
-      console.log('sceneParamArray: ', sceneParamArray)
       sceneParamArray.forEach((sceneParams, index) => {
         const splitSceneParams = sceneParams.split('_')
         const cpsParams: cpsParams = {
@@ -422,8 +421,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                     const timeEnd = sceneValidityResults[granuleId].timeEnd as Date
                     const producerGranuleId = sceneValidityResults[granuleId].producerGranuleId as string
                     const utmZone = producerGranuleId.substring(producerGranuleId.indexOf('_UTM') + 4, producerGranuleId.indexOf('_N') - 1)
-                    console.log(producerGranuleId)
-                    console.log('utmZone: ', utmZone)
+
                     // get the granuleId from it and pass it to the parameters
                     const parameters: allProductParameters = {
                       granuleId,
