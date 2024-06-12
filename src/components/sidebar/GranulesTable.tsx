@@ -6,7 +6,7 @@ import { granuleAlertMessageConstant, granuleSelectionLabels, productCustomizati
    afterCPSL,
    afterCPSR,
    spatialSearchCollectionConceptId} from '../../constants/rasterParameterConstants';
-import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
+import { Button, Col, Form, OverlayTrigger, Row, Tooltip, Spinner, Alert } from 'react-bootstrap';
 import { InfoCircle, Plus, Trash } from 'react-bootstrap-icons';
 import { AdjustType, AdjustValueDecoder, GranuleForTable, GranuleTableProps, InputType, SaveType, SpatialSearchResult, TableTypes, alertMessageInput, allProductParameters, handleSaveResult, validScene } from '../../types/constantTypes';
 import { addProduct, setSelectedGranules, setGranuleFocus, addGranuleTableAlerts, editProduct, addSpatialSearchResults, clearGranuleTableAlerts, setWaitingForSpatialSearch } from './actions/productSlice';
@@ -740,7 +740,7 @@ const GranuleTable = (props: GranuleTableProps) => {
                   <td><Form.Control value={scene} required id="add-product-scene" placeholder="scene_id" onChange={event => setScene(event.target.value)}/></td>
                 </tr>
                 <tr className='add-granules'>
-                  <td>Valid Values:</td>
+                  <td>Valid Values: {renderInfoIcon('validCPSValues')}</td>
                   <td>{`${inputBounds.cycle.min} - ${inputBounds.cycle.max}`}</td>
                   <td>{`${inputBounds.pass.min} - ${inputBounds.pass.max}`}</td>
                   <td>{`${inputBounds.scene.min} - ${inputBounds.scene.max}`}</td>
@@ -755,6 +755,9 @@ const GranuleTable = (props: GranuleTableProps) => {
       {tableType === 'granuleSelection' ? (
         <>
           <Row style={{marginTop: '5px', marginBottom: '5px'}}><Col>To add multiple scenes at once, enter two numbers into the scene input field separated by a hyphen (e.g. 1-10)</Col></Row>
+          <Row><Col>
+            <Alert variant='warning'>Only <b>scientific orbit</b> cycle, pass, scene values are supported at this time.</Alert>
+          </Col></Row>
           <Row>
             <Col style={{marginTop: '10px'}}>
               {waitingForScenesToBeAdded || waitingForSpatialSearch || waitingForFootprintSearch ? 
