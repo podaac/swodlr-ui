@@ -123,7 +123,7 @@ export interface InputBounds {
 // TODO: change cycle max back to 578 when calibration orbit is implemented
 export const inputBounds: inputValuesDictionary = {
     cycle: {
-        min: 0,
+        min: 1,
         max: 399
     },
     pass: {
