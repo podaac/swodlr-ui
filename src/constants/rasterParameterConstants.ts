@@ -108,7 +108,8 @@ export const parameterHelp: ParameterHelp = {
     pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
     scene: `Predefined 128 x 128 km squares of the SWOT observations.`,
     status: `The processing status of your custom product. The status types are as follows: NEW, UNAVAILABLE, GENERATING, ERROR, READY, AVAILABLE`,
-    granuleTableLimit: `There is a limit of ${granuleTableLimit} scenes allowed to be added to the scene table at a time. This is to ensure our scene processing pipeline can handle the demand of all of SWODLR's users.`
+    granuleTableLimit: `There is a limit of ${granuleTableLimit} scenes allowed to be added to the scene table at a time. This is to ensure our scene processing pipeline can handle the demand of all of SWODLR's users.`,
+    validCPSValues: `There are two types of orbits, calibration and scientific. Calibration orbits have a 400-578 cycle range and science orbits have a 0-399 cycle range. Cycles in the calibration orbit range are not currently supported at this time but will be in the future.`,
 }
 
 export interface InputBounds {
@@ -118,10 +119,12 @@ export interface InputBounds {
     }
 }
 
+// cycle for calibration orbit is 400-578
+// TODO: change cycle max back to 578 when calibration orbit is implemented
 export const inputBounds: inputValuesDictionary = {
     cycle: {
         min: 0,
-        max: 578
+        max: 399
     },
     pass: {
         min: 1,
