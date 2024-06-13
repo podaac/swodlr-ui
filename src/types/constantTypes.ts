@@ -25,8 +25,11 @@ export interface allProductParameters {
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
   footprint: LatLngExpression[],
+  producerGranuleId: string,
+  timeEnd: Date,
+  timeStart: Date,
+  utmZone: string,
   inTimeRange?: boolean,
-  fileName?: string
 }
 
 export interface GranuleForTable {
@@ -134,8 +137,27 @@ export interface newUrlParamsObject {
   [key: string]: string | number | boolean
 }
 
+export interface validSceneInfo {
+  valid: boolean,
+  polygons?: LatLngExpression[],
+  timeEnd?: Date,
+  timeStart?: Date,
+  producerGranuleId?: string
+}
+
 export interface validScene {
-  [key: string]: boolean
+  [key: string]: validSceneInfo
+}
+
+export interface granuleMetadataInfo {
+  polygons: LatLngExpression[],
+  timeEnd: Date,
+  timeStart: Date,
+  producerGranuleId: string
+}
+
+export interface granuleMetadata {
+  [key: string]: granuleMetadataInfo
 }
 
 export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge' | 'successfullyReGenerated'
@@ -143,7 +165,12 @@ export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvaila
 export interface SpatialSearchResult {
   cycle: string,
   pass: string,
-  scene: string
+  scene: string,
+  timeStart: string,
+  timeEnd: string,
+  producerGranuleId: string,
+  granuleUr: string,
+  polygons: string[]
 }
 export type footprintResponse = LatLngExpression[] | boolean
 
@@ -162,4 +189,8 @@ export interface handleSaveResult {
 // key is the page number and the value is the product ID of the last element on a page
 export interface RetrievedDataHistory {
   [key: string]: string
+}
+
+export interface cpsParams {
+  cycleParam: string, passParam: string, sceneParam: string
 }

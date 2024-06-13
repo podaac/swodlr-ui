@@ -149,7 +149,7 @@ const HistoryFilters = () => {
                     <Accordion.Item eventKey="0">
                         <Accordion.Header>Cycle</Accordion.Header>
                         <Accordion.Body>
-                            <Formik onSubmit={console.log} initialValues={{}}>
+                            <Formik onSubmit={() => {}} initialValues={{}}>
                                 <Form>
                                     <Form.Group className="mb-3" controlId="cycle-filter-input">
                                         <Form.Control type="number" isInvalid={cycleIsInvalid} placeholder="cycle_id" onChange={(e) => handleChangeFilters('cycle', String(e.target.value), !cycleIsInvalid)}/>

@@ -1,4 +1,3 @@
-import { LatLngExpression } from "leaflet"
 import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
 import { FilterParameters } from "../types/historyPageTypes"
 
@@ -214,29 +213,6 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     utmZoneAdjust: 'test',
     mgrsBandAdjust: 'test',
   }
-
-  export const sampleFootprint: LatLngExpression[] = [
-    [
-      33.62959926136482,
-      -119.59722240610449
-    ],
-    [
-      33.93357164098772,
-      -119.01030070905898
-    ],
-    [
-      33.445222247065175,
-      -118.6445806486702
-    ],
-    [
-      33.137055033294544,
-      -119.23445170097719
-    ],
-    [
-      33.629599562267856,
-      -119.59722227107866
-    ]
-  ] 
 
 export const spatialSearchResultLimit = 2000
 export const beforeCPS = '_x_x_x_'
