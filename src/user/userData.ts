@@ -1,10 +1,11 @@
 import { gql, GraphQLClient, RequestMiddleware } from 'graphql-request'
 import { generateL2RasterProductQuery, userProductsQuery, userQuery } from '../constants/graphqlQueries';
-import { CurrentUser, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
+import { CurrentUser, UserProductQueryVariables, UserResponse, getUserProductsResponse } from '../types/graphqlTypes';
 import { Session } from '../authentication/session';
 
 const userIdQuery = gql`${userQuery}`
 const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
+const cmrGraphqlUri = 'https://cmr.earthdata.nasa.gov/graphql'
 const graphqlUri = baseUri + '/graphql'
 
 const requestMiddleware: RequestMiddleware = async (request) => {
@@ -31,6 +32,13 @@ export const graphQLClient = new GraphQLClient(graphqlUri, {
     credentials: `include`,
     mode: `cors`,
     requestMiddleware
+})
+
+export const cmrGraphQLClient = new GraphQLClient(cmrGraphqlUri, {
+  credentials: `include`,
+  mode: `cors`,
+  requestMiddleware,
+  
 })
 
 export const getUserDataResponse = async () => {
@@ -110,13 +118,13 @@ export const generateL2RasterProduct = async (
   }
 }
 
-export const getUserProducts = async () => {
+export const getUserProducts = async (userProductsQueryVariables?: UserProductQueryVariables) => {
   try {
-      const userProductResponse = await graphQLClient.request(userProductsQuery).then(result => {
-        const userProductsResult = (result as UserResponse).currentUser.products
-        return {status: 'success', products: userProductsResult} as getUserProductsResponse
-      })
-      return userProductResponse
+    const userProductResponse = await graphQLClient.request(userProductsQuery, userProductsQueryVariables).then(result => {
+      const userProductsResult = (result as UserResponse).currentUser.products
+      return {status: 'success', products: userProductsResult} as getUserProductsResponse
+    })
+    return userProductResponse
   } catch (err) {
       console.log (err)
       if (err instanceof Error) {

@@ -229,7 +229,8 @@ CUSTOMIZE PRODUCT CONTAINER
   left: 0;
   z-index: 1000;
   padding-top: 125px;
-  padding-bottom: 58px
+  padding-bottom: 58px;
+  /* overflow-y: auto; */
 }
 
 .sidebar-resize {
@@ -310,8 +311,29 @@ tfoot {
 }
 
 .table-responsive-generatedProducts {
-  max-height: 75vh;
+  max-height: 62vh;
   overflow-y: auto;
+}
+
+.table-filter {
+  background-color:#1a2535;
+  border: solid white 1px
+}
+
+.center {
+  width:100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-link-item {
+  background-color: #1A2535;
+  border-color: #1A2535;
+}
+
+.pagination-link-item:active {
+  background-color: #1A2535;
+  border-color: #1A2535;
 }
 
 .dark-mode-table {
@@ -398,7 +420,14 @@ ABOUT PAGE
 
 .about-page {
   max-height: 82vh;
-  overflow-y: auto;
+  background-color: #3d5d82;
+  overflow-y: scroll;
+}
+
+.my-data-page {
+  max-height: 82vh;
+  background-color: #3d5d82;
+  /* overflow-y: scroll; */
 }
 
 .about-card {

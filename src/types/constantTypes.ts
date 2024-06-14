@@ -25,7 +25,11 @@ export interface allProductParameters {
   utmZoneAdjust: string,
   mgrsBandAdjust: string,
   footprint: LatLngExpression[],
-  inTimeRange?: boolean
+  producerGranuleId: string,
+  timeEnd: Date,
+  timeStart: Date,
+  utmZone: string,
+  inTimeRange?: boolean,
 }
 
 export interface GranuleForTable {
@@ -133,16 +137,40 @@ export interface newUrlParamsObject {
   [key: string]: string | number | boolean
 }
 
-export interface validScene {
-  [key: string]: boolean
+export interface validSceneInfo {
+  valid: boolean,
+  polygons?: LatLngExpression[],
+  timeEnd?: Date,
+  timeStart?: Date,
+  producerGranuleId?: string
 }
 
-export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge'
+export interface validScene {
+  [key: string]: validSceneInfo
+}
+
+export interface granuleMetadataInfo {
+  polygons: LatLngExpression[],
+  timeEnd: Date,
+  timeStart: Date,
+  producerGranuleId: string
+}
+
+export interface granuleMetadata {
+  [key: string]: granuleMetadataInfo
+}
+
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge' | 'successfullyReGenerated'
 
 export interface SpatialSearchResult {
   cycle: string,
   pass: string,
-  scene: string
+  scene: string,
+  timeStart: string,
+  timeEnd: string,
+  producerGranuleId: string,
+  granuleUr: string,
+  polygons: string[]
 }
 export type footprintResponse = LatLngExpression[] | boolean
 
@@ -156,4 +184,13 @@ export type SaveType = 'manual' | 'urlParameter' | 'spatialSearch'
 export interface handleSaveResult {
   result: string, 
   savedScenes?: allProductParameters[]
+}
+
+// key is the page number and the value is the product ID of the last element on a page
+export interface RetrievedDataHistory {
+  [key: string]: string
+}
+
+export interface cpsParams {
+  cycleParam: string, passParam: string, sceneParam: string
 }

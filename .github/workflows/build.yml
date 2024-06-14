@@ -31,7 +31,7 @@ on:
       commit:
         type: string
         description: Custom commit hash
-    
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -58,11 +58,14 @@ jobs:
       - name: Initial checkout ${{ github.ref }}
         if: github.event.inputs.commit == ''
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.podaac-cicd.outputs.token }}
       - name: Adjust to proper commit hash ${{ github.event.inputs.commit }}
         if: github.event.inputs.commit != ''
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
@@ -121,7 +124,7 @@ jobs:
           echo "deploy_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
           VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
           echo "deploy_env_lower=$VENUE" >> $GITHUB_OUTPUT
-      ## Build      
+      ## Build
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -167,6 +170,12 @@ jobs:
         with:
           name: build
           path: build/*
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
       - name: Commit Version Bump
         # If building an alpha, release candidate, or release then we commit the version bump back to the repo
         if: |
@@ -174,10 +183,13 @@ jobs:
           steps.rc.conclusion == 'success'      ||
           steps.release.conclusion == 'success'
         run: |
-          git config user.name "${GITHUB_ACTOR}"
+          git config user.name "PODAAC-CICD"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          echo "machine github.com login x-access-token password ${{ steps.generate_token.outputs.token }}" > ~/.netrc
           git commit -am "/version ${{ env.software_version }}"
           git push
+        env:
+          GH_APP_TOKEN: ${{ steps.generate_token.outputs.token }}
       - name: Push Tag
         if: |
           steps.alpha.conclusion == 'success'   ||

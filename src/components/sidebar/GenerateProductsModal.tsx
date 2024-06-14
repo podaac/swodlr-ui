@@ -19,7 +19,7 @@ const GenerateProductsModal = () => {
 
     const handleGenerate = () => {
         // unselect select-all box
-        dispatch(addGeneratedProducts(addedGranules.map(granuleObj => granuleObj.granuleId)))
+        dispatch(addGeneratedProducts({granuleIds: addedGranules.map(granuleObj => granuleObj.granuleId), typeOfGenerate: 'generate'}))
         dispatch(setShowGenerateProductModalFalse())
         setSaveGranulesAlert('successfullyGenerated')
     }

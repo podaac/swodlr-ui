@@ -60,7 +60,7 @@ export interface UserResponse {
     currentUser: CurrentUser
 }
 
-export type ProductState = 'NEW' | 'UNAVAILABLE' | 'GENERATING' | 'ERROR' | 'READY' | 'AVAILABLE;'
+export type ProductState = 'NEW' | 'UNAVAILABLE' | 'GENERATING' | 'ERROR' | 'READY' | 'AVAILABLE'
 
 export type GraphqlResponseStatus = 'success' | 'error' | 'unknown'
 
@@ -71,3 +71,20 @@ export interface getUserProductsResponse {
     error?: Error | string,
   }
   
+export interface UserProductQueryVariables {
+    [key: string]: string
+}
+
+export interface cpsValidationResponse {
+    items: string[]
+}
+
+export interface validScene {
+    [key: string]: boolean
+}
+
+export type cycleGroup = {cycle: string, pass: string, scene: string}[]
+
+export interface cycleGroups {
+    [key: string]: {cycle: string, pass: string, scene: string}[]
+}

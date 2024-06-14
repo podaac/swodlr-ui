@@ -64,7 +64,7 @@ const App = () => {
       navigate(`/customizeProduct/configureOptions${search}`)
     }
      else if (stepTarget === '#added-scenes' && action === 'update') {
-      navigate(`/customizeProduct/selectScenes?cyclePassScene=9_515_130&showUTMAdvancedOptions=true`)
+      navigate(`/customizeProduct/selectScenes?cyclePassScene=12_468_45&showUTMAdvancedOptions=true`)
     } else if (stepTarget === '#customization-tab' && action === 'start') {
       navigate('/customizeProduct/selectScenes')
     } else if (action === 'next' && stepTarget === '#my-data-page') {
@@ -75,6 +75,7 @@ const App = () => {
       dispatch(deleteProduct(addedProducts.map(product => product.granuleId)))
       navigate(`/customizeProduct/selectScenes`)
     }
+    // TODO: Make condition to load previous page when clicking previous before trying to target component to highlight. Use conditions "stepTarget === '#alert-messages' && action === 'prev' && lifecycle === 'init'"
   };
 
   useEffect(() => {
@@ -122,6 +123,9 @@ const App = () => {
         showProgress
         continuous
         scrollToFirstStep
+        locale={{
+          last:"Exit Tutorial",
+        }}
       />
       <Routes>
         <Route path="/" element={ getPageWithFormatting(<Welcome />, false) } />
