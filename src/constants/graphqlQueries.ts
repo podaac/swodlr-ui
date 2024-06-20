@@ -33,7 +33,11 @@ export const userProductsQuery = `
     query getUserProducts($limit: Int, $after: ID, $cycle: Int, $pass: Int, $scene: Int, $outputGranuleExtentFlag: Boolean, $outputSamplingGridType: GridType, $beforeTimestamp: String, $afterTimestamp: String) 
     {
         currentUser {
+<<<<<<< HEAD
             products (limit: $limit, after: $after, cycle: $cycle, pass: $pass, scene: $scene, outputGranuleExtentFlag: $outputGranuleExtentFlag, outputSamplingGridType: $outputSamplingGridType, beforeTimestamp: $beforeTimestamp, afterTimestamp: $afterTimestamp) {
+=======
+            products (limit: $limit, after: $after) {
+>>>>>>> e84f20048ee552f578368e0d47bcc3bac894afd2
                 id
                 timestamp
                 cycle
@@ -77,6 +81,20 @@ query($params: GranulesInput) {
     }
 }
 `
+
+// export const getSpatialSearchGranules = `
+// query GetSpatialSearchGranules($params: GranulesInput) {
+//   granules(params: $params) {
+//     items {
+//       producerGranuleId
+//       granuleUr
+//       timeStart
+//       timeEnd
+//       polygons
+//     }
+//   }
+// }
+// `
 
 export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
