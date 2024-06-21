@@ -1,7 +1,7 @@
 import { Accordion, Button, Col, Form, Row, Spinner } from "react-bootstrap";
-import { ProductState } from "../../types/graphqlTypes";
+import { GridType, ProductQueryParameters, ProductState, UserProductQueryVariables } from "../../types/graphqlTypes";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { setCurrentFilter, setWaitingForMyDataFiltering } from "../sidebar/actions/productSlice";
+import { setCurrentFilter, setWaitingForMyDataFiltering, setWaitingForMyDataFilteringReset } from "../sidebar/actions/productSlice";
 import { defaultFilterParameters, defaultSpatialSearchEndDate, defaultSpatialSearchStartDate, inputBounds, parameterOptionValues, rasterResolutionOptions } from "../../constants/rasterParameterConstants";
 import { useState } from "react";
 import { OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution, Adjust, FilterParameters, FilterAction } from "../../types/historyPageTypes";
@@ -9,6 +9,62 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Formik } from "formik";
 
+export const getFilterParameters = (currentFilters: FilterParameters, limit?: number, after?: string): UserProductQueryVariables => {
+    const productVariablesObject: ProductQueryParameters = {}
+    const {cycle, pass, scene, outputGranuleExtentFlag, outputSamplingGridType, startDate, endDate} = currentFilters
+
+    if(typeof limit !== 'undefined') productVariablesObject.limit = limit
+    if(typeof after !== 'undefined') productVariablesObject.after = after
+    if(cycle !== 'none') {
+        productVariablesObject.cycle = parseInt(cycle)
+    }
+    if (pass !== 'none') {
+        productVariablesObject.pass = parseInt(pass)
+    }
+    if (scene !== 'none') {
+        productVariablesObject.scene = parseInt(scene)
+    }
+    if (outputGranuleExtentFlag.length > 0) {
+        let outputGranuleExtentFlagToUse = null
+        if(outputGranuleExtentFlag.includes('128 x 128')) outputGranuleExtentFlagToUse = false
+        if(outputGranuleExtentFlag.includes('256 x 128')) outputGranuleExtentFlagToUse = true
+        if(outputGranuleExtentFlagToUse !== null) productVariablesObject.outputGranuleExtentFlag = outputGranuleExtentFlagToUse
+    }
+    if (outputSamplingGridType.length > 0) {
+        let outputSamplingGridTypeToUse = null
+        if(outputSamplingGridType.includes('UTM')) outputSamplingGridTypeToUse = 'UTM'
+        if(outputSamplingGridType.includes('LAT/LON')) outputSamplingGridTypeToUse = 'GEO'
+        if(outputSamplingGridTypeToUse !== null) productVariablesObject.outputSamplingGridType = outputSamplingGridTypeToUse as GridType
+    }
+
+    // filter [status, rasterResolution, utmZoneAdjust, mgrsBandAdjust] after products gotten. 
+    // TODO: Implement these into this function once the filtering endpoint supports it.
+    if(startDate !== 'none') {
+        productVariablesObject.afterTimestamp = startDate.toISOString().replace('Z','')
+    }
+    if(endDate !== 'none') {
+        productVariablesObject.beforeTimestamp = endDate.toISOString().replace('Z','')
+    }
+    return productVariablesObject as UserProductQueryVariables
+}
+
+export const productPassesFilterCheck = (currentFilters: FilterParameters, status: string, rasterResolution: number, utmZoneAdjust?: number, mgrsBandAdjust?: number): boolean => {
+    let productPassesFilter = true
+
+    if (currentFilters.status.length > 0 && !currentFilters.status.includes(status as ProductState)) {
+        return false
+    }
+    if (currentFilters.rasterResolution.length > 0 && !currentFilters.rasterResolution.includes(String(rasterResolution) as RasterResolution)) {
+        return false
+    }
+    if (utmZoneAdjust !== undefined && currentFilters.utmZoneAdjust.length > 0 && !currentFilters.utmZoneAdjust.includes(String(utmZoneAdjust) as Adjust)) {
+        return false
+    }
+    if (mgrsBandAdjust !== undefined && currentFilters.mgrsBandAdjust.length > 0 && !currentFilters.mgrsBandAdjust.includes(String(mgrsBandAdjust) as Adjust)) {
+        return false
+    }
+    return productPassesFilter
+}
 
 const HistoryFilters = () => {
     const dispatch = useAppDispatch()
@@ -16,11 +72,12 @@ const HistoryFilters = () => {
     const [endDateToUse, setEndDateToUse] = useState<Date>(defaultSpatialSearchEndDate)
     const [startDateToUse, setStartDateToUse] = useState<Date>(defaultSpatialSearchStartDate)
     const waitingForMyDataFiltering = useAppSelector((state) => state.product.waitingForMyDataFiltering)
+    const waitingForMyDataFilteringReset = useAppSelector((state) => state.product.waitingForMyDataFilteringReset)
     const [cycleIsValid, setCycleIsValid] = useState<boolean>(true)
     const [passIsValid, setPassIsValid] = useState<boolean>(true)
     const [sceneIsValid, setSceneIsValid] = useState<boolean>(true)
 
-    const handleChangeFilters = (filter: FilterAction, value: string, valueValidity?: boolean) => {      
+    const handleChangeFilters = (filter: FilterAction, value: string) => {      
         const currentFiltersToModify: FilterParameters = structuredClone(currentFilters)
         switch(filter) {
           case 'cycle':
@@ -119,6 +176,20 @@ const HistoryFilters = () => {
                 setStartDateToUse(new Date(value))
             }
             break;
+        case 'reset':
+            
+            currentFiltersToModify['cycle'] = 'none'
+            currentFiltersToModify['pass'] = 'none'
+            currentFiltersToModify['scene'] = 'none'
+            currentFiltersToModify['status'] = []
+            currentFiltersToModify['outputGranuleExtentFlag'] = []
+            currentFiltersToModify['outputSamplingGridType'] = []
+            currentFiltersToModify['rasterResolution'] = []
+            currentFiltersToModify['utmZoneAdjust'] = []
+            currentFiltersToModify['mgrsBandAdjust'] = []
+            currentFiltersToModify['endDate'] = 'none'
+            currentFiltersToModify['startDate'] = 'none'
+            break;
           default:
         }
         setCurrentFilters(currentFiltersToModify)
@@ -127,6 +198,12 @@ const HistoryFilters = () => {
     const handleApplyFilters = () => {
         dispatch(setCurrentFilter(currentFilters))
         dispatch(setWaitingForMyDataFiltering(true))
+    }
+
+    const handleResetFilters = () => {
+        dispatch(setCurrentFilter(defaultFilterParameters))
+        handleChangeFilters('reset', 'random value')
+        dispatch(setWaitingForMyDataFilteringReset(true))
     }
 
     const statusOptions = ['NEW', 'UNAVAILABLE', 'GENERATING', 'ERROR', 'READY', 'AVAILABLE']
@@ -152,7 +229,7 @@ const HistoryFilters = () => {
                             <Formik onSubmit={() => {}} initialValues={{}}>
                                 <Form>
                                     <Form.Group className="mb-3" controlId="cycle-filter-input">
-                                        <Form.Control type="number" isInvalid={cycleIsInvalid} placeholder="cycle_id" onChange={(e) => handleChangeFilters('cycle', String(e.target.value), !cycleIsInvalid)}/>
+                                        <Form.Control type="number" isInvalid={cycleIsInvalid} placeholder="cycle_id" onChange={(e) => handleChangeFilters('cycle', String(e.target.value))}/>
                                         <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.cycle.min} - ${inputBounds.cycle.max}`}</h6>
                                     </Form.Group>
                                 </Form>
@@ -166,7 +243,7 @@ const HistoryFilters = () => {
                         <Accordion.Body>
                             <Form>
                                 <Form.Group className="mb-3" controlId="pass-filter-input">
-                                    <Form.Control type="number" isInvalid={passIsInvalid} placeholder="pass_id" onChange={(e) => handleChangeFilters('pass', String(e.target.value), !passIsInvalid)}/>
+                                    <Form.Control type="number" isInvalid={passIsInvalid} placeholder="pass_id" onChange={(e) => handleChangeFilters('pass', String(e.target.value))}/>
                                     <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.pass.min} - ${inputBounds.pass.max}`}</h6>
                                 </Form.Group>
                             </Form>
@@ -179,7 +256,7 @@ const HistoryFilters = () => {
                         <Accordion.Body>
                             <Form>
                                 <Form.Group className="mb-3" controlId="scene-filter-input">
-                                    <Form.Control type="number" isInvalid={sceneIsInvalid} placeholder="scene_id" onChange={(e) => handleChangeFilters('scene', String(e.target.value), !sceneIsInvalid)}/>
+                                    <Form.Control type="number" isInvalid={sceneIsInvalid} placeholder="scene_id" onChange={(e) => handleChangeFilters('scene', String(e.target.value))}/>
                                     <h6 style={{paddingTop: '10px'}}>{`Valid Values: ${inputBounds.scene.min} - ${inputBounds.scene.max}`}</h6>
                                 </Form.Group>
                             </Form>
@@ -319,11 +396,16 @@ const HistoryFilters = () => {
                     </Accordion.Item>
                 </Accordion>
             </Row>
-                <Button style={{marginTop: '10px', marginBottom: '10px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} onClick={() => handleApplyFilters()}>{waitingForMyDataFiltering ? 
+                <Button style={{marginTop: '10px', marginBottom: '10px', marginRight: '5px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} onClick={() => handleApplyFilters()}>{waitingForMyDataFiltering ? 
                             <Spinner size="sm" animation="border" role="status">
                             <span className="visually-hidden">Loading...</span>
                         </Spinner> 
                 : 'Apply'}</Button>
+                <Button style={{marginTop: '10px', marginBottom: '10px', marginLeft: '5px'}} disabled={!cycleIsValid || !passIsValid || !sceneIsValid} variant='secondary' onClick={() => handleResetFilters()}>{waitingForMyDataFilteringReset ? 
+                            <Spinner size="sm" animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner> 
+                : 'Reset'}</Button>
                 {!cycleIsValid || !passIsValid || !sceneIsValid ? <h6 style={{color: 'red'}}>{applyFilterErrorMessage}</h6> : null}
         </Col>
     )
