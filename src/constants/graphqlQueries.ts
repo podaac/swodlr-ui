@@ -26,18 +26,12 @@ export const generateL2RasterProductQuery = `
         }
     }
 `
-// , $cycle: Int, $pass: Int, $scene: Int, $outputGranuleExtentFlag: Boolean, $outputSamplingGridType: GridType, $beforeTimestamp: String, $afterTimestamp: String
-// , cycle: $cycle, pass: $pass, scene: $scene, outputGranuleExtentFlag: $outputGranuleExtentFlag, outputSamplingGridType: $outputSamplingGridType, beforeTimestamp: $beforeTimestamp, afterTimestamp: $afterTimestamp
 
 export const userProductsQuery = `
     query getUserProducts($limit: Int, $after: ID, $cycle: Int, $pass: Int, $scene: Int, $outputGranuleExtentFlag: Boolean, $outputSamplingGridType: GridType, $beforeTimestamp: String, $afterTimestamp: String) 
     {
         currentUser {
-<<<<<<< HEAD
             products (limit: $limit, after: $after, cycle: $cycle, pass: $pass, scene: $scene, outputGranuleExtentFlag: $outputGranuleExtentFlag, outputSamplingGridType: $outputSamplingGridType, beforeTimestamp: $beforeTimestamp, afterTimestamp: $afterTimestamp) {
-=======
-            products (limit: $limit, after: $after) {
->>>>>>> e84f20048ee552f578368e0d47bcc3bac894afd2
                 id
                 timestamp
                 cycle

@@ -40,10 +40,10 @@ export const getFilterParameters = (currentFilters: FilterParameters, limit?: nu
     // filter [status, rasterResolution, utmZoneAdjust, mgrsBandAdjust] after products gotten. 
     // TODO: Implement these into this function once the filtering endpoint supports it.
     if(startDate !== 'none') {
-        productVariablesObject.afterTimestamp = new Date(startDate.setSeconds(0,0)).toISOString().replace('Z','')
+        productVariablesObject.afterTimestamp = startDate.toISOString().replace('Z','')
     }
     if(endDate !== 'none') {
-        productVariablesObject.beforeTimestamp = new Date(endDate.setSeconds(0,0)).toISOString().replace('Z','')
+        productVariablesObject.beforeTimestamp = endDate.toISOString().replace('Z','')
     }
     return productVariablesObject as UserProductQueryVariables
 }
@@ -52,16 +52,16 @@ export const productPassesFilterCheck = (currentFilters: FilterParameters, statu
     let productPassesFilter = true
 
     if (currentFilters.status.length > 0 && !currentFilters.status.includes(status as ProductState)) {
-        productPassesFilter = false
+        return false
     }
     if (currentFilters.rasterResolution.length > 0 && !currentFilters.rasterResolution.includes(String(rasterResolution) as RasterResolution)) {
-        productPassesFilter = false
+        return false
     }
     if (utmZoneAdjust !== undefined && currentFilters.utmZoneAdjust.length > 0 && !currentFilters.utmZoneAdjust.includes(String(utmZoneAdjust) as Adjust)) {
-        productPassesFilter = false
+        return false
     }
     if (mgrsBandAdjust !== undefined && currentFilters.mgrsBandAdjust.length > 0 && !currentFilters.mgrsBandAdjust.includes(String(mgrsBandAdjust) as Adjust)) {
-        productPassesFilter = false
+        return false
     }
     return productPassesFilter
 }
