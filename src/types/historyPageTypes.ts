@@ -16,7 +16,6 @@ export interface FilterParameters {
   mgrsBandAdjust: Adjust[],
   startDate: Date | 'none',
   endDate: Date | 'none'
-
 }
 
-export type FilterAction = 'cycle' | 'scene' | 'pass' | 'status' | 'outputGranuleExtentFlag' | 'outputSamplingGridType' | 'rasterResolution' | 'utmZoneAdjust' | 'mgrsBandAdjust' | 'startDate' | 'endDate'
+export type FilterAction = 'cycle' | 'scene' | 'pass' | 'status' | 'outputGranuleExtentFlag' | 'outputSamplingGridType' | 'rasterResolution' | 'utmZoneAdjust' | 'mgrsBandAdjust' | 'startDate' | 'endDate' | 'reset'

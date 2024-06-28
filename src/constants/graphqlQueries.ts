@@ -28,10 +28,10 @@ export const generateL2RasterProductQuery = `
 `
 
 export const userProductsQuery = `
-    query getUserProducts($limit: Int, $after: ID) 
+    query getUserProducts($limit: Int, $after: ID, $cycle: Int, $pass: Int, $scene: Int, $outputGranuleExtentFlag: Boolean, $outputSamplingGridType: GridType, $beforeTimestamp: String, $afterTimestamp: String) 
     {
         currentUser {
-            products (limit: $limit, after: $after) {
+            products (limit: $limit, after: $after, cycle: $cycle, pass: $pass, scene: $scene, outputGranuleExtentFlag: $outputGranuleExtentFlag, outputSamplingGridType: $outputSamplingGridType, beforeTimestamp: $beforeTimestamp, afterTimestamp: $afterTimestamp) {
                 id
                 timestamp
                 cycle
@@ -59,6 +59,8 @@ export const userProductsQuery = `
         }
     }
 `
+
+export const defaultUserProductsLimit = 1000000
 
 export const getGranules = `
 query($params: GranulesInput) {

@@ -141,7 +141,6 @@ const WorldMap = () => {
         })
         const spatialSearchResults = updatedGranulesToUse.map((updatedGranuleObject: any) => {
           const {producerGranuleId, granuleUr, cpsString, polygons, timeStart, timeEnd} = updatedGranuleObject
-          console.log(granuleUr)
           const cyclePassSceneStringArray = cpsString.split('_').map((id: string) => parseInt(id).toString())
           const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
           const sceneToUse = String(Math.floor(tileValue))
