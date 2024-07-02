@@ -5,7 +5,7 @@ import YukonImage from '../../assets/SWOT-YUKON.jpeg'
 import LatLongUTM from '../../assets/lat-lon-vs-utm.png'
 import UpSWOTResolution from '../../assets/swot-go-up-resolution.jpg'
 import packageJson from '../../../package.json'
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const About = () => {
     const [backendVersion, setBackendVersion] = useState('')
@@ -18,6 +18,7 @@ const About = () => {
       }, []);
       
     return (
+        // @ts-ignore
         <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '0px', height: '100%'}}>
             <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h4></Row>
 
@@ -161,7 +162,7 @@ const About = () => {
                     </ListGroup>
                 </div>
             </Row>
-        </Col> as ReactElement
+        </Col>
     );
 }
 
