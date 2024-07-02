@@ -18,7 +18,7 @@ const About = () => {
       }, []);
       
     return (
-        // @ts-ignore
+        /* @ts-ignore */
         <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '0px', height: '100%'}}>
             <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h4></Row>
 
