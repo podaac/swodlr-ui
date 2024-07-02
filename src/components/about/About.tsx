@@ -18,7 +18,7 @@ const About = () => {
       }, []);
       
     return (
-        <Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '0px', height: '100%'}}>
+        <><Col className="about-page" style={{marginTop: '70px', paddingRight: '12px', marginLeft: '0px', height: '100%'}}>
             <Row><h4 style={{marginTop: '10px', marginBottom: '20px'}}>About: SWOT On-Demand Level-2 Raster Generator</h4></Row>
 
             <Row className='about-card' style={{marginRight: '10%', marginLeft: '10%', marginBottom: '40px'}}>
@@ -161,7 +161,7 @@ const About = () => {
                     </ListGroup>
                 </div>
             </Row>
-        </Col>
+        </Col></>
     );
 }
 
