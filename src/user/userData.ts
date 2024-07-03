@@ -4,7 +4,7 @@ import { CurrentUser, UserProductQueryVariables, UserResponse, getUserProductsRe
 import { Session } from '../authentication/session';
 
 const userIdQuery = gql`${userQuery}`
-const baseUri = process.env.REACT_APP_SWODLR_API_BASE_URI;
+const baseUri = import.meta.env.VITE_SWODLR_API_BASE_URI;
 const cmrGraphqlUri = 'https://cmr.earthdata.nasa.gov/graphql'
 const graphqlUri = baseUri + '/graphql'
 
