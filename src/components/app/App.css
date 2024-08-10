@@ -266,28 +266,35 @@ CUSTOMIZE PRODUCT CONTAINER
 .dark-mode-sidebar-section-title {
   background-color: #1A2535;
 }
-/* .dark-mode-sidebar-section-body {
-  background-color: #26384F;
-} */
 
 .light-mode-sidebar-section-title {
   background-color: #1A2535;
 }
-/* .light-mode-sidebar-section-body {
-  background-color: #26384F;
-} */
 
 /**************************************************
 PRODUCT TABLE
 **************************************************/
 
-.dark-mode-table tr:hover td {
-  /* background-color: pink; */
+table th {
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+  border-right: 1px solid white;
 }
 
-thead {
+table td {
+  border-bottom: 1px solid white;
+  border-right: 1px solid white;
+}
+
+table th:first-child,
+table td:first-child {
+  border-left: 1px solid white;
+}
+
+table thead th {
   position: sticky;
   top: -1px;
+  background-color: #1A2535;
 }
 
 tfoot {
@@ -305,6 +312,10 @@ tfoot {
   overflow-y: auto;
 }
 
+table, th, td {
+  border: 1px solid white;
+}
+
 .table-responsive-productCustomization {
   max-height: 30vh;
   overflow-y: auto;
@@ -317,7 +328,7 @@ tfoot {
 
 .table-filter {
   background-color:#1a2535;
-  border: solid white 1px
+  /* border: solid white 1px */
 }
 
 .center {
@@ -339,8 +350,14 @@ tfoot {
 .dark-mode-table {
   color: #FAF9F6;
   border: #FAF9F6 solid 1px;
-  /* margin-right: '50px';
-  margin-left: '50px' */
+ 
+}
+
+.dark-mode-table th, tr, td {
+  color: #FAF9F6;
+  border-bottom: #FAF9F6 solid 1px;
+  border-top: #FAF9F6 solid 1px;
+  background-color: #1A2535;
 }
 
 .dark-mode-table tr {
@@ -350,18 +367,13 @@ tfoot {
 
 .light-mode-table {
   color: black;
-  border: black solid 1px;
 }
 
 .dark-mode-table tr.add-granules {
-  border-bottom: none;
-  /* background-color: #314a68; */
   background-color: #1A2535;
 }
 
 .dark-mode-table thead {
-  /* border: #FAF9F6 solid 1px; */
-  /* background-color: #314a68; */
   background-color: #1A2535;
 }
 
@@ -371,7 +383,6 @@ tfoot {
 }
 
 .light-mode-table thead {
-  /* border: #FAF9F6 solid 1px; */
   background-color: #c8c7c5;
 }
 
