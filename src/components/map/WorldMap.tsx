@@ -218,7 +218,7 @@ const WorldMap = () => {
           <div style={{float:'right', width:'49%', height:'100%'}} id='map-tutorial-target'/>
           <TileLayer
             url={`https://api.mapbox.com/styles/v1/${REACT_APP_MAPBOX_STYLE}/tiles/256/{z}/{x}/{y}@2x?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`}
-            attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+            attribution='© Mapbox, © OpenStreetMap'
             maxZoom = {18}
             noWrap
             bounds={
