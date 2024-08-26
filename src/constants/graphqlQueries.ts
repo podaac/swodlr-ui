@@ -28,10 +28,10 @@ export const generateL2RasterProductQuery = `
 `
 
 export const userProductsQuery = `
-    query getUserProducts($limit: Int, $after: ID) 
+    query getUserProducts($limit: Int, $after: ID, $cycle: Int, $pass: Int, $scene: Int, $outputGranuleExtentFlag: Boolean, $outputSamplingGridType: GridType, $beforeTimestamp: String, $afterTimestamp: String) 
     {
         currentUser {
-            products (limit: $limit, after: $after) {
+            products (limit: $limit, after: $after, cycle: $cycle, pass: $pass, scene: $scene, outputGranuleExtentFlag: $outputGranuleExtentFlag, outputSamplingGridType: $outputSamplingGridType, beforeTimestamp: $beforeTimestamp, afterTimestamp: $afterTimestamp) {
                 id
                 timestamp
                 cycle
@@ -60,20 +60,41 @@ export const userProductsQuery = `
     }
 `
 
+export const defaultUserProductsLimit = 1000000
+
 export const getGranules = `
-    query($tileParams: GranulesInput) {
-        tiles: granules(params: $tileParams) {
-            items {
-                granuleUr
-            }
+query($params: GranulesInput) {
+    granules(params: $params) {
+        items {
+          producerGranuleId
+          granuleUr
+          timeStart
+          timeEnd
+          polygons
         }
+        cursor
     }
+}
 `
+
+// export const getSpatialSearchGranules = `
+// query GetSpatialSearchGranules($params: GranulesInput) {
+//   granules(params: $params) {
+//     items {
+//       producerGranuleId
+//       granuleUr
+//       timeStart
+//       timeEnd
+//       polygons
+//     }
+//   }
+// }
+// `
 
 export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
     const variables = {
-        "tileParams": {
+        "params": {
           'collectionConceptIds': [spatialSearchCollectionConceptId],
           "limit": 100,
           "cycle": cycle,
@@ -84,6 +105,37 @@ export const getGranuleVariables = (cycle: number, pass: number, sceneIds: numbe
               "pattern": true
             }
           }
+        }
+      }
+    return variables
+}
+
+export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number, cursor?: string) => {
+    const variables = {
+        "params": {
+          polygon,
+          collectionConceptId,
+          limit,
+          cursor
+        }
+      }
+    return variables
+}
+
+export const getFootprintVariables = (cycle: number, pass: number, sceneIds: number[]) => {
+    const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
+    const variables = {
+        "params": {
+          'collectionConceptIds': [spatialSearchCollectionConceptId],
+          "limit": 100,
+          "cycle": cycle,
+          "passes": {"0": {"pass": pass}},
+          "readableGranuleName": sceneIdsForGranuleName,
+          "options": {
+            "readableGranuleName": {
+              "pattern": true
+            }
+          },
         }
       }
     return variables

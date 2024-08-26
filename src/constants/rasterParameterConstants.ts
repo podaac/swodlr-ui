@@ -1,4 +1,3 @@
-import { LatLngExpression } from "leaflet"
 import { ParameterHelp, ParameterOptions, granuleAlertMessageConstantType, inputValuesDictionary, parameterValuesDictionary } from "../types/constantTypes"
 import { FilterParameters } from "../types/historyPageTypes"
 
@@ -108,7 +107,8 @@ export const parameterHelp: ParameterHelp = {
     pass: `Predefined sections of the orbit between the maximum and minimum latitudes. SWOT has 584 passes in one cycle, split into ascending and descending passes`,
     scene: `Predefined 128 x 128 km squares of the SWOT observations.`,
     status: `The processing status of your custom product. The status types are as follows: NEW, UNAVAILABLE, GENERATING, ERROR, READY, AVAILABLE`,
-    granuleTableLimit: `There is a limit of ${granuleTableLimit} scenes allowed to be added to the scene table at a time. This is to ensure our scene processing pipeline can handle the demand of all of SWODLR's users.`
+    granuleTableLimit: `There is a limit of ${granuleTableLimit} scenes allowed to be added to the scene table at a time. This is to ensure our scene processing pipeline can handle the demand of all of SWODLR's users.`,
+    validCPSValues: `There are two types of orbits, calibration and scientific. Calibration orbits have a 400-578 cycle range and science orbits have a 0-399 cycle range. Cycles in the calibration orbit range are not currently supported at this time but will be in the future.`,
 }
 
 export interface InputBounds {
@@ -118,10 +118,12 @@ export interface InputBounds {
     }
 }
 
+// cycle for calibration orbit is 400-578
+// TODO: change cycle max back to 578 when calibration orbit is implemented
 export const inputBounds: inputValuesDictionary = {
     cycle: {
-        min: 0,
-        max: 578
+        min: 1,
+        max: 399
     },
     pass: {
         min: 1,
@@ -194,10 +196,6 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
         message: `Successfully started product generation! Go to the 'My Data' page to track progress.`,
         variant: 'success'
     },
-    spatialSearchAreaTooLarge: {
-        message: `The search area you've selected on the map is too large. Please choose a smaller area to search.`,
-        variant: 'warning'
-    },
     successfullyReGenerated: {
         message: `Successfully re-submitted product generation! Go to the 'My Data' page to track progress.`,
         variant: 'success'
@@ -211,29 +209,6 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
     utmZoneAdjust: 'test',
     mgrsBandAdjust: 'test',
   }
-
-  export const sampleFootprint: LatLngExpression[] = [
-    [
-      33.62959926136482,
-      -119.59722240610449
-    ],
-    [
-      33.93357164098772,
-      -119.01030070905898
-    ],
-    [
-      33.445222247065175,
-      -118.6445806486702
-    ],
-    [
-      33.137055033294544,
-      -119.23445170097719
-    ],
-    [
-      33.629599562267856,
-      -119.59722227107866
-    ]
-  ] 
 
 export const spatialSearchResultLimit = 2000
 export const beforeCPS = '_x_x_x_'
