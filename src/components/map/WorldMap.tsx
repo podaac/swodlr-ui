@@ -9,7 +9,7 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
+import { afterCPSL, afterCPSR, beforeCPS, productsPerPage, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -120,21 +120,22 @@ const WorldMap = () => {
         return polygonString
       }).join()
 
-      let cursor: string | undefined = 'initialValue'
+      let cursor: string | null = 'initialValue'
       const spatialSearchItems: any[] = []
+      const productsPerPageInt = parseInt(productsPerPage)
       while(cursor !== null) {
-        if(cursor === 'initialValue') cursor = undefined
+        if(cursor === 'initialValue') cursor = null
         cursor = await fetch('https://graphql.earthdata.nasa.gov/api', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ query: getGranules, variables: getSpatialSearchGranuleVariables(polygonUrlString, spatialSearchCollectionConceptId, spatialSearchResultLimit, cursor) })
+          body: JSON.stringify({ query: getGranules, variables: getSpatialSearchGranuleVariables(polygonUrlString, spatialSearchCollectionConceptId, parseInt(productsPerPage), cursor) })
         }).then(async data => {
           const responseJson = await data.json()
           spatialSearchItems.push(...responseJson.data.granules.items)
-          return responseJson.data.granules.cursor
+          return spatialSearchItems.length > productsPerPageInt ? null : responseJson.data.granules.cursor
         })
       }
 
