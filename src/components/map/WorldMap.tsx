@@ -9,7 +9,7 @@ import { EditControl } from 'react-leaflet-draw'
 import { Session } from '../../authentication/session';
 import { lineString } from '@turf/helpers';
 import booleanClockwise from '@turf/boolean-clockwise';
-import { afterCPSL, afterCPSR, beforeCPS, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
+import { afterCPSL, afterCPSR, beforeCPS, productsPerPage, spatialSearchCollectionConceptId, spatialSearchResultLimit } from '../../constants/rasterParameterConstants';
 import { addSpatialSearchResults, setMapFocus, setWaitingForSpatialSearch } from '../sidebar/actions/productSlice';
 import { SpatialSearchResult } from '../../types/constantTypes';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -80,6 +80,12 @@ const WorldMap = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Retrieves scenes within the specified coordinates by performing a spatial search query.
+   * 
+   * @param {Array<Array<{lat: number, lng: number}>>} coordinatesToSearch - An array of polygons, where each polygon is an array of coordinates.
+   * @return {Promise<Error | undefined>} A promise that resolves with an error if the query fails, or undefined if the query is successful.
+   */
   const getScenesWithinCoordinates = async (coordinatesToSearch: {lat: number, lng: number}[][]) => {
     try {
       // get session token to use in spatial search query
@@ -114,51 +120,58 @@ const WorldMap = () => {
         return polygonString
       }).join()
 
-      const spatialSearchResponse = await fetch('https://graphql.earthdata.nasa.gov/api', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query: getGranules, variables: getSpatialSearchGranuleVariables(polygonUrlString, spatialSearchCollectionConceptId, spatialSearchResultLimit) })
-      }).then(async data => {
-        const responseJson = await data.json()
-        // TODO: make subsequent calls to get granules in spatial search area till everything is found.
+      let cursor: string | null = 'initialValue'
+      const spatialSearchItems: any[] = []
+      const productsPerPageInt = parseInt(productsPerPage)
+      while(cursor !== null) {
+        if(cursor === 'initialValue') cursor = null
+        cursor = await fetch('https://graphql.earthdata.nasa.gov/api', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query: getGranules, variables: getSpatialSearchGranuleVariables(polygonUrlString, spatialSearchCollectionConceptId, parseInt(productsPerPage), cursor) })
+        }).then(async data => {
+          const responseJson = await data.json()
+          spatialSearchItems.push(...responseJson.data.granules.items)
+          return spatialSearchItems.length > productsPerPageInt ? null : responseJson.data.granules.cursor
+        })
+      }
 
-        const updatedGranules = responseJson.data.granules.items.map((item: any) => {
-          const itemCopy = structuredClone(item)
-          const cpsString = item.granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
-          itemCopy.cpsString = cpsString
-          return itemCopy
-        })
-        const cpsStringTracker: string[] = []
-        const updatedGranulesToUse = updatedGranules.filter((updatedGranuleObject: any) => {
-          // if cpsString not in tracker, it has not been repeated yet. Add to tracker and return
-          const granuleRepeated = cpsStringTracker.includes(updatedGranuleObject.cpsString)
-          if(!granuleRepeated) cpsStringTracker.push(updatedGranuleObject.cpsString)
-          return !granuleRepeated
-          // if cpsString in tracker, it has been repeated. Do not return
-        })
-        const spatialSearchResults = updatedGranulesToUse.map((updatedGranuleObject: any) => {
-          const {producerGranuleId, granuleUr, cpsString, polygons, timeStart, timeEnd} = updatedGranuleObject
-          const cyclePassSceneStringArray = cpsString.split('_').map((id: string) => parseInt(id).toString())
-          const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
-          const sceneToUse = String(Math.floor(tileValue))
-          const returnObject: SpatialSearchResult = {
-            cycle: cyclePassSceneStringArray?.[0],
-            pass: cyclePassSceneStringArray?.[1],
-            scene : sceneToUse,
-            producerGranuleId,
-            granuleUr,
-            timeStart,
-            timeEnd,
-            polygons
-          }
-          return returnObject
-        })
-        return spatialSearchResults
+      const updatedGranules = spatialSearchItems.map((item: any) => {
+        const itemCopy = structuredClone(item)
+        const cpsString = item.granuleUr.match(`${beforeCPS}([0-9]+(_[0-9]+)+)(${afterCPSR}|${afterCPSL})`)?.[1]
+        itemCopy.cpsString = cpsString
+        return itemCopy
       })
-      dispatch(addSpatialSearchResults(spatialSearchResponse as SpatialSearchResult[]))
+      const cpsStringTracker: string[] = []
+      const updatedGranulesToUse = updatedGranules.filter((updatedGranuleObject: any) => {
+        // if cpsString not in tracker, it has not been repeated yet. Add to tracker and return
+        const granuleRepeated = cpsStringTracker.includes(updatedGranuleObject.cpsString)
+        if(!granuleRepeated) cpsStringTracker.push(updatedGranuleObject.cpsString)
+        return !granuleRepeated
+        // if cpsString in tracker, it has been repeated. Do not return
+      })
+      const spatialSearchResults = updatedGranulesToUse.map((updatedGranuleObject: any) => {
+        const {producerGranuleId, granuleUr, cpsString, polygons, timeStart, timeEnd} = updatedGranuleObject
+        const cyclePassSceneStringArray = cpsString.split('_').map((id: string) => parseInt(id).toString())
+        const tileValue = parseInt(cyclePassSceneStringArray?.[2] as string)
+        const sceneToUse = String(Math.floor(tileValue))
+        const returnObject: SpatialSearchResult = {
+          cycle: cyclePassSceneStringArray?.[0],
+          pass: cyclePassSceneStringArray?.[1],
+          scene : sceneToUse,
+          producerGranuleId,
+          granuleUr,
+          timeStart,
+          timeEnd,
+          polygons
+        }
+        return returnObject
+      })
+
+      dispatch(addSpatialSearchResults(spatialSearchResults as SpatialSearchResult[]))
     } catch (err) {
       if (err instanceof Error) {
           return err

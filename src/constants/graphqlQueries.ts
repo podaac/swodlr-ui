@@ -72,6 +72,7 @@ query($params: GranulesInput) {
           timeEnd
           polygons
         }
+        cursor
     }
 }
 `
@@ -109,12 +110,13 @@ export const getGranuleVariables = (cycle: number, pass: number, sceneIds: numbe
     return variables
 }
 
-export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number) => {
+export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number, cursor: string | null) => {
     const variables = {
         "params": {
           polygon,
           collectionConceptId,
-          limit
+          limit,
+          cursor
         }
       }
     return variables
