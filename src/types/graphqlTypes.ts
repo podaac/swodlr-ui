@@ -37,6 +37,24 @@ export interface Product {
     status: Status[]
 }
 
+export type GridType = 'UTM' | 'GEO'
+
+export interface ProductQueryParameters {
+    cycle?: number,
+    pass?: number,
+    scene?: number,
+    outputGranuleExtentFlag?: Boolean,
+    outputSamplingGridType?: GridType,
+    rasterResolution?: number,
+    utmZoneAdjust?: number,
+    mgrsBandAdjust?: number,
+    beforeTimestamp?: string,
+    afterTimestamp?: string,
+    // pagination
+    after?: string,
+    limit?: number
+}
+
 export interface CurrentUser {
     id: string,
     email: string,
@@ -72,7 +90,7 @@ export interface getUserProductsResponse {
   }
   
 export interface UserProductQueryVariables {
-    [key: string]: string
+    [key: string]: string | number | GridType
 }
 
 export interface cpsValidationResponse {
