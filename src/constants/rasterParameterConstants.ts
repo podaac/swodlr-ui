@@ -196,10 +196,6 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
         message: `Successfully started product generation! Go to the 'My Data' page to track progress.`,
         variant: 'success'
     },
-    spatialSearchAreaTooLarge: {
-        message: `The search area you've selected on the map is too large. Please choose a smaller area to search.`,
-        variant: 'warning'
-    },
     successfullyReGenerated: {
         message: `Successfully re-submitted product generation! Go to the 'My Data' page to track progress.`,
         variant: 'success'
@@ -215,6 +211,7 @@ export const granuleAlertMessageConstant: granuleAlertMessageConstantType = {
   }
 
 export const spatialSearchResultLimit = 2000
+export const spatialSearchResultsBatchSize = 1000
 export const beforeCPS = '_x_x_x_'
 export const afterCPSR = 'F_'
 export const afterCPSL = 'F_'

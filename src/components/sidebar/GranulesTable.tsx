@@ -140,7 +140,6 @@ const GranuleTable = (props: GranuleTableProps) => {
       const fetchData = async () => {
         let scenesFoundArray: string[] = []
         let addedScenes: string[] = []
-        if (spatialSearchResults.length < 1000) {
           for(let i=0; i<spatialSearchResults.length; i++) {
             if ((addedProducts.length + scenesFoundArray.filter(result => result === 'found something').length) >= granuleTableLimit) {
               // don't let more than 10 be added
@@ -165,13 +164,7 @@ const GranuleTable = (props: GranuleTableProps) => {
             // add parameters
             addSearchParamToCurrentUrlState({'cyclePassScene': addedScenes.join('-')})
           }
-        } else {
-          // If too many spatial search results, the search doesn't work because there too many granules and a limit was reached.
-          // In this scenario, make an alert that indicates that the search area was too large.
-          // TODO: remove this alert when there is a fix implemented for cmr spatial search limit.
-          // The valid granules are sometimes not a part of the first 1000 results which is the bug here.
-          scenesFoundArray.push('spatialSearchAreaTooLarge')
-        }
+
         dispatch(setWaitingForSpatialSearch(false))
         return scenesFoundArray
       }
@@ -181,7 +174,6 @@ const GranuleTable = (props: GranuleTableProps) => {
         .then((noScenesFoundResults) => {
           if((noScenesFoundResults.includes('noScenesFound') && !noScenesFoundResults.includes('found something'))) setSaveGranulesAlert('noScenesFound')
           if(noScenesFoundResults.includes('hit granule limit')) setSaveGranulesAlert('granuleLimit')
-          if(noScenesFoundResults.includes('spatialSearchAreaTooLarge')) setSaveGranulesAlert('spatialSearchAreaTooLarge')
         })
         // make sure to catch any error
         .catch(console.error);
@@ -282,9 +274,11 @@ const GranuleTable = (props: GranuleTableProps) => {
       const maxIsValid = checkInBounds(inputType, max)
       validInput = minIsValid && maxIsValid
     } else {
+      console.log('inputValue: ',inputValue)
       const validInBounds = checkInBounds(inputType, inputValue.trim())
       validInput = validInBounds
     }
+    console.log('validInput: ',validInput)
     return validInput
   }
 
