@@ -274,11 +274,9 @@ const GranuleTable = (props: GranuleTableProps) => {
       const maxIsValid = checkInBounds(inputType, max)
       validInput = minIsValid && maxIsValid
     } else {
-      console.log('inputValue: ',inputValue)
       const validInBounds = checkInBounds(inputType, inputValue.trim())
       validInput = validInBounds
     }
-    console.log('validInput: ',validInput)
     return validInput
   }
 

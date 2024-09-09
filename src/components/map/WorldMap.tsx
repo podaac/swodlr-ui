@@ -16,7 +16,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { getGranules, getSpatialSearchGranuleVariables } from '../../constants/graphqlQueries';
 
-const REACT_APP_MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
+const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -242,7 +242,7 @@ const WorldMap = () => {
           }
           <div style={{float:'right', width:'49%', height:'100%'}} id='map-tutorial-target'/>
           <TileLayer
-            url={`https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`}
+            url={`https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
             attribution='© Mapbox, © OpenStreetMap'
             maxZoom = {18}
             noWrap
