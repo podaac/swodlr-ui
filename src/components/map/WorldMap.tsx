@@ -16,7 +16,6 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { getGranules, getSpatialSearchGranuleVariables } from '../../constants/graphqlQueries';
 
-const REACT_APP_MAPBOX_STYLE = process.env.REACT_APP_MAPBOX_STYLE;
 const REACT_APP_MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
 let DefaultIcon = L.icon({
@@ -215,9 +214,14 @@ const WorldMap = () => {
 
   return (
     <Row style={{height: '100%', paddingTop: '70px', paddingBottom: '0px', marginRight: '0%'}}>
-      <MapContainer className='Map-container' spatial-search-map
+      <MapContainer 
+        className='Map-container' 
+        spatial-search-map
         id='spatial-search-map'  
-        zoom={7} scrollWheelZoom={true} zoomControl={false} 
+        zoom={7} 
+        scrollWheelZoom={true} 
+        zoomControl={false} 
+        style={{backgroundColor: '#2C415C', height: '100%', width: '100%'}}
       >
           {(useLocation().pathname.includes('selectScenes') && userHasCorrectEdlPermissions) ? (
             <FeatureGroup>
@@ -238,7 +242,7 @@ const WorldMap = () => {
           }
           <div style={{float:'right', width:'49%', height:'100%'}} id='map-tutorial-target'/>
           <TileLayer
-            url={`https://api.mapbox.com/styles/v1/${REACT_APP_MAPBOX_STYLE}/tiles/256/{z}/{x}/{y}@2x?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`}
+            url={`https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`}
             attribution='© Mapbox, © OpenStreetMap'
             maxZoom = {18}
             noWrap
