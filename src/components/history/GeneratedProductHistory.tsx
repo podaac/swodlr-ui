@@ -1,57 +1,17 @@
 import { Alert, Col, OverlayTrigger, Row, Table, Tooltip, Spinner, Form, DropdownButton, Dropdown, Badge } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { Product, ProductState } from "../../types/graphqlTypes";
+import { Product } from "../../types/graphqlTypes";
 import { useEffect, useState } from "react";
 import { InfoCircle } from "react-bootstrap-icons";
 import { generatedProductsLabels, infoIconsToRender, parameterHelp, productsPerPage } from "../../constants/rasterParameterConstants";
 import { getUserProducts } from "../../user/userData";
 import { useLocation, useNavigate } from "react-router-dom";
 import DataPagination from "./DataPagination";
-import HistoryFilters from "./HistoryFilters";
-import { Adjust, FilterParameters, OutputGranuleExtentFlagOptions, OutputSamplingGridType, RasterResolution } from "../../types/historyPageTypes";
+import HistoryFilters, { getFilterParameters, productPassesFilterCheck } from "./HistoryFilters";
 import { setShowReGenerateProductModalTrue } from "../sidebar/actions/modalSlice";
 import ReGenerateProductsModal from "./ReGenerateProductsModal";
-import { setAllUserProducts, setGranulesToReGenerate, setUserProducts, setWaitingForMyDataFiltering, setWaitingForProductsToLoad } from "../sidebar/actions/productSlice";
-
-export const productPassesFilterCheck = (currentFilters: FilterParameters, cycle: number, pass: number, scene: number, outputGranuleExtentFlag: boolean, status: string, outputSamplingGridType: string, rasterResolution: number, dateGenerated: string, utmZoneAdjust?: number, mgrsBandAdjust?: number): boolean => {
-    let productPassesFilter = true
-    const outputGranuleExtentFlagMap = ['128 x 128','256 x 128']
-
-    if(currentFilters.cycle !== 'none' && currentFilters.cycle !== String(cycle)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.pass !== 'none' && currentFilters.pass !== String(pass)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.scene !== 'none' && currentFilters.scene !== String(scene)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.outputGranuleExtentFlag.length > 0 && !currentFilters.outputGranuleExtentFlag.includes(outputGranuleExtentFlagMap[+outputGranuleExtentFlag] as OutputGranuleExtentFlagOptions)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.status.length > 0 && !currentFilters.status.includes(status as ProductState)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.outputSamplingGridType.length > 0 && !currentFilters.outputSamplingGridType.includes(outputSamplingGridType as OutputSamplingGridType)) {
-        productPassesFilter = false
-    }
-    if (currentFilters.rasterResolution.length > 0 && !currentFilters.rasterResolution.includes(String(rasterResolution) as RasterResolution)) {
-        productPassesFilter = false
-    }
-    if (utmZoneAdjust !== undefined && currentFilters.utmZoneAdjust.length > 0 && !currentFilters.utmZoneAdjust.includes(String(utmZoneAdjust) as Adjust)) {
-        productPassesFilter = false
-    }
-    if (mgrsBandAdjust !== undefined && currentFilters.mgrsBandAdjust.length > 0 && !currentFilters.mgrsBandAdjust.includes(String(mgrsBandAdjust) as Adjust)) {
-        productPassesFilter = false
-    }
-    if(currentFilters.startDate !== 'none' && new Date(dateGenerated) < currentFilters.startDate) {
-        productPassesFilter = false
-    }
-    if(currentFilters.endDate !== 'none' && new Date(dateGenerated) > currentFilters.endDate) {
-        productPassesFilter = false
-    }
-    return productPassesFilter
-}
+import { setAllUserProducts, setGranulesToReGenerate, setUserProducts, setWaitingForMyDataFiltering, setWaitingForMyDataFilteringReset, setWaitingForProductsToLoad } from "../sidebar/actions/productSlice";
+import { defaultUserProductsLimit } from "../../constants/graphqlQueries";
 
 const GeneratedProductHistory = () => {
     const dispatch = useAppDispatch()
@@ -60,28 +20,32 @@ const GeneratedProductHistory = () => {
     const currentFilters = useAppSelector((state) => state.product.currentFilters)
     const waitingForProductsToLoad = useAppSelector((state) => state.product.waitingForProductsToLoad)
     const waitingForMyDataFiltering = useAppSelector((state) => state.product.waitingForMyDataFiltering)
+    const waitingForMyDataFilteringReset = useAppSelector((state) => state.product.waitingForMyDataFilteringReset)
     const { search } = useLocation()
     const navigate = useNavigate()
     const [totalNumberOfProducts, setTotalNumberOfProducts] = useState<number>(0)
     const [totalNumberOfFilteredProducts, setTotalNumberOfFilteredProducts] = useState<number>(0)
     const [checkedProducts, setCheckedProducts] = useState<Product[]>([])
     const [allChecked, setAllChecked] = useState<boolean>(false)
+    const [hasAlreadyLoadedInitialProducts, setHasAlreadyLoadedInitialProducts] = useState<boolean>(false)
     
     useEffect(() => {
         // get the data for the first page
         // go through all the user product data to get the id of each one so that 
         const fetchData = async () => {
             if(!waitingForMyDataFiltering) dispatch(setWaitingForProductsToLoad(true))
-            await getUserProducts({limit: '1000000'}).then(response => {
+
+            const productQueryParameters = getFilterParameters(currentFilters, defaultUserProductsLimit)
+            // add variables for filters
+            await getUserProducts(productQueryParameters).then(response => {
                 dispatch(setWaitingForProductsToLoad(false))
                 // filter products for what is in the filter
                 const allProducts = response.products as Product[]
                 setTotalNumberOfProducts(allProducts.length)
                 const filteredProducts = allProducts.filter(product => {
-                    const {status, utmZoneAdjust, mgrsBandAdjust, outputGranuleExtentFlag, outputSamplingGridType, rasterResolution, timestamp: dateGenerated, cycle, pass, scene, granules} = product
+                    const {status, utmZoneAdjust, mgrsBandAdjust, rasterResolution} = product
                     const statusToUse = status[0].state
-                    const outputSamplingGridTypeToUse = outputSamplingGridType === 'GEO' ? 'LAT/LON' : outputSamplingGridType
-                    const productPassesFilter = productPassesFilterCheck(currentFilters, cycle, pass, scene, outputGranuleExtentFlag, statusToUse, outputSamplingGridTypeToUse, rasterResolution, dateGenerated, utmZoneAdjust, mgrsBandAdjust)
+                    const productPassesFilter = productPassesFilterCheck(currentFilters, statusToUse, rasterResolution, utmZoneAdjust, mgrsBandAdjust)
                     if(productPassesFilter) {
                         return product
                     } else {
@@ -89,14 +53,16 @@ const GeneratedProductHistory = () => {
                     }
                 })
                 setTotalNumberOfFilteredProducts(filteredProducts.length)
+                setHasAlreadyLoadedInitialProducts(true)
                 dispatch(setAllUserProducts(filteredProducts))
                 const productsPerPageToInt = parseInt(productsPerPage)
                 dispatch(setUserProducts(filteredProducts.slice(0, productsPerPageToInt)))
                 dispatch(setWaitingForMyDataFiltering(false))
+                dispatch(setWaitingForMyDataFilteringReset(false))
             })
         }
         fetchData().catch(console.error)
-      }, [currentFilters]);
+      }, [dispatch, currentFilters, waitingForMyDataFiltering, waitingForMyDataFilteringReset]);
 
       // reset all checked checkbox when going to next page
       useEffect(() => {
@@ -226,7 +192,7 @@ const GeneratedProductHistory = () => {
                     </div>
                     {<DataPagination totalNumberOfProducts={totalNumberOfProducts} totalNumberOfFilteredProducts={totalNumberOfFilteredProducts} />}
                     {!waitingForProductsToLoad && userProducts.length === 0 ? <Row>{productHistoryAlert()}</Row> : null}
-                    {waitingForProductsToLoad ? waitingForProductsToLoadSpinner() : null}
+                    {waitingForProductsToLoad && !hasAlreadyLoadedInitialProducts ? waitingForProductsToLoadSpinner() : null}
                 </div>
                 </Col>
             </Row>
