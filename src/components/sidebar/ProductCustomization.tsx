@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import Form from 'react-bootstrap/Form';
-import { Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Alert, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { parameterHelp, parameterOptionValues } from '../../constants/rasterParameterConstants'
 import { InfoCircle } from 'react-bootstrap-icons';
 import { setGenerateProductParameters, setShowUTMAdvancedOptions } from "./actions/productSlice";
 import { useSearchParams } from 'react-router-dom';
 import { GenerateProductParameters } from '../../types/constantTypes';
+
+// TODO: revert back after ONLY RESOLUTION SELECTION period is over. Search todos related to disabled and featureNotAvailable
 
 const ProductCustomization = () => {
     const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
@@ -149,20 +151,40 @@ const ProductCustomization = () => {
         </OverlayTrigger>
     )
 
+    const renderFeatureNotAvailable = (jsxContents: JSX.Element, featureDisabled: boolean) => {
+        return featureDisabled ?
+            <OverlayTrigger
+                placement="right"
+                overlay={
+                    <Tooltip id="feature-not-available-tooltip">Option not currently available.</Tooltip>
+                }
+            >
+                {<span>{jsxContents}</span>}
+            </OverlayTrigger>
+            : jsxContents
+    }
+
     const renderOutputSamplingGridTypeInputs = (outputSamplingGridType: string) => {
         const inputArray = parameterOptionValues.outputSamplingGridType.values.map((value, index) => {
+            // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
+            const featureNotAvailable = value === 'lat/lon'
             const resolutionToUse: number = value === 'utm' ? rasterResolutionUTM : rasterResolutionGEO
             return (
-                <Form.Check 
-                    checked={value === generateProductParameters.outputSamplingGridType}
-                    inline 
-                    label={String(value).toUpperCase()} 
-                    name="outputSamplingGridTypeGroup" 
-                    type={'radio'} 
-                    id={`outputSamplingGridTypeGroup-radio-${index}`} 
-                    onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
-                    key={`outputSamplingGridTypeGroup-radio-key-${index}`}
-                />
+                renderFeatureNotAvailable(               
+                    <Form.Check 
+                        checked={value === generateProductParameters.outputSamplingGridType}
+                        // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
+                        disabled={featureNotAvailable}
+                        inline 
+                        label={String(value).toUpperCase()} 
+                        name="outputSamplingGridTypeGroup" 
+                        type={'radio'} 
+                        id={`outputSamplingGridTypeGroup-radio-${index}`} 
+                        onChange={() => setOutputSamplingGridType(value as string, resolutionToUse)}
+                        key={`outputSamplingGridTypeGroup-radio-key-${index}`}
+                    />,
+                    featureNotAvailable
+                )
             )}
         )
         inputArray.push(
@@ -198,17 +220,24 @@ const ProductCustomization = () => {
                     </Col>
                 <Col md={{ span: 5, offset: 1 }}>
                     {parameterOptionValues.outputGranuleExtentFlag.values.map((value, index) => {
+                        // TODO: Remove featureNotAvailable after ONLY RESOLUTION SELECTION period is over
+                        const featureNotAvailable: boolean = Boolean(value)
                         return (
+                            renderFeatureNotAvailable(
                             <Form.Check 
                                 checked={value === generateProductParameters.outputGranuleExtentFlag}
                                 inline 
+                                // TODO: Remove disabled after ONLY RESOLUTION SELECTION period is over
+                                disabled={featureNotAvailable}
                                 label={value ? '256 x 128 km' : '128 x 128 km'} 
                                 name="outputGranuleExtentFlagTypeGroup" 
                                 type={'radio'} 
                                 id={`outputGranuleExtentFlagTypeGroup-radio-${index}`} 
                                 onChange={() => setOutputGranuleExtentFlag(value)}
                                 key={`outputGranuleExtentFlagTypeGroup-radio-key-${index}`}
-                            />
+                            />,
+                            featureNotAvailable
+                            )
                         )
                     })}
                 </Col>
@@ -235,6 +264,13 @@ const ProductCustomization = () => {
                     {renderRasterResolutionOptions(outputSamplingGridType)}
                 </Col>
                 <Col md={{ span: 2, offset: 0 }} style={{paddingLeft: '0px'}}>{renderRasterResolutionUnits(outputSamplingGridType)}</Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Alert key='alert-features-not-available' variant='warning'>
+                        Some options are not enabled in the current version of SWODLR and will be enabled at a later date
+                    </Alert>
+                </Col>
             </Row>
         </div>
     </div>      

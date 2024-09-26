@@ -1,4 +1,4 @@
-import { Col, Pagination, Row, Spinner } from "react-bootstrap";
+import { Col, Pagination, Row } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { setUserProducts } from "../sidebar/actions/productSlice";
 import { productsPerPage } from "../../constants/rasterParameterConstants";
@@ -6,13 +6,12 @@ import { useState } from "react";
 
 
 const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilteredProducts: number, }) => {
-    const {totalNumberOfProducts, totalNumberOfFilteredProducts} = props
+    const { totalNumberOfFilteredProducts} = props
     const dispatch = useAppDispatch()
     const userProducts = useAppSelector((state) => state.product.userProducts)
     const allUserProducts = useAppSelector((state) => state.product.allUserProducts)
     const [noNextPage, setNoNextPage] = useState<boolean>(false)
     const [noPreviousPage, setNoPreviousPage] = useState<boolean>(true)
-    const [waitingForPagination, setWaitingForPagination] = useState<boolean>(false)
     const [currentPageNumber, setCurrentPageNumber] = useState<number>(1) 
     const numberOfTotalPages = Math.ceil(allUserProducts.length / parseInt(productsPerPage))
 
@@ -31,16 +30,6 @@ const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilt
             setNoPreviousPage(false)
             setNoNextPage(false)
         }
-    }
-
-    const waitingForPaginationSpinner = () => {
-        return (
-            <div>
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner> 
-            </div>
-        )
     }
 
     const getPaginationItemsWithEllipsis = () => {
@@ -78,12 +67,12 @@ const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilt
             }
         }
 
-        if(pagesAllowed[0] > 2) pagesToShow.unshift(<Pagination.Ellipsis />)
-        if(pagesAllowed[pagesAllowed.length-1] < numberOfTotalPages-1) pagesToShow.push(<Pagination.Ellipsis />)
+        if(pagesAllowed[0] > 2) pagesToShow.unshift(<Pagination.Ellipsis key='ellipsis-first' />)
+        if(pagesAllowed[pagesAllowed.length-1] < numberOfTotalPages-1) pagesToShow.push(<Pagination.Ellipsis key='ellipsis-last'/>)
         return pagesToShow
     }
 
-    return waitingForPagination ? waitingForPaginationSpinner() : (
+    return (
         <Row>
             <Col xs={2}></Col>
             <Col xs={7}>
@@ -99,10 +88,9 @@ const DataPagination = (props: {totalNumberOfProducts: number, totalNumberOfFilt
                     : null
                 }
             </Col>
-            <Col xs={3} style={{paddingTop: '15px'}}><h6><b>{totalNumberOfProducts}</b> Total Generated Products</h6></Col>
+            <Col xs={3} style={{paddingTop: '15px'}}><h6><b>{totalNumberOfFilteredProducts}</b> Total Generated Products</h6></Col>
         </Row>
     )
 }
 
 export default DataPagination;
-

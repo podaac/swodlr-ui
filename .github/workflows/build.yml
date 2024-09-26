@@ -31,7 +31,7 @@ on:
       commit:
         type: string
         description: Custom commit hash
-    
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -58,11 +58,14 @@ jobs:
       - name: Initial checkout ${{ github.ref }}
         if: github.event.inputs.commit == ''
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.podaac-cicd.outputs.token }}
       - name: Adjust to proper commit hash ${{ github.event.inputs.commit }}
         if: github.event.inputs.commit != ''
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
@@ -121,7 +124,7 @@ jobs:
           echo "deploy_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
           VENUE=$(echo "${{ env.TARGET_ENV }}" | tr '[:upper:]' '[:lower:]')
           echo "deploy_env_lower=$VENUE" >> $GITHUB_OUTPUT
-      ## Build      
+      ## Build
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}

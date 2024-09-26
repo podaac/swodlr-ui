@@ -7,7 +7,7 @@
     "URL": {
         "URLContentType": "DistributionURL",
         "Type": "GOTO WEB TOOL",
-        "URLValue": "http://swodlr.podaac.sit.earthdatacloud.nasa.gov/"
+        "URLValue": "http://swodlr.podaac.sit.earthdatacloud.nasa.gov"
     },
     "Description": "SWODLR (swaa·dler) is an open-source software system developed to generate custom Level 2 raster data products for the SWOT mission. It provides an Application Programming Interface (API) and Graphical User Interface (GUI) that allows end-users to provide custom configurations to generate on-demand raster data products from underlying standard data products (PIXC, PIXCVec).",
     "ToolKeywords" : [

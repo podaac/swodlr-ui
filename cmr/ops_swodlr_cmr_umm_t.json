@@ -46,7 +46,7 @@
   "URL": {
     "URLContentType": "DistributionURL",
     "Type": "GOTO WEB TOOL",
-    "URLValue": "http://swodlr.podaac.earthdatacloud.nasa.gov/"
+    "URLValue": "http://swodlr.podaac.earthdatacloud.nasa.gov"
   },
   "MetadataSpecification": {
     "URL": "https://cdn.earthdata.nasa.gov/umm/tool/v1.2.0",
