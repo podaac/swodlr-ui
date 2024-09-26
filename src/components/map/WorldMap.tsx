@@ -16,8 +16,6 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { getGranules, getSpatialSearchGranuleVariables } from '../../constants/graphqlQueries';
 
-const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow
@@ -242,8 +240,8 @@ const WorldMap = () => {
           }
           <div style={{float:'right', width:'49%', height:'100%'}} id='map-tutorial-target'/>
           <TileLayer
-            url={`https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
-            attribution='© Mapbox, © OpenStreetMap'
+            url='https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            attribution='Esri, Maxar, Earthstar Geographics, and the GIS User Community'
             maxZoom = {18}
             noWrap
             bounds={
