@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.2.0]
+
+### Changed
+  - [issues/114](https://github.com/podaac/swodlr-ui/issues/114): My data page now uses server side filtering for most columns
+
 ## [1.1.1]
 
 ### Fixed
