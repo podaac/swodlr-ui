@@ -122,7 +122,8 @@ const WorldMap = () => {
 
       let cursor: string | null = 'initialValue'
       const spatialSearchItems: any[] = []
-      while(cursor !== null) {
+
+      do {
         if(cursor === 'initialValue') cursor = null
         cursor = await fetch('https://graphql.earthdata.nasa.gov/api', {
           method: 'POST',
@@ -145,7 +146,7 @@ const WorldMap = () => {
           spatialSearchItems.push(...filteredResponseItems)
           return spatialSearchItems.length > spatialSearchResultsBatchSize ? null : responseJson.data.granules.cursor
         })
-      }
+      } while(cursor !== null)
 
       const updatedGranules = spatialSearchItems.map((item: any) => {
         const itemCopy = structuredClone(item)
