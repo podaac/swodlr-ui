@@ -128,6 +128,7 @@ const GeneratedProductHistory = () => {
     const renderHistoryTable = () => {
         const downloadButtonDisabled = checkedProducts.length === 0 || checkedProducts.every(product => product.granules.length === 0)
         const downloadUrlList = checkedProducts.map(product => product.granules.map(granule => granule.uri)).flat()
+        const productIdList = checkedProducts.map(product => product.id)
         return (
             <Row>
                 {<Col xs={2} style={{height: '100%'}}><HistoryFilters /></Col>}                
@@ -141,6 +142,7 @@ const GeneratedProductHistory = () => {
                         <DropdownButton data-bs-theme='dark' style={{}} id="dropdown-basic-button" title={<><Badge bg="secondary">{checkedProducts.length}</Badge> Actions</>}>
                             <Dropdown.Item disabled={downloadButtonDisabled} onClick={() => handleDownloadProduct(downloadUrlList)}>Download</Dropdown.Item>
                             <Dropdown.Item disabled={downloadButtonDisabled} onClick={() => handleCopyClick(downloadUrlList)}>Copy Download Url</Dropdown.Item>
+                            <Dropdown.Item onClick={() => handleCopyClick(productIdList)}>Copy Products Id</Dropdown.Item>
                             <Dropdown.Item disabled={checkedProducts.length === 0} onClick={() => handleOnReGenerateClick(checkedProducts)}>Re-Generate</Dropdown.Item>
                             <ReGenerateProductsModal />
                         </DropdownButton>

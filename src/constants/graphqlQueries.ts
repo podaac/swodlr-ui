@@ -72,23 +72,10 @@ query($params: GranulesInput) {
           timeEnd
           polygons
         }
+        cursor
     }
 }
 `
-
-// export const getSpatialSearchGranules = `
-// query GetSpatialSearchGranules($params: GranulesInput) {
-//   granules(params: $params) {
-//     items {
-//       producerGranuleId
-//       granuleUr
-//       timeStart
-//       timeEnd
-//       polygons
-//     }
-//   }
-// }
-// `
 
 export const getGranuleVariables = (cycle: number, pass: number, sceneIds: number[]) => {
     const sceneIdsForGranuleName = sceneIds.map(sceneId => `SWOT_L2_HR_Raster_*_${padCPSForCmrQuery(String(sceneId))}F_*`)
@@ -109,12 +96,13 @@ export const getGranuleVariables = (cycle: number, pass: number, sceneIds: numbe
     return variables
 }
 
-export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number) => {
+export const getSpatialSearchGranuleVariables = (polygon: string, collectionConceptId: string, limit: number, cursor: string | null) => {
     const variables = {
         "params": {
           polygon,
           collectionConceptId,
-          limit
+          limit,
+          cursor
         }
       }
     return variables

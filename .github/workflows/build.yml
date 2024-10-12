@@ -169,7 +169,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: build/*
+          path: dist/*
       - name: Commit Version Bump
         # If building an alpha, release candidate, or release then we commit the version bump back to the repo
         if: |
@@ -257,7 +257,7 @@ jobs:
         id: download
         with:
           name: build
-          path: build/
+          path: dist/
       - name: Sync S3
         run:
           aws s3 sync ${{steps.download.outputs.download-path}} s3://${{ env.SWODLR_UI_BUCKET }} --delete

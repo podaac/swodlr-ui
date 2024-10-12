@@ -11,7 +11,7 @@ const About = () => {
     const [backendVersion, setBackendVersion] = useState('')
     useEffect(() => {
         const fetchData = async () => {
-            setBackendVersion(await fetch(`${process.env.REACT_APP_SWODLR_API_BASE_URI}/about`).then((version) => version.json()).then(response => response.version))
+            setBackendVersion(await fetch(`${import.meta.env.VITE_SWODLR_API_BASE_URI}/about`).then((version) => version.json()).then(response => response.version))
         }
         fetchData()
         .catch(console.error);

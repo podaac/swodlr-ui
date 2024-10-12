@@ -15,8 +15,8 @@ declare interface SerializedSession {
 }
 
 const LOCAL_STORAGE_SESSION_KEY = 'session';
-const EDL_BASE_URI = process.env.REACT_APP_EDL_BASE_URI;
-const EDL_CLIENT_ID = process.env.REACT_APP_EDL_CLIENT_ID;
+const EDL_BASE_URI = import.meta.env.VITE_EDL_BASE_URI;
+const EDL_CLIENT_ID = import.meta.env.VITE_EDL_CLIENT_ID;
 
 export class Session {
   private static _current: Session | null = null;

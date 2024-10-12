@@ -13,7 +13,7 @@ const MainNavbar = () => {
   const colorModeClass = useAppSelector((state) => state.navbar.colorModeClass)
   const userData = useAppSelector((state) => state.app.currentUser)
   const navigate = useNavigate()
-  const BASE_REDIRECT_URI = process.env.REACT_APP_BASE_REDIRECT_URI;
+  const BASE_REDIRECT_URI = import.meta.env.VITE_BASE_REDIRECT_URI;
 
   var { email, firstName, lastName } = userData || {};
   const { search } = useLocation();

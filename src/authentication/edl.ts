@@ -3,9 +3,9 @@ import arrayBufferToHex from 'array-buffer-to-hex';
 import { OAuthParametersNotFound, OAuthTokenExchangeFailed, RequiredModulesNotFound } from './exception';
 import { Session } from './session';
 
-const BASE_REDIRECT_URI = process.env.REACT_APP_BASE_REDIRECT_URI;
-const EDL_BASE_URI = process.env.REACT_APP_EDL_BASE_URI;
-const EDL_CLIENT_ID = process.env.REACT_APP_EDL_CLIENT_ID;
+const BASE_REDIRECT_URI = import.meta.env.VITE_BASE_REDIRECT_URI;
+const EDL_BASE_URI = import.meta.env.VITE_EDL_BASE_URI;
+const EDL_CLIENT_ID = import.meta.env.VITE_EDL_CLIENT_ID;
 const OAUTH_PARAMS_KEY = 'edl-auth-params';
 
 const textEncoder = new TextEncoder();

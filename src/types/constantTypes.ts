@@ -160,7 +160,7 @@ export interface granuleMetadata {
   [key: string]: granuleMetadataInfo
 }
 
-export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'spatialSearchAreaTooLarge' | 'successfullyReGenerated'
+export type alertMessageInput = 'success' | 'alreadyAdded' | 'allScenesNotAvailable' | 'alreadyAddedAndNotFound' | 'noScenesAdded' | 'readyForGeneration' | 'invalidCycle' | 'invalidPass' | 'invalidScene' | 'invalidScene' | 'someScenesNotAvailable' | 'granuleLimit' | 'notInTimeRange' | 'noScenesFound' | 'someSuccess' | 'successfullyGenerated' | 'successfullyReGenerated'
 
 export interface SpatialSearchResult {
   cycle: string,
