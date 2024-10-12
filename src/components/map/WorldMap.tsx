@@ -120,11 +120,10 @@ const WorldMap = () => {
         return polygonString
       }).join()
 
-      let cursor: string | null = 'initialValue'
+      let cursor: string | null = null
       const spatialSearchItems: any[] = []
 
       do {
-        if(cursor === 'initialValue') cursor = null
         cursor = await fetch('https://graphql.earthdata.nasa.gov/api', {
           method: 'POST',
           headers: {
