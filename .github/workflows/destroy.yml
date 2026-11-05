@@ -1,0 +1,72 @@
+name: Destroy deployment
+on:
+  # Manual only: run from the Actions tab
+  workflow_dispatch:
+    inputs:
+      venue:
+        type: choice
+        description: Venue to destroy
+        options:
+          - SIT
+          - UAT
+      confirm:
+        type: string
+        description: Type the venue name again to confirm
+
+# Don't run at the same time as a deploy against the same Terraform state
+concurrency:
+  group: swodlr-ui-terraform-${{ github.event.inputs.venue }}
+
+jobs:
+  destroy:
+    name: Destroy
+    runs-on: ubuntu-latest
+    # Skipped unless the confirmation matches the selected venue
+    if: github.event.inputs.venue == github.event.inputs.confirm
+    environment: ${{ github.event.inputs.venue }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-session-name: GitHubActions
+          aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
+          aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
+          mask-aws-account-id: true
+      - name: Destroy ${{ github.event.inputs.venue }}
+        working-directory: terraform/
+        env:
+          AWS_DEFAULT_REGION: us-west-2
+          TF_VAR_cloudfront_distribution_id: ${{ secrets.CF_DISTRIBUTION_ID }}
+          TF_VAR_cloudfront_allow_vpcs: ${{ secrets.EDC_INTERNET_SERVICES_VPCS }}
+        run: |
+          set -eo pipefail
+          VENUE=$(echo "${{ github.event.inputs.venue }}" | tr '[:upper:]' '[:lower:]')
+          export TF_IN_AUTOMATION=true
+
+          # Same initialization as bin/deploy.sh (default workspace)
+          source ./environments/${VENUE}.env
+          terraform init -reconfigure -input=false \
+            -backend-config="bucket=podaac-services-${VENUE}-terraform" \
+            -backend-config="profile=ngap-service-${VENUE}" \
+            -backend-config="region=$REGION"
+          terraform workspace select default
+
+          # The site bucket is filled by `aws s3 sync` and has no force_destroy,
+          # so it has to be emptied or the destroy fails with BucketNotEmpty.
+          BUCKET=$(terraform output -raw swodlr-bucket-name || true)
+          if [ -n "$BUCKET" ]; then
+            aws s3 rm "s3://${BUCKET}" --recursive
+          fi
+
+          # app_version is a required variable but irrelevant when destroying
+          terraform destroy -input=false -auto-approve \
+            -var-file=tfvars/${VENUE}.tfvars \
+            -var="credentials=~/.aws/credentials" \
+            -var="profile=ngap-service-${VENUE}" \
+            -var="app_version=destroy"
