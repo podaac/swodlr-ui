@@ -49,11 +49,12 @@ jobs:
           VENUE=$(echo "${{ github.event.inputs.venue }}" | tr '[:upper:]' '[:lower:]')
           export TF_IN_AUTOMATION=true
 
-          # Same initialization as bin/deploy.sh (default workspace)
+          # Like bin/deploy.sh (default workspace), but without the AWS profile:
+          # that profile only exists on developer machines. On the runner the
+          # backend authenticates with the AWS_* credentials from the environment.
           source ./environments/${VENUE}.env
           terraform init -reconfigure -input=false \
             -backend-config="bucket=podaac-services-${VENUE}-terraform" \
-            -backend-config="profile=ngap-service-${VENUE}" \
             -backend-config="region=$REGION"
           terraform workspace select default
 
@@ -64,7 +65,9 @@ jobs:
             aws s3 rm "s3://${BUCKET}" --recursive
           fi
 
-          # app_version is a required variable but irrelevant when destroying
+          # credentials, profile and app_version are required variables. The first
+          # two are unused by the config; app_version only feeds a Version tag.
+          # None of the values matter when destroying.
           terraform destroy -input=false -auto-approve \
             -var-file=tfvars/${VENUE}.tfvars \
             -var="credentials=~/.aws/credentials" \
